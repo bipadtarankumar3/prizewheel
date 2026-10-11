@@ -745,38 +745,78 @@
   </div>
 
   @php
-  $popup = DB::table('popupalerts')->where('user_type','admin')->where('status','active')->orderBy('id','desc')->first();
-@endphp
-  <div class="modal fade quotation newsShowPopupModal"  tabindex="-1" aria-labelledby="smallQuoteModal" aria-hidden="true">
+    $popup = DB::table('popupalerts')->where('user_type','admin')->where('status','active')->orderBy('id','desc')->first();
+  @endphp
+  @if (!empty($popup))
+  <!-- Modern Styled Popup Alert Modal -->
+  <div class="modal fade newsShowPopupModal" id="newsShowPopupModal" tabindex="-1" aria-labelledby="newsShowPopupModalLabel" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content"  style="width: 95%;">
+      <div class="modal-content modern-popup-modal-content">
+        
+        <!-- Radiant Gradient Accent Bar -->
+        <div class="popup-gradient-bar"></div>
 
-        <div class="modal-body">
-
-          <div class="" style="float: right;">
-              <button type="button" class="btn-close popup_close"  onclick="popupModalClose()" data-bs-dismiss="modal" aria-label="Close">
-                  <i class="fas fa-times"></i>
-              </button>
+        <!-- Modal Header -->
+        <div class="popup-modal-header">
+          <div class="d-flex align-items-center gap-3">
+            <div class="popup-header-icon-box">
+              <i class="ti ti-sparkles"></i>
+            </div>
+            <div>
+              <span class="popup-category-badge">
+                <i class="ti ti-bell-ringing"></i> Official Notice
+              </span>
+              <h4 class="popup-modal-title mb-0" id="newsShowPopupModalLabel">
+                {{ $popup->title ?? 'Welcome to Digital Spin Wheel' }}
+              </h4>
+            </div>
           </div>
-            <div class="modal-content">
-              @if (!empty($popup))
-                 
-                 @if (!empty($popup->popup_img))
-                    <h4>{{$popup->title}}</h4> 
-                 @endif
-                 @if (!empty($popup->popup_img))
-                      <img src="{{$popup->popup_img}}" alt=""  style="height: 405px;">   
-                 @endif
-               
-              @endif
-                
+          <button type="button" class="popup-circle-close-btn" onclick="popupModalClose()" data-bs-dismiss="modal" aria-label="Close" title="Close announcement">
+            <i class="ti ti-x"></i>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="popup-modal-body">
+          @if (!empty($popup->popup_img))
+            <div class="popup-image-showcase-frame">
+              <img src="{{ $popup->popup_img }}" alt="{{ $popup->title ?? 'Announcement' }}" class="popup-main-image" loading="lazy">
+            </div>
+          @endif
+
+          <!-- Quick Action Contact & Info Strip -->
+          <div class="popup-quick-info-strip">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <div class="d-flex align-items-center gap-2 text-muted small">
+                <i class="ti ti-shield-check text-success fs-5"></i>
+                <span class="fw-semibold text-dark">Verified Partner Support</span>
               </div>
-          
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <a href="tel:+919087868584" class="popup-chip-link" title="Call Support">
+                  <i class="ti ti-phone-call text-primary"></i> +91 9087868584
+                </a>
+                <a href="https://digitalvyapari.online" target="_blank" class="popup-chip-link" title="Visit Website">
+                  <i class="ti ti-world text-primary"></i> Visit Website
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="popup-modal-footer">
+          <button type="button" class="btn popup-btn-dismiss" onclick="popupModalClose()" data-bs-dismiss="modal">
+            Close
+          </button>
+          <a href="https://digitalvyapari.online" target="_blank" class="btn popup-btn-action">
+            <i class="ti ti-external-link me-1"></i> Visit Website
+          </a>
         </div>
 
       </div>
     </div>
   </div>
+  @endif
 
 
 <div class="modal fade quotation ClearAllSpainModal"  tabindex="-1" aria-labelledby="smallQuoteModal" aria-hidden="true">
@@ -912,24 +952,18 @@
     }
 
 
-    //
+    // Auto show active popup alert
     @if (!empty($popup) && $popup->status == 'active')
-      @if(!Session::get('popupShow'))
-          //alert('fff');
-          setTimeout(function(){ $('.newsShowPopupModal').modal('show');}, 1000);
-          
-      @else
-          //alert('ddd');
-          $('.newsShowPopupModal').modal('hide');
-      @endif
+      if (!sessionStorage.getItem('popupDismissed')) {
+        setTimeout(function(){ 
+          $('.newsShowPopupModal').modal('show');
+        }, 600);
+      }
     @endif
 
     function popupModalClose(){
-        //alert('pop');
-        @php
-            Session::put('popupShow','show');
-        @endphp
-        $('.newsShowPopupModal').modal('hide');
+      sessionStorage.setItem('popupDismissed', 'true');
+      $('.newsShowPopupModal').modal('hide');
     } 
 
     function clearAllSpain(){
