@@ -120,7 +120,7 @@ class FrontendController extends Controller
                             
                             if(count($Spinner) == 0 ){
                                     $status= 'spinn_not_available';
-                                    return view('frontend.404',compact('status'));
+                                    return view('frontend.404',compact('status','user'));
                             }
                             
                             // dd($Spinner);
@@ -195,7 +195,7 @@ class FrontendController extends Controller
                     }
                 } else {
                     $status= 'user_date_expired';
-                    return view('frontend.404',compact('status'));
+                    return view('frontend.404',compact('status','user'));
                 }
                 
                 
