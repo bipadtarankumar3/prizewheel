@@ -817,6 +817,31 @@ body {
   border-color: rgba(59, 130, 246, 0.35);
 }
 
+/* Card Header Context: High-contrast visible text */
+.dash-card-header .dash-hero-pill.pill-blue,
+.dash-modern-card .dash-hero-pill.pill-blue {
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border: 1px solid #bfdbfe !important;
+  font-weight: 700 !important;
+}
+
+.dash-card-header .dash-hero-pill.pill-orange,
+.dash-modern-card .dash-hero-pill.pill-orange {
+  background: #fff7ed !important;
+  color: #c2410c !important;
+  border: 1px solid #fed7aa !important;
+  font-weight: 700 !important;
+}
+
+.dash-card-header .dash-hero-pill,
+.dash-modern-card .dash-hero-pill {
+  background: #f1f5f9 !important;
+  color: #334155 !important;
+  border: 1px solid #cbd5e1 !important;
+  font-weight: 700 !important;
+}
+
 .dash-hero-btn {
   display: inline-flex;
   align-items: center;

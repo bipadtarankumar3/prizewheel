@@ -102,7 +102,9 @@
           <h3 class="dash-card-title">
             <i class="ti ti-chart-line text-primary"></i> Store Registrations Trend (Last 7 Days)
           </h3>
-          <span class="dash-hero-pill pill-blue">Real-time Growth</span>
+          <span class="dash-hero-pill pill-blue fw-bold" style="background: #eff6ff !important; color: #1d4ed8 !important; border: 1px solid #bfdbfe !important;">
+            <i class="ti ti-trending-up me-1"></i> Real-time Growth
+          </span>
         </div>
         <div class="dash-card-body">
           <div id="adminGrowthChart" style="min-height: 280px;"></div>
@@ -813,7 +815,9 @@
       // --- Super Admin Growth Chart ---
       const adminGrowthEl = document.querySelector("#adminGrowthChart");
       if (adminGrowthEl && typeof ApexCharts !== 'undefined') {
-        const growthOptions = {
+          const adminStoreNamesByDay = {!! json_encode($adminChartStoreNames ?? []) !!};
+
+          const growthOptions = {
           series: [{
             name: "New Stores Registered",
             data: {!! json_encode($adminChartRegistrations ?? [1, 2, 0, 3, 1, 4, 2]) !!}
@@ -851,7 +855,23 @@
             strokeDashArray: 4
           },
           tooltip: {
-            theme: 'dark'
+            theme: 'dark',
+            custom: function({series, seriesIndex, dataPointIndex, w}) {
+              const count = series[seriesIndex][dataPointIndex];
+              const date = w.globals.categoryLabels[dataPointIndex];
+              const names = (adminStoreNamesByDay[dataPointIndex] && adminStoreNamesByDay[dataPointIndex].length > 0)
+                ? adminStoreNamesByDay[dataPointIndex].join(', ')
+                : 'No store registered';
+              
+              let html = '<div class="p-2.5" style="background: #0f172a; color: #ffffff; border-radius: 10px; font-size: 12px; box-shadow: 0 4px 18px rgba(0,0,0,0.35); min-width: 170px;">';
+              html += '<div style="font-weight: 700; color: #94a3b8; font-size: 11px; margin-bottom: 2px;">' + date + '</div>';
+              html += '<div style="color: #ff6b00; font-weight: 800; font-size: 13px; margin-bottom: 4px;">' + count + ' ' + (count === 1 ? 'Store' : 'Stores') + ' Registered</div>';
+              if (count > 0) {
+                html += '<div style="color: #f8fafc; font-weight: 600; font-size: 11.5px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 4px;"><i class="ti ti-building-store" style="color: #38bdf8; margin-right: 4px;"></i>' + names + '</div>';
+              }
+              html += '</div>';
+              return html;
+            }
           }
         };
         new ApexCharts(adminGrowthEl, growthOptions).render();

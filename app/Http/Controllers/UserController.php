@@ -634,16 +634,19 @@ class UserController extends Controller
                 // 7 days registration chart
                 $adminChartDates = [];
                 $adminChartRegistrations = [];
+                $adminChartStoreNames = [];
                 for ($i = 6; $i >= 0; $i--) {
                     $d = date('Y-m-d', strtotime("-$i days"));
                     $adminChartDates[] = date('M d', strtotime("-$i days"));
-                    $adminChartRegistrations[] = User::where('type','user')->whereDate('created_at', $d)->count();
+                    $storesOnDay = User::where('type','user')->whereDate('created_at', $d)->get();
+                    $adminChartRegistrations[] = $storesOnDay->count();
+                    $adminChartStoreNames[] = $storesOnDay->pluck('name')->toArray();
                 }
 
                 return view('admin.dashboard', compact(
                     'Users', 'ActiveUsers', 'InactiveUsers', 'ExpiredUser',
                     'TotalCampings', 'TotalSpinners', 'TotalLeads', 'TotalSpins', 'TotalVisits',
-                    'RecentUsers', 'adminChartDates', 'adminChartRegistrations'
+                    'RecentUsers', 'adminChartDates', 'adminChartRegistrations', 'adminChartStoreNames'
                 ));
             }
 

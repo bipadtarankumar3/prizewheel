@@ -443,66 +443,104 @@
                     <i class="ti ti-chevron-down header-profile-chevron"></i>
                   </a>
 
-                  <div class="dropdown-menu content-dd dropdown-menu-end dropdown-menu-animate-up shadow-lg border-0" style="border-radius: 14px;" aria-labelledby="drop1">
-                    <div class="profile-dropdown position-relative p-3" data-simplebar>
+                  <div class="dropdown-menu content-dd dropdown-menu-end dropdown-menu-animate-up border-0" 
+                       style="min-width: 330px; border-radius: 20px; box-shadow: 0 20px 45px -8px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(15, 23, 42, 0.05); overflow: hidden; padding: 0;" 
+                       aria-labelledby="drop1">
+                    <div class="profile-dropdown position-relative p-0" data-simplebar>
                       
-                      <div class="d-flex align-items-center p-3 rounded-3 bg-light mb-3">
-                        <img src="{{ !empty(Auth::user()->logo) ? Auth::user()->logo : asset('adminAssets/images/profile/user-1.jpg') }}" class="rounded-circle shadow-sm" width="56" height="56" style="object-fit:cover;" alt="" />
-                        <div class="ms-3 overflow-hidden">
-                          <h6 class="mb-1 text-dark fw-bold text-truncate">{{ Auth::user()->name }}</h6>
-                          <p class="mb-1 text-muted fs-2 text-truncate">{{ Auth::user()->email }}</p>
-                          <span class="badge bg-warning-subtle text-warning fw-bold fs-1 rounded-pill">
-                            {{ Auth::user()->type == 'admin' ? 'Administrator' : '1-Day Free Trial' }}
+                      <!-- User Header Profile Card -->
+                      <div class="p-3 d-flex align-items-center gap-3" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-bottom: 1px solid #f1f5f9;">
+                        <img src="{{ !empty(Auth::user()->logo) ? Auth::user()->logo : asset('adminAssets/images/profile/user-1.jpg') }}" 
+                             class="rounded-3 shadow-sm border" 
+                             width="54" height="54" 
+                             style="object-fit: cover; border-color: #e2e8f0 !important;" 
+                             alt="User Avatar" />
+                        <div class="overflow-hidden" style="line-height: 1.35;">
+                          <h6 class="mb-0 text-dark fw-bold text-truncate" style="font-size: 14.5px;">{{ Auth::user()->name }}</h6>
+                          <div class="text-muted text-truncate my-1" style="font-size: 11.5px;">{{ Auth::user()->email }}</div>
+                          <span class="badge" style="background: rgba(255, 107, 0, 0.1); color: #ea580c; border: 1px solid rgba(255, 107, 0, 0.2); font-size: 10px; font-weight: 700; border-radius: 9999px; padding: 2px 8px;">
+                            {{ Auth::user()->type == 'admin' ? '🛡 Administrator' : '✨ 1-Day Free Trial' }}
                           </span>
                         </div>
                       </div>
 
-                      <div class="message-body">
-                        @if(session()->has('impersonated_by_admin'))
-                          <div class="p-2.5 mb-2 rounded-3" style="background: linear-gradient(135deg, rgba(255, 170, 0, 0.12), rgba(255, 107, 0, 0.12)); border: 1px solid rgba(255, 170, 0, 0.35);">
-                            <div class="d-flex align-items-center justify-content-between mb-1">
-                              <span class="fw-bold fs-2 text-dark"><i class="ti ti-shield-lock text-warning me-1"></i> Store View</span>
-                              <span class="badge bg-warning text-dark px-1.5 py-0.5" style="font-size: 9.5px;">Active</span>
-                            </div>
-                            <p class="mb-2 text-muted" style="font-size: 11.5px; line-height: 1.3;">
-                              Viewing as <strong>{{ Auth::user()->name }}</strong>. Switch back to Super Admin.
-                            </p>
-                            <a href="{{ URL::to('admin/return_to_admin') }}" class="btn btn-warning btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-1 shadow-sm py-1.5">
-                              <i class="ti ti-arrow-back-up"></i> Switch Back to Admin
-                            </a>
+                      <!-- Impersonated Store View Notice -->
+                      @if(session()->has('impersonated_by_admin'))
+                        <div class="m-3 p-3 rounded-3" style="background: #0f172a; color: #ffffff; box-shadow: 0 6px 18px rgba(15, 23, 42, 0.15);">
+                          <div class="d-flex align-items-center justify-content-between mb-1.5">
+                            <span style="font-size: 11.5px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px;">
+                              <i class="ti ti-shield-lock"></i> Store View Mode
+                            </span>
+                            <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 9.5px; border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 9999px; padding: 2px 7px;">
+                              Active
+                            </span>
                           </div>
-                        @endif
+                          <p class="mb-2 text-white-50" style="font-size: 11px; line-height: 1.35;">
+                            Viewing store as <strong class="text-white">{{ Auth::user()->name }}</strong>. Switch back anytime.
+                          </p>
+                          <a href="{{ URL::to('admin/return_to_admin') }}" 
+                             class="btn btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-1.5 shadow-sm" 
+                             style="background: linear-gradient(135deg, #ff6b00 0%, #ea580c 100%); color: #ffffff; border: none; border-radius: 10px; padding: 7px 12px; font-size: 12px; box-shadow: 0 3px 10px rgba(255, 107, 0, 0.3);">
+                            <i class="ti ti-arrow-back-up"></i> Switch Back to Admin
+                          </a>
+                        </div>
+                      @endif
+
+                      <!-- Navigation Menu List -->
+                      <div class="p-2" style="display: flex; flex-direction: column; gap: 2px;">
                         @if (Auth::user()->type == 'admin')
-                          <a href="{{URL::to('admin/sitesetting')}}" class="d-flex align-items-center gap-3 py-2 px-3 rounded-2 text-dark text-decoration-none bg-hover-light">
-                            <i class="ti ti-settings fs-5 text-primary"></i>
-                            <span class="fw-semibold fs-3">Site Settings</span>
+                          <a href="{{URL::to('admin/sitesetting')}}" class="d-flex align-items-center gap-2.5 p-2 rounded-3 text-dark text-decoration-none" style="transition: all 0.2s ease;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                            <div style="width: 34px; height: 34px; border-radius: 9px; background: #f5f3ff; color: #7c3aed; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">
+                              <i class="ti ti-settings"></i>
+                            </div>
+                            <span class="fw-semibold text-dark" style="font-size: 13px;">Site Settings</span>
+                            <i class="ti ti-chevron-right ms-auto text-muted" style="font-size: 12px; opacity: 0.4;"></i>
                           </a>
                         @endif
 
-                        <a href="{{URL::to('admin/profile')}}" class="d-flex align-items-center gap-3 py-2 px-3 rounded-2 text-dark text-decoration-none bg-hover-light">
-                          <i class="ti ti-user fs-5 text-primary"></i>
-                          <span class="fw-semibold fs-3">Account & Profile</span>
+                        <a href="{{URL::to('admin/profile')}}" class="d-flex align-items-center gap-2.5 p-2 rounded-3 text-dark text-decoration-none" style="transition: all 0.2s ease;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                          <div style="width: 34px; height: 34px; border-radius: 9px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">
+                            <i class="ti ti-user"></i>
+                          </div>
+                          <span class="fw-semibold text-dark" style="font-size: 13px;">Account &amp; Profile</span>
+                          <i class="ti ti-chevron-right ms-auto text-muted" style="font-size: 12px; opacity: 0.4;"></i>
                         </a>
 
                         @if (Auth::user()->type == 'user')
-                          <a href="{{URL::to('admin/print_qr_code')}}" target="_blank" class="d-flex align-items-center gap-3 py-2 px-3 rounded-2 text-dark text-decoration-none bg-hover-light">
-                            <i class="ti ti-qrcode fs-5 text-warning"></i>
-                            <span class="fw-semibold fs-3">Download QR Stand</span>
+                          <a href="{{URL::to('admin/print_qr_code')}}" target="_blank" class="d-flex align-items-center gap-2.5 p-2 rounded-3 text-dark text-decoration-none" style="transition: all 0.2s ease;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                            <div style="width: 34px; height: 34px; border-radius: 9px; background: #fff7ed; color: #ea580c; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">
+                              <i class="ti ti-qrcode"></i>
+                            </div>
+                            <span class="fw-semibold text-dark" style="font-size: 13px;">Download QR Stand</span>
+                            <i class="ti ti-external-link ms-auto text-muted" style="font-size: 12px; opacity: 0.4;"></i>
                           </a>
-                          <a href="{{URL::to('u/'.Auth::user()->name_url)}}" target="_blank" class="d-flex align-items-center gap-3 py-2 px-3 rounded-2 text-dark text-decoration-none bg-hover-light">
-                            <i class="ti ti-world fs-5 text-success"></i>
-                            <span class="fw-semibold fs-3">Visit Live Site</span>
+
+                          <a href="{{URL::to('u/'.Auth::user()->name_url)}}" target="_blank" class="d-flex align-items-center gap-2.5 p-2 rounded-3 text-dark text-decoration-none" style="transition: all 0.2s ease;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                            <div style="width: 34px; height: 34px; border-radius: 9px; background: #ecfdf5; color: #059669; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">
+                              <i class="ti ti-world"></i>
+                            </div>
+                            <span class="fw-semibold text-dark" style="font-size: 13px;">Visit Live Site</span>
+                            <i class="ti ti-external-link ms-auto text-muted" style="font-size: 12px; opacity: 0.4;"></i>
                           </a>
-                          <a href="javascript:void(0)" onclick="clearAllSpain()" class="d-flex align-items-center gap-3 py-2 px-3 rounded-2 text-danger text-decoration-none bg-hover-light">
-                            <i class="ti ti-trash fs-5"></i>
-                            <span class="fw-semibold fs-3">Clear Test Cookies</span>
+
+                          <a href="javascript:void(0)" onclick="clearAllSpain()" class="d-flex align-items-center gap-2.5 p-2 rounded-3 text-danger text-decoration-none" style="transition: all 0.2s ease;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
+                            <div style="width: 34px; height: 34px; border-radius: 9px; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">
+                              <i class="ti ti-trash"></i>
+                            </div>
+                            <span class="fw-semibold text-danger" style="font-size: 13px;">Clear Test Cookies</span>
+                            <i class="ti ti-chevron-right ms-auto text-danger" style="font-size: 12px; opacity: 0.4;"></i>
                           </a>
                         @endif
                       </div>
 
-                      <div class="pt-3 mt-2 border-top">
-                        <a href="{{URL::to('logout')}}" class="btn btn-outline-danger w-100 fw-bold py-2 rounded-2">
-                          <i class="ti ti-logout me-1"></i> Sign Out
+                      <!-- Sign Out Button Footer -->
+                      <div class="p-3 border-top" style="background: #ffffff;">
+                        <a href="{{URL::to('logout')}}" 
+                           class="btn w-100 fw-bold d-flex align-items-center justify-content-center gap-2" 
+                           style="background: #f8fafc; color: #dc2626; border: 1.5px solid #fee2e2; border-radius: 12px; padding: 9px; font-size: 13px; transition: all 0.2s ease;"
+                           onmouseover="this.style.background='#fef2f2'; this.style.borderColor='#fca5a5';"
+                           onmouseout="this.style.background='#f8fafc'; this.style.borderColor='#fee2e2';">
+                          <i class="ti ti-logout"></i> Sign Out
                         </a>
                       </div>
 
