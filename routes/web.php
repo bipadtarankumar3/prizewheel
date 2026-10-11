@@ -38,8 +38,13 @@ Route::post('/u/spinner_round_check',[FrontendController::class,'spinner_round_c
 Route::post('/u/spinner_value_check',[FrontendController::class,'spinner_value_check']);
 Route::get('/dummy',[FrontendController::class,'dummy']);
 
-Route::get('login',[UserController::class,'login']);
+Route::get('login',[UserController::class,'login'])->name('login');
 Route::post('login_post',[UserController::class,'login_post']);
+Route::get('register',[UserController::class,'register_page'])->name('register');
+Route::post('register_post',[UserController::class,'register_post'])->name('register_post');
+Route::get('auth/google',[UserController::class,'google_redirect'])->name('google_login');
+Route::get('auth/google/callback',[UserController::class,'google_callback'])->name('google_callback');
+Route::get('captcha/refresh',[UserController::class,'refresh_captcha'])->name('captcha_refresh');
 Route::get('logout',[UserController::class,'logout']);
 
 Route::any('otp_verify_page',[UserController::class,'otp_verify_page']);

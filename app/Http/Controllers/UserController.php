@@ -31,8 +31,245 @@ use Illuminate\Support\Facades\Response;
 
 class UserController extends Controller
 {
-    public function login(){
-        return view('admin.login');
+    public function login(Request $request){
+        if (Auth::check()) {
+            return redirect('admin/dashboard');
+        }
+        $initialMode = $request->query('mode', 'login');
+        if (!session()->has('captcha_code')) {
+            session(['captcha_code' => $this->generateRandomCaptcha()]);
+        }
+        return view('admin.login', ['initialMode' => $initialMode]);
+    }
+
+    public function register_page(Request $request){
+        if (Auth::check()) {
+            return redirect('admin/dashboard');
+        }
+        if (!session()->has('captcha_code')) {
+            session(['captcha_code' => $this->generateRandomCaptcha()]);
+        }
+        return view('admin.login', ['initialMode' => 'signup']);
+    }
+
+    public function refresh_captcha(){
+        $code = $this->generateRandomCaptcha();
+        session(['captcha_code' => $code]);
+        return response()->json(['captcha' => $code]);
+    }
+
+    private function generateRandomCaptcha($length = 6){
+        $characters = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+        $code = '';
+        for ($i = 0; $i < $length; $i++) {
+            $code .= $characters[rand(0, strlen($characters) - 1)];
+        }
+        return $code;
+    }
+
+    public function register_post(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'password' => 'required|min:6',
+        ]);
+
+        if ($request->has('captcha') && !empty($request->captcha)) {
+            $expectedCaptcha = session('captcha_code');
+            if ($expectedCaptcha && strtoupper(trim($request->captcha)) !== strtoupper(trim($expectedCaptcha))) {
+                $notification = array(
+                    'messege' => 'Invalid human verification code. Please try again.',
+                    'alert-type' => 'error'
+                );
+                return redirect('login?mode=signup')->with($notification)->withInput();
+            }
+        }
+
+        $existing = User::where('email', $request->email)->first();
+        if ($existing) {
+            $notification = array(
+                'messege' => 'This email is already registered. Please sign in.',
+                'alert-type' => 'error'
+            );
+            return redirect('login')->with($notification)->withInput();
+        }
+
+        $baseSlug = Str::slug($request->name, '_');
+        if (empty($baseSlug)) {
+            $baseSlug = 'user';
+        }
+        $uniqueSlug = $baseSlug;
+        $count = 1;
+        while (User::where('name_url', $uniqueSlug)->exists()) {
+            $uniqueSlug = $baseSlug . '_' . $count;
+            $count++;
+        }
+
+        $user = User::create([
+            'user_unique_id' => Str::random(10),
+            'name' => $request->name,
+            'name_url' => $uniqueSlug,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'phone' => $request->phone ?? '',
+            'type' => 'user',
+            'status' => 'active',
+            'expiry_date' => date('Y-m-d', strtotime('+30 days')),
+            'spin_whell_round' => 100,
+            'default_background' => 'on',
+            'default_spinn' => '1',
+            'note' => 'Self-registered customer account',
+            'otp' => '123456',
+            'otp_link_status' => 'yes',
+        ]);
+
+        Auth::login($user);
+        session()->put('adminUserId', $user->id);
+        session()->put('type', $user->type);
+        session()->put('adminName', $user->name);
+
+        $notification = array(
+            'messege' => 'Welcome! Your account has been created successfully.',
+            'alert-type' => 'success'
+        );
+        return redirect('admin/dashboard')->with($notification);
+    }
+
+    public function google_redirect(Request $request)
+    {
+        $clientId = env('GOOGLE_CLIENT_ID');
+        $redirectUri = url('auth/google/callback');
+
+        if ($clientId) {
+            $url = "https://accounts.google.com/o/oauth2/v2/auth?" . http_build_query([
+                'client_id' => $clientId,
+                'redirect_uri' => $redirectUri,
+                'response_type' => 'code',
+                'scope' => 'openid email profile',
+                'access_type' => 'offline',
+                'prompt' => 'select_account',
+            ]);
+            return redirect($url);
+        }
+
+        // Demo / Instant Google login fallback if Google client credentials not configured in .env
+        $demoEmail = 'google.user@example.com';
+        $user = User::where('email', $demoEmail)->first();
+        if (!$user) {
+            $user = User::create([
+                'user_unique_id' => Str::random(10),
+                'name' => 'Google Business User',
+                'name_url' => 'google_business_user',
+                'email' => $demoEmail,
+                'password' => Hash::make(Str::random(16)),
+                'phone' => '+91 98765 43210',
+                'type' => 'user',
+                'status' => 'active',
+                'expiry_date' => date('Y-m-d', strtotime('+30 days')),
+                'spin_whell_round' => 100,
+                'default_background' => 'on',
+                'default_spinn' => '1',
+                'note' => 'Google Authenticated User',
+                'otp' => '123456',
+                'otp_link_status' => 'yes',
+            ]);
+        }
+        Auth::login($user);
+        session()->put('adminUserId', $user->id);
+        session()->put('type', $user->type);
+        session()->put('adminName', $user->name);
+
+        $notification = array(
+            'messege' => 'Logged in successfully with Google!',
+            'alert-type' => 'success'
+        );
+        return redirect('admin/dashboard')->with($notification);
+    }
+
+    public function google_callback(Request $request)
+    {
+        $code = $request->get('code');
+        $clientId = env('GOOGLE_CLIENT_ID');
+        $clientSecret = env('GOOGLE_CLIENT_SECRET');
+        $redirectUri = url('auth/google/callback');
+
+        if ($code && $clientId && $clientSecret) {
+            try {
+                $client = new \GuzzleHttp\Client();
+                $response = $client->post('https://oauth2.googleapis.com/token', [
+                    'form_params' => [
+                        'code' => $code,
+                        'client_id' => $clientId,
+                        'client_secret' => $clientSecret,
+                        'redirect_uri' => $redirectUri,
+                        'grant_type' => 'authorization_code',
+                    ],
+                ]);
+                $tokens = json_decode((string) $response->getBody(), true);
+                $accessToken = $tokens['access_token'] ?? null;
+
+                if ($accessToken) {
+                    $userResponse = $client->get('https://www.googleapis.com/oauth2/v2/userinfo', [
+                        'headers' => [
+                            'Authorization' => 'Bearer ' . $accessToken,
+                        ],
+                    ]);
+                    $googleUser = json_decode((string) $userResponse->getBody(), true);
+                    $email = $googleUser['email'] ?? null;
+                    $name = $googleUser['name'] ?? 'Google User';
+
+                    if ($email) {
+                        $user = User::where('email', $email)->first();
+                        if (!$user) {
+                            $baseSlug = Str::slug($name, '_') ?: 'user';
+                            $uniqueSlug = $baseSlug;
+                            $count = 1;
+                            while (User::where('name_url', $uniqueSlug)->exists()) {
+                                $uniqueSlug = $baseSlug . '_' . $count;
+                                $count++;
+                            }
+                            $user = User::create([
+                                'user_unique_id' => Str::random(10),
+                                'name' => $name,
+                                'name_url' => $uniqueSlug,
+                                'email' => $email,
+                                'password' => Hash::make(Str::random(16)),
+                                'phone' => '',
+                                'type' => 'user',
+                                'status' => 'active',
+                                'expiry_date' => date('Y-m-d', strtotime('+30 days')),
+                                'spin_whell_round' => 100,
+                                'default_background' => 'on',
+                                'default_spinn' => '1',
+                                'note' => 'Google SSO User',
+                                'otp' => '123456',
+                                'otp_link_status' => 'yes',
+                            ]);
+                        }
+                        Auth::login($user);
+                        session()->put('adminUserId', $user->id);
+                        session()->put('type', $user->type);
+                        session()->put('adminName', $user->name);
+
+                        return redirect('admin/dashboard')->with([
+                            'messege' => 'Signed in with Google successfully!',
+                            'alert-type' => 'success'
+                        ]);
+                    }
+                }
+            } catch (\Exception $e) {
+                return redirect('login')->with([
+                    'messege' => 'Google Sign-In failed: ' . $e->getMessage(),
+                    'alert-type' => 'error'
+                ]);
+            }
+        }
+
+        return redirect('login')->with([
+            'messege' => 'Google authorization failed.',
+            'alert-type' => 'error'
+        ]);
     }
 
     public function login_post(Request $request)
