@@ -38,4 +38,14 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function campings()
+    {
+        return $this->hasMany(Camping::class, 'created_by', 'id');
+    }
+
+    public function spinners()
+    {
+        return $this->hasMany(Spinner::class, 'created_by', 'id');
+    }
 }

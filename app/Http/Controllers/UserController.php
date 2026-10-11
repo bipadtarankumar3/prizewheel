@@ -843,28 +843,63 @@ class UserController extends Controller
 
         if(Auth::check() && Auth::user()->type == 'admin'){
 
-
             $where = '1=1';
+            $today = date('Y-m-d');
+            $startOfMonth = date('Y-m-01');
 
             if(isset($request))
             {
-                
-                if($request->start_date!='')
+                if(!empty($request->start_date))
                 {
                     $where .= " and  date(users.created_at) >=  '$request->start_date'" ;
                     $array['start_date'] = $request->start_date;
                 }
-                if($request->end_date!='')
+                if(!empty($request->end_date))
                 {
-
                     $where .= " and  date(users.created_at) <=  '$request->end_date'" ;
                     $array['end_date'] = $request->end_date ;
                 }
 
+                if(!empty($request->filter))
+                {
+                    if($request->filter == 'today')
+                    {
+                        $where .= " and date(users.created_at) = '$today'";
+                        $array['activeFilter'] = 'today';
+                    }
+                    elseif($request->filter == 'month')
+                    {
+                        $where .= " and date(users.created_at) >= '$startOfMonth'";
+                        $array['activeFilter'] = 'month';
+                    }
+                    elseif($request->filter == 'active')
+                    {
+                        $where .= " and users.status = 'active' and date(users.expiry_date) >= '$today'";
+                        $array['activeFilter'] = 'active';
+                    }
+                    elseif($request->filter == 'expired')
+                    {
+                        $where .= " and (users.status = 'inactive' or date(users.expiry_date) < '$today')";
+                        $array['activeFilter'] = 'expired';
+                    }
+                }
             }
 
-            $array['user'] = User::where('type','user')->whereRaw($where)->orderBy('id','desc')->get();
-            // dd($user);
+            // High-detail metrics
+            $array['totalUsersCount'] = User::where('type','user')->count();
+            $array['todayRegisteredCount'] = User::where('type','user')->whereDate('created_at', $today)->count();
+            $array['monthRegisteredCount'] = User::where('type','user')->whereDate('created_at', '>=', $startOfMonth)->count();
+            $array['activeUsersCount'] = User::where('type','user')->where('status','active')->whereDate('expiry_date','>=',$today)->count();
+            $array['expiredUsersCount'] = User::where('type','user')->where(function($q) use ($today) {
+                $q->where('status','inactive')->orWhereDate('expiry_date','<',$today);
+            })->count();
+
+            $array['user'] = User::where('type','user')
+                ->whereRaw($where)
+                ->withCount(['campings', 'spinners'])
+                ->orderBy('id','desc')
+                ->get();
+
             return view('admin.user.list',$array);
         }else{
             return redirect('/');
