@@ -395,7 +395,7 @@ class SpinnerController extends Controller
         return redirect('/login');
     }
 
-    public function spinner_form_list($id){
+    public function spinner_form_list(Request $request, $id){
 
         if(Auth::check()){
 
@@ -403,22 +403,27 @@ class SpinnerController extends Controller
 
             if(isset($request))
             {
-                
-                if($request->start_date!='')
+                if(!empty($request->start_date))
                 {
                     $where .= " and  date(spinner_forms.created_at) >=  '$request->start_date'" ;
                     $array['start_date'] = $request->start_date;
                 }
-                if($request->end_date!='')
+                if(!empty($request->end_date))
                 {
-
                     $where .= " and  date(spinner_forms.created_at) <=  '$request->end_date'" ;
                     $array['end_date'] = $request->end_date ;
                 }
-
+                if(!empty($request->search))
+                {
+                    $search = addslashes($request->search);
+                    $where .= " and (spinner_forms.name like '%{$search}%' or spinner_forms.phone like '%{$search}%' or spinner_forms.email like '%{$search}%' or spinner_forms.whatsapp_number like '%{$search}%')" ;
+                    $array['search'] = $request->search;
+                }
             }
 
             $array['id'] = $id;
+            $array['camping'] = Camping::with('user')->find($id);
+
             $array['SpinnerForm'] = SpinnerForm::
             select(
                 'spinner_forms.id',
@@ -441,8 +446,15 @@ class SpinnerController extends Controller
             ->leftJoin('spinners','spinners.id','spinner_forms.spinner_id')
             ->where('spinner_forms.camping_id',$id)
             ->whereRaw($where)
-             ->orderBy('spinner_forms.id','desc')
+            ->orderBy('spinner_forms.id','desc')
             ->get();
+
+            // Computed KPI metrics
+            $array['totalLeads'] = $array['SpinnerForm']->count();
+            $array['totalWinners'] = $array['SpinnerForm']->filter(function($i) { return !empty($i->spinner_name); })->count();
+            $array['totalProofs'] = $array['SpinnerForm']->filter(function($i) { return !empty($i->schreenshot); })->count();
+            $array['totalWhatsapp'] = $array['SpinnerForm']->filter(function($i) { return !empty($i->whatsapp_number); })->count();
+
             return view('user.spinner_form.spinner_form_list',$array);
         }
     }
