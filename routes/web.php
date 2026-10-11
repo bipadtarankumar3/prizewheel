@@ -192,6 +192,12 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth']], function () {
     Route::any('add_popup_alert', [PopupalertController::class,'add_popup_alert']);
     // ----------------- Popupalert End------------------------
 
-
 });
 
+// Smart redirect fallback: /{user_name} -> /u/{user_name}
+Route::get('/{user_name}', function ($user_name) {
+    if (\App\Models\User::where('name_url', $user_name)->exists()) {
+        return redirect('/u/' . $user_name);
+    }
+    abort(404);
+});

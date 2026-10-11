@@ -198,7 +198,7 @@
        STORE / CAMPAIGN USER DASHBOARD
        ========================================== --}}
   @php
-    $storeUrl = url('/') . '/' . (Auth::user()->name_url ?? 'u/' . Auth::user()->id);
+    $storeUrl = url('u/' . (Auth::user()->name_url ?: Auth::user()->id));
     $activeCampaign = $campaigns->where('status', 'active')->first() ?? $campaigns->first();
   @endphp
 
