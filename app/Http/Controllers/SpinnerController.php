@@ -285,46 +285,114 @@ class SpinnerController extends Controller
 
         if(Auth::check()){
 
-            $where = '1=1';
+            $query = Camping::with(['user', 'spinners'])->withCount(['spinners', 'spinnerForms']);
 
-            if(isset($request))
-            {
-                
-                if($request->start_date!='')
-                {
-                    $where .= " and  date(campings.created_at) >=  '$request->start_date'" ;
-                    $array['start_date'] = $request->start_date;
-                }
-                if($request->end_date!='')
-                {
-
-                    $where .= " and  date(campings.created_at) <=  '$request->end_date'" ;
-                    $array['end_date'] = $request->end_date ;
-                }
-
+            // If store user, restrict to their own campaigns
+            if (Auth::user()->type == 'user') {
+                $query->where('campings.created_by', Auth::user()->id);
             }
 
-            $array['camping'] = Camping::where('created_by',Auth::user()->id)->where('status','active')->whereRaw($where)->get();
-            return view('user.spinner_form.list',$array);
+            // Filters
+            $start_date = $request->start_date ?? '';
+            $end_date = $request->end_date ?? '';
+            $store_id = $request->store_id ?? '';
+            $search = $request->search ?? '';
+            $status_filter = $request->status_filter ?? 'all'; // all, active, expired
+
+            $today = date('Y-m-d');
+
+            if(!empty($start_date)){
+                $query->whereDate('campings.start_date', '>=', $start_date);
+            }
+            if(!empty($end_date)){
+                $query->whereDate('campings.end_date', '<=', $end_date);
+            }
+            if(!empty($store_id)){
+                $query->where('campings.created_by', $store_id);
+            }
+
+            if($status_filter == 'active'){
+                $query->where('campings.status', 'active')->whereDate('campings.end_date', '>=', $today);
+            } elseif($status_filter == 'expired'){
+                $query->where(function($q) use ($today) {
+                    $q->where('campings.status', 'inactive')->orWhereDate('campings.end_date', '<', $today);
+                });
+            }
+
+            if(!empty($search)){
+                $query->where(function($q) use ($search) {
+                    $q->where('campings.campaign_name', 'like', "%{$search}%")
+                      ->orWhere('campings.title', 'like', "%{$search}%")
+                      ->orWhere('campings.sub_title', 'like', "%{$search}%")
+                      ->orWhereHas('user', function($uq) use ($search) {
+                          $uq->where('name', 'like', "%{$search}%")
+                             ->orWhere('email', 'like', "%{$search}%")
+                             ->orWhere('phone', 'like', "%{$search}%");
+                      });
+                });
+            }
+
+            $camping = $query->orderBy('campings.id', 'desc')->get();
+
+            // Total KPIs across displayed campaigns
+            $totalCampaigns = $camping->count();
+            $totalLeads = $camping->sum('spinner_forms_count');
+            $totalQuota = $camping->sum('total_form');
+            $totalSpinsAllocated = $camping->sum('number_of_total_spinn');
+            $totalSlicesConfigured = $camping->sum('spinners_count');
+            $activeCampaignsCount = $camping->filter(function($c) use ($today) {
+                return $c->status == 'active' && $c->end_date >= $today;
+            })->count();
+            $expiredCampaignsCount = $camping->filter(function($c) use ($today) {
+                return $c->status == 'inactive' || $c->end_date < $today;
+            })->count();
+
+            // Telemetry counts for leads verification
+            $campIds = $camping->pluck('id')->toArray();
+            $totalScreenshots = SpinnerForm::whereIn('camping_id', $campIds)
+                ->whereNotNull('schreenshot')
+                ->where('schreenshot', '!=', '')
+                ->count();
+            $totalPrizesAwarded = SpinnerForm::whereIn('camping_id', $campIds)
+                ->whereNotNull('spinner_id')
+                ->count();
+
+            $uniqueStoresCount = $camping->pluck('created_by')->unique()->count();
+
+            // Store list for Super Admin dropdown
+            $allStores = Auth::user()->type == 'admin'
+                ? User::where('type', 'user')->select('id', 'name', 'email')->orderBy('name')->get()
+                : collect();
+
+            return view('user.spinner_form.list', compact(
+                'camping', 'totalCampaigns', 'totalLeads', 'totalQuota', 'totalSpinsAllocated',
+                'totalSlicesConfigured', 'activeCampaignsCount', 'expiredCampaignsCount',
+                'totalScreenshots', 'totalPrizesAwarded', 'uniqueStoresCount',
+                'start_date', 'end_date', 'store_id', 'search', 'status_filter', 'allStores'
+            ));
         }
+
+        return redirect('/login');
     }
 
-        
     public function downloadFormCampingPdf(Request $request){
 
         if(Auth::check()){
-                //dd($request->all());
-                $id = $request->checkbox;
+            $id = $request->checkbox;
             if ($id != null) {
-                $array['camping'] = Camping::where('created_by',Auth::user()->id)->whereIn('id',$id)->where('status','active')->get();
-            $pdf = PDF::loadView('user.spinner_form.campingFormPdf', $array);
-        
-            return $pdf->download('campingFormPdf.pdf');
+                if (Auth::user()->type == 'admin') {
+                    $array['camping'] = Camping::whereIn('id', $id)->get();
+                } else {
+                    $array['camping'] = Camping::where('created_by', Auth::user()->id)->whereIn('id', $id)->get();
+                }
+                $pdf = PDF::loadView('user.spinner_form.campingFormPdf', $array);
+                return $pdf->download('campingFormPdf.pdf');
             } else {
                 return back();
             }
-                  
         }
+
+        return redirect('/login');
     }
 
     public function spinner_form_list($id){
