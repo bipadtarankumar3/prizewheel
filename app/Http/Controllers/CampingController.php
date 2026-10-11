@@ -92,35 +92,79 @@ class CampingController extends Controller
 
         if(Auth::check()){
 
-            $where = '1=1';
+            $presentDate = date('Y-m-d');
+            
+            $query = Camping::with(['user', 'spinners'])->withCount(['spinners', 'spinnerForms']);
 
-            if(isset($request))
-            {
-                
-                if($request->start_date!='')
-                {
-                    $where .= " and  date(campings.created_at) >=  '$request->start_date'" ;
-                    $array['start_date'] = $request->start_date;
-                }
-                if($request->end_date!='')
-                {
-
-                    $where .= " and  date(campings.created_at) <=  '$request->end_date'" ;
-                    $array['end_date'] = $request->end_date ;
-                }
-
+            // If user is a store/client, restrict to their own campaigns
+            if (Auth::user()->type == 'user') {
+                $query->where('campings.created_by', Auth::user()->id);
             }
 
-            $presentDate = date('Y-m-d');
+            // Expiry condition: end_date in the past
+            $query->whereDate('campings.end_date', '<', $presentDate);
 
-            $array['camping'] = Camping::select('campings.*','users.name as user_name')
-            ->leftJoin('users','users.id','campings.id')
-            ->whereDate('end_date','<',$presentDate)
-            ->whereRaw($where)
-            ->get();
-            // dd($user);
-            return view('user.camping.expired_camping_list',$array);
+            // Filters
+            $start_date = $request->start_date ?? '';
+            $end_date = $request->end_date ?? '';
+            $store_id = $request->store_id ?? '';
+            $search = $request->search ?? '';
+            $status_filter = $request->status_filter ?? 'all';
+
+            if(!empty($start_date)){
+                $query->whereDate('campings.start_date', '>=', $start_date);
+            }
+            if(!empty($end_date)){
+                $query->whereDate('campings.end_date', '<=', $end_date);
+            }
+            if(!empty($store_id)){
+                $query->where('campings.created_by', $store_id);
+            }
+            if($status_filter != 'all' && !empty($status_filter)){
+                $query->where('campings.status', $status_filter);
+            }
+            if(!empty($search)){
+                $query->where(function($q) use ($search) {
+                    $q->where('campings.campaign_name', 'like', "%{$search}%")
+                      ->orWhere('campings.title', 'like', "%{$search}%")
+                      ->orWhere('campings.sub_title', 'like', "%{$search}%")
+                      ->orWhereHas('user', function($uq) use ($search) {
+                          $uq->where('name', 'like', "%{$search}%")
+                             ->orWhere('email', 'like', "%{$search}%")
+                             ->orWhere('phone', 'like', "%{$search}%");
+                      });
+                });
+            }
+
+            $camping = $query->orderBy('campings.end_date', 'desc')->get();
+
+            // Calculate comprehensive KPIs & analytics across all expired campaigns
+            $totalExpired = $camping->count();
+            $totalLeads = $camping->sum('spinner_forms_count');
+            $totalQuota = $camping->sum('total_form');
+            $totalSpinsAllocated = $camping->sum('number_of_total_spinn');
+            $totalSlicesConfigured = $camping->sum('spinners_count');
+            $uniqueStoresCount = $camping->pluck('created_by')->unique()->count();
+
+            // Expired in last 30 days
+            $thirtyDaysAgo = date('Y-m-d', strtotime('-30 days'));
+            $recentlyExpired = $camping->filter(function($c) use ($thirtyDaysAgo) {
+                return $c->end_date >= $thirtyDaysAgo;
+            })->count();
+
+            // All stores for admin dropdown filter
+            $allStores = Auth::user()->type == 'admin'
+                ? User::where('type', 'user')->select('id', 'name', 'email')->orderBy('name')->get()
+                : collect();
+
+            return view('user.camping.expired_camping_list', compact(
+                'camping', 'totalExpired', 'totalLeads', 'totalQuota', 'totalSpinsAllocated',
+                'totalSlicesConfigured', 'uniqueStoresCount', 'recentlyExpired',
+                'start_date', 'end_date', 'store_id', 'search', 'status_filter', 'allStores'
+            ));
         }
+
+        return redirect('/login');
     }
 
     public function add_camping_page(){
@@ -134,18 +178,22 @@ class CampingController extends Controller
     public function downloadCampaignPdf(Request $request){
 
         if(Auth::check()){
-                //dd($request->all());
-                $id = $request->checkbox;
+            $id = $request->checkbox;
             if ($id != null) {
-                $array['camping'] = Camping::whereIn('id',$id )->where('created_by',Auth::user()->id)->get();
-            $pdf = PDF::loadView('user.camping.campingPdf', $array);
-        
-            return $pdf->download('campaign.pdf');
+                if (Auth::user()->type == 'admin') {
+                    $array['camping'] = Camping::whereIn('id', $id)->get();
+                } else {
+                    $array['camping'] = Camping::whereIn('id', $id)->where('created_by', Auth::user()->id)->get();
+                }
+                $pdf = PDF::loadView('user.camping.campingPdf', $array);
+            
+                return $pdf->download('campaign.pdf');
             } else {
                 return back();
             }
-                  
         }
+
+        return redirect('/login');
     }
 
     public function add_camping(Request $request){

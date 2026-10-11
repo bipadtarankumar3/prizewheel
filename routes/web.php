@@ -100,6 +100,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth']], function () {
 
     // ----------------- Camping ------------------------
     Route::any('camping_list', [CampingController::class,'camping_list']);
+    Route::any('expired_camping_list', [CampingController::class,'expired_camping_list']);
     Route::get('add_camping_page', [CampingController::class,'add_camping_page']);
     Route::post('add_camping', [CampingController::class,'add_camping']);
     Route::post('downloadCampaignPdf', [CampingController::class,'downloadCampaignPdf']);
