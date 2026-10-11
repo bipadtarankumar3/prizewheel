@@ -103,6 +103,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth']], function () {
     Route::post('downloadCampaignPdf', [CampingController::class,'downloadCampaignPdf']);
     Route::get('edit_camping/{id}', [CampingController::class,'edit_camping']);
     Route::get('delete_camping/{id}', [CampingController::class,'delete_camping']);
+    Route::post('set_single_active_campaign', [CampingController::class,'set_single_active_campaign']);
     // ----------------- Camping End------------------------
 
 

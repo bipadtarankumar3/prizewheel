@@ -244,4 +244,31 @@ class CampingController extends Controller
             
         }
     }
+
+    public function set_single_active_campaign(Request $request){
+        if(Auth::check()){
+            $user_id = Auth::user()->id;
+            $campaign_id = $request->campaign_id;
+
+            $target = Camping::where('id', $campaign_id)->where('created_by', $user_id)->first();
+            if(!$target){
+                return response()->json(['status' => false, 'message' => 'Campaign not found or access denied.'], 404);
+            }
+
+            // At a time, only 1 campaign can be active: Deactivate all other campaigns of this user
+            Camping::where('created_by', $user_id)->update(['status' => 'inactive']);
+
+            // Set chosen campaign as active
+            $target->status = 'active';
+            $target->save();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Campaign "' . $target->campaign_name . '" is now the only active campaign!',
+                'active_id' => $target->id,
+                'active_name' => $target->campaign_name
+            ]);
+        }
+        return response()->json(['status' => false, 'message' => 'Unauthorized'], 401);
+    }
 }

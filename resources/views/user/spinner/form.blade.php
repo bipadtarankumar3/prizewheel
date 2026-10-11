@@ -9,7 +9,10 @@
         <select name="camping_id" id="camping_id"  class="col-3 control-label col-form-label form-control" required>
           <option value="" >Select</option>
           @foreach ($camping as $item)
-              <option value="{{$item->id}}" @if (isset($Spinner)) @if($Spinner->camping_id == $item->id) selected @endif  @endif>{{$item->campaign_name}}</option>
+              <option value="{{$item->id}}" 
+                @if (isset($Spinner) && $Spinner->camping_id == $item->id) selected 
+                @elseif(isset($selected_camping_id) && $selected_camping_id == $item->id) selected 
+                @endif>{{$item->campaign_name}} @if($item->status == 'active')(Active)@endif</option>
           @endforeach
           
         </select>

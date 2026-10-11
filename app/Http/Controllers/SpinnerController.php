@@ -27,32 +27,77 @@ class SpinnerController extends Controller
         if(Auth::check()){
 
             $where = '1=1';
+            $user_id = Auth::user()->id;
 
             if(isset($request))
             {
-                
-                if($request->start_date!='')
+                if(!empty($request->start_date))
                 {
                     $where .= " and  date(spinners.created_at) >=  '$request->start_date'" ;
                     $array['start_date'] = $request->start_date;
                 }
-                if($request->end_date!='')
+                if(!empty($request->end_date))
                 {
-
                     $where .= " and  date(spinners.created_at) <=  '$request->end_date'" ;
                     $array['end_date'] = $request->end_date ;
                 }
+            }
 
+            // Optional direct filter by campaign_id
+            $filterCampingId = $request->campaign_id ?? null;
+            if(!empty($filterCampingId)){
+                $where .= " and spinners.camping_id = " . intval($filterCampingId);
+                $array['filterCampingId'] = $filterCampingId;
             }
 
             $array['Spinner'] = Spinner::select('spinners.*','campings.campaign_name as c_name','campings.title as c_title')
             ->leftJoin('campings','campings.id','spinners.camping_id')
-            ->where('spinners.created_by',Auth::user()->id)
+            ->where('spinners.created_by', $user_id)
             ->whereRaw($where)
             ->orderBy('id','desc')
             ->get();
-            //dd($Spinner);
-            return view('user.spinner.list',$array);
+
+            // Paginated campaigns - 6 per page with pagination
+            $campings = Camping::where('created_by', $user_id)
+                ->orderByRaw("CASE WHEN status = 'active' THEN 0 ELSE 1 END")
+                ->orderBy('id', 'desc')
+                ->paginate(6);
+
+            foreach ($campings as $camp) {
+                $cSpinners = Spinner::where('camping_id', $camp->id)->where('created_by', $user_id)->get();
+                $camp->spinners_count = $cSpinners->count();
+                $camp->active_spinners_count = $cSpinners->where('status', 'active')->count();
+                $camp->total_quantity = $cSpinners->sum('value');
+                $camp->total_forms_joined = SpinnerForm::where('camping_id', $camp->id)->count();
+            }
+
+            $array['campings'] = $campings;
+
+            // Global metrics and counts (Enforce strictly 1 active campaign)
+            $allUserCampings = Camping::where('created_by', $user_id)->get();
+            $allCampIds = $allUserCampings->pluck('id')->toArray();
+            $allUserSpinners = Spinner::where('created_by', $user_id)->get();
+
+            $allActive = $allUserCampings->where('status', 'active');
+            if ($allActive->count() > 1) {
+                // Keep only the single latest active campaign, deactivate all others
+                $activeCamp = $allActive->sortByDesc('id')->first();
+                Camping::where('created_by', $user_id)->where('id', '!=', $activeCamp->id)->update(['status' => 'inactive']);
+                foreach ($campings as $camp) {
+                    $camp->status = ($camp->id == $activeCamp->id) ? 'active' : 'inactive';
+                }
+            } else {
+                $activeCamp = $allActive->first();
+            }
+
+            $array['totalCampaignsCount'] = $allUserCampings->count();
+            $array['activeCampaignsCount'] = $activeCamp ? 1 : 0;
+            $array['activeCampaign'] = $activeCamp;
+            $array['totalSpinnersCount'] = $allUserSpinners->count();
+            $array['totalStockQty'] = $allUserSpinners->sum('value');
+            $array['totalFormsCount'] = SpinnerForm::whereIn('camping_id', $allCampIds)->count();
+
+            return view('user.spinner.list', $array);
         }
     }
 
@@ -84,16 +129,17 @@ class SpinnerController extends Controller
     public function add_spinner_page(){
 
         if(Auth::check()){
-            $camping = Camping::where('created_by',Auth::user()->id)->where('status','active')->get();
+            $camping = Camping::where('created_by',Auth::user()->id)->get();
             return view('user.spinner.create',compact('camping'));
         }
     }
 
-    public function spinner_form(){
+    public function spinner_form(Request $request){
 
         if(Auth::check()){
-            $camping = Camping::where('created_by',Auth::user()->id)->where('status','active')->get();
-            return view('user.spinner.form',compact('camping'));
+            $camping = Camping::where('created_by',Auth::user()->id)->get();
+            $selected_camping_id = $request->camping_id ?? '';
+            return view('user.spinner.form',compact('camping', 'selected_camping_id'));
         }
     }
 
