@@ -49,6 +49,7 @@ Route::get('logout',[UserController::class,'logout']);
 
 Route::any('otp_verify_page',[UserController::class,'otp_verify_page']);
 Route::any('otp_verify',[UserController::class,'otp_verify']);
+Route::any('resend_otp',[UserController::class,'resend_otp']);
 Route::get('forgotPassword',[UserController::class,'forgotPassword']);
 Route::post('adminUserIdCheck',[UserController::class,'adminUserIdCheck']);
 Route::get('confirmPasswordPage/{adminKey}',[UserController::class,'confirmPasswordPage']);

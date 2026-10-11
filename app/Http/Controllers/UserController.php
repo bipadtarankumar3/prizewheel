@@ -23,6 +23,8 @@ use Config;
 use Mail;
 use App\Mail\adminForgotPassMail;
 use App\Mail\OtpVerifyMail;
+use App\Mail\UserRegisteredMail;
+use App\Mail\AdminNewUserAlertMail;
 
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Response;
@@ -123,6 +125,9 @@ class UserController extends Controller
             'otp' => '123456',
             'otp_link_status' => 'yes',
         ]);
+
+        // Send welcome email to user and alert to admin
+        $this->sendRegistrationEmails($user);
 
         Auth::login($user);
         session()->put('adminUserId', $user->id);
@@ -328,32 +333,150 @@ class UserController extends Controller
 
     public function login_post(Request $request)
     {
-
-        // User::create([
-        //     'name' => 'admin',
-        //     'email' => 'admin@gmail.com',
-        //     'password' => Hash::make(123456)
-        // ]);return;
-
         $request->validate([
             'email' => 'required',
             'password' => 'required',
         ]);
-   
+
+        // When any user logs in, create account 1 time with same email if not existing yet
+        $existingUser = User::where('email', $request->email)->first();
+        if (!$existingUser) {
+            $baseSlug = Str::slug(explode('@', $request->email)[0], '_');
+            if (empty($baseSlug)) {
+                $baseSlug = 'user';
+            }
+            $uniqueSlug = $baseSlug;
+            $count = 1;
+            while (User::where('name_url', $uniqueSlug)->exists()) {
+                $uniqueSlug = $baseSlug . '_' . $count;
+                $count++;
+            }
+
+            $newUser = User::create([
+                'user_unique_id' => Str::random(10),
+                'name' => ucfirst(explode('@', $request->email)[0]),
+                'name_url' => $uniqueSlug,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'phone' => '',
+                'type' => 'user',
+                'status' => 'active',
+                'expiry_date' => date('Y-m-d', strtotime('+1 day')),
+                'spin_whell_round' => 100,
+                'default_background' => 'on',
+                'default_spinn' => '1',
+                'note' => 'Auto-created on first login (1-Day Trial)',
+                'otp' => '123456',
+                'otp_link_status' => 'yes',
+            ]);
+
+            // Send emails to new user and admin
+            $this->sendRegistrationEmails($newUser);
+
+            Auth::login($newUser);
+            session()->put('adminUserId', $newUser->id);
+            session()->put('type', $newUser->type);
+            session()->put('adminName', $newUser->name);
+
+            $notification = array(
+                'messege' => 'Welcome! Account created successfully with 1-Day Free Trial.',
+                'alert-type' => 'success'
+            );
+            return redirect('admin/dashboard')->with($notification);
+        }
+
         $credentials = $request->only('email', 'password');
         if (Auth::attempt($credentials)) {
-
             if (Auth::user()->type == 'admin') {
                 $otp_number = 123456;
                 //$otp_number = mt_rand(100000, 999999);
-                $admin=DB::table('users')->where('email',Auth::user()->email)->update(['otp'=>$otp_number]);
-    
-                 $mail=DB::table('mail_configures')->first();
-                 $config = array(
+                $admin = DB::table('users')->where('email', Auth::user()->email)->update(['otp' => $otp_number]);
+
+                try {
+                    $mail = DB::table('mail_configures')->first();
+                    if ($mail) {
+                        $config = array(
+                            'driver' => 'smtp',
+                            'host' => $mail->mail_host,
+                            'port' => $mail->mail_port,
+                            'from' => array('address' => $mail->mail_from_address, 'name' => $mail->mail_from_name ?: 'PrizeWheel'),
+                            'encryption' => $mail->mail_encryption,
+                            'username' => $mail->mail_username,
+                            'password' => $mail->mail_password,
+                            'sendmail' => '/usr/sbin/sendmail -bs',
+                            'pretend' => false,
+                            'stream' => [
+                                'ssl' => [
+                                    'allow_self_signed' => true,
+                                    'verify_peer' => false,
+                                    'verify_peer_name' => false,
+                                ],
+                            ],
+                        );
+                        Config::set('mail', $config);
+                    }
+                    Mail::to(Auth::user()->email)->send(new OtpVerifyMail("ADMIN", $otp_number));
+                } catch (\Throwable $e) {
+                    \Log::error('OTP Mail error: ' . $e->getMessage());
+                }
+
+                session()->put('admin_id', Auth::user()->id);
+                session()->put('otp', $otp_number);
+                return redirect('otp_verify_page');
+            } else {
+                session()->put('adminUserId', Auth::user()->id);
+                session()->put('type', Auth::user()->type);
+                session()->put('adminName', Auth::user()->name);
+                return redirect('admin/dashboard');
+            }
+        }
+
+        $notification = array(
+            'messege' => 'Login details are Invalid',
+            'alert-type' => 'error'
+        );
+        return back()->with($notification);
+    }
+
+    public function otp_verify_page()
+    {
+        $admin_id = session()->get('admin_id');
+
+        if ($admin_id) {
+            $user = User::find($admin_id);
+            $maskedEmail = $user ? Str::mask($user->email, '*', 3, -4) : 'your email';
+            return view('admin.otp_verify', compact('user', 'maskedEmail'));
+        } else {
+            return redirect('admin');
+        }
+    }
+
+    public function resend_otp()
+    {
+        $admin_id = session()->get('admin_id');
+        if (!$admin_id) {
+            return redirect('login');
+        }
+
+        $user = User::find($admin_id);
+        if (!$user) {
+            return redirect('login');
+        }
+
+        $otp_number = mt_rand(100000, 999999);
+        $user->otp = $otp_number;
+        $user->save();
+
+        session()->put('otp', $otp_number);
+
+        try {
+            $mail = DB::table('mail_configures')->first();
+            if ($mail) {
+                $config = array(
                     'driver' => 'smtp',
                     'host' => $mail->mail_host,
                     'port' => $mail->mail_port,
-                    'from' => array('address' => $mail->mail_from_address, 'name' => $mail->mail_from_name),
+                    'from' => array('address' => $mail->mail_from_address, 'name' => $mail->mail_from_name ?: 'PrizeWheel'),
                     'encryption' => $mail->mail_encryption,
                     'username' => $mail->mail_username,
                     'password' => $mail->mail_password,
@@ -367,37 +490,68 @@ class UserController extends Controller
                         ],
                     ],
                 );
-                Config::set('mail',$config);
-                $type="ADMIN";
-                $user= Mail::to(Auth::user()->email)->send(new OtpVerifyMail($type,$otp_number));
-                session()->put('admin_id', Auth::user()->id);
-                session()->put('otp', $otp_number);
-                return redirect('otp_verify_page');
-            } else {
-                return redirect('admin/dashboard');
+                Config::set('mail', $config);
             }
-            
-
-            
+            Mail::to($user->email)->send(new OtpVerifyMail("ADMIN", $otp_number));
+        } catch (\Throwable $e) {
+            \Log::error('Resend OTP error: ' . $e->getMessage());
         }
-  
+
+        $masked = Str::mask($user->email, '*', 3, -4);
         $notification = array(
-            'messege'=>'Login details are Invalid',
-            'alert-type'=>'error'
+            'messege' => 'A new 6-digit OTP code has been sent to ' . $masked,
+            'alert-type' => 'success'
         );
         return back()->with($notification);
     }
 
-    public function otp_verify_page(){
+    /**
+     * Send notification emails to newly registered user & admin(s)
+     */
+    public function sendRegistrationEmails($user)
+    {
+        try {
+            $mail = DB::table('mail_configures')->first();
+            if ($mail) {
+                $config = array(
+                    'driver' => 'smtp',
+                    'host' => $mail->mail_host,
+                    'port' => $mail->mail_port,
+                    'from' => array('address' => $mail->mail_from_address, 'name' => $mail->mail_from_name ?: 'PrizeWheel'),
+                    'encryption' => $mail->mail_encryption,
+                    'username' => $mail->mail_username,
+                    'password' => $mail->mail_password,
+                    'sendmail' => '/usr/sbin/sendmail -bs',
+                    'pretend' => false,
+                    'stream' => [
+                        'ssl' => [
+                            'allow_self_signed' => true,
+                            'verify_peer' => false,
+                            'verify_peer_name' => false,
+                        ],
+                    ],
+                );
+                Config::set('mail', $config);
+            }
 
-        $admin_id = session()->get('admin_id');
+            // 1. Send Welcome Email to the new user
+            if (!empty($user->email)) {
+                Mail::to($user->email)->send(new UserRegisteredMail($user));
+            }
 
-        if ($admin_id) {
-            return view('admin.otp_verify');
-        } else {
-            return redirect('admin');
+            // 2. Send Registration Alert Email to Admin(s)
+            $adminEmails = User::where('type', 'admin')->pluck('email')->filter()->unique()->toArray();
+            if (empty($adminEmails)) {
+                $adminEmails = ['digitalvyapariofficial@gmail.com'];
+            }
+            foreach ($adminEmails as $adminEmail) {
+                if (!empty($adminEmail)) {
+                    Mail::to($adminEmail)->send(new AdminNewUserAlertMail($user));
+                }
+            }
+        } catch (\Throwable $e) {
+            \Log::error('User registration email dispatch failed: ' . $e->getMessage());
         }
-        
     }
 
     
