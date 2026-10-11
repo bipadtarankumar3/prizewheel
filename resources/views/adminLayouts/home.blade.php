@@ -214,11 +214,23 @@
             </div>
             <div class="sidebar-user-details">
               <span class="sidebar-user-name" title="{{ Auth::user()->name }}">{{ Auth::user()->name }}</span>
-              <span class="sidebar-user-badge">{{ Auth::user()->type == 'admin' ? 'Super Admin' : '1-Day Trial' }}</span>
+              <span class="sidebar-user-badge">
+                @if(session()->has('impersonated_by_admin'))
+                  Store (Impersonated)
+                @else
+                  {{ Auth::user()->type == 'admin' ? 'Super Admin' : '1-Day Trial' }}
+                @endif
+              </span>
             </div>
-            <a href="{{ URL::to('logout') }}" class="sidebar-user-logout" title="Sign Out">
-              <i class="ti ti-logout"></i>
-            </a>
+            @if(session()->has('impersonated_by_admin'))
+              <a href="{{ URL::to('admin/return_to_admin') }}" class="sidebar-user-return-btn" title="Back to Super Admin">
+                <i class="ti ti-arrow-back-up"></i>
+              </a>
+            @else
+              <a href="{{ URL::to('logout') }}" class="sidebar-user-logout" title="Sign Out">
+                <i class="ti ti-logout"></i>
+              </a>
+            @endif
           </div>
 
         </div>
@@ -268,6 +280,17 @@
           <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
             <div class="d-flex align-items-center justify-content-between">
               <ul class="navbar-nav flex-row ms-auto align-items-center gap-2">
+
+                @if(session()->has('impersonated_by_admin'))
+                  <!-- RETURN TO ADMIN NAVBAR BUTTON -->
+                  <li class="nav-item">
+                    <a href="{{ URL::to('admin/return_to_admin') }}" class="btn-return-admin-nav-pill" title="Exit store view and return to Super Admin">
+                      <span class="admin-pulse-dot"></span>
+                      <i class="ti ti-arrow-back-up"></i>
+                      <span>Back to Admin</span>
+                    </a>
+                  </li>
+                @endif
 
                 @if(Auth::user()->type == 'user')
                   <!-- TRIAL ACCESS EXPIRATION BUTTON -->
@@ -427,6 +450,20 @@
                       </div>
 
                       <div class="message-body">
+                        @if(session()->has('impersonated_by_admin'))
+                          <div class="p-2.5 mb-2 rounded-3" style="background: linear-gradient(135deg, rgba(255, 170, 0, 0.12), rgba(255, 107, 0, 0.12)); border: 1px solid rgba(255, 170, 0, 0.35);">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                              <span class="fw-bold fs-2 text-dark"><i class="ti ti-shield-lock text-warning me-1"></i> Store View</span>
+                              <span class="badge bg-warning text-dark px-1.5 py-0.5" style="font-size: 9.5px;">Active</span>
+                            </div>
+                            <p class="mb-2 text-muted" style="font-size: 11.5px; line-height: 1.3;">
+                              Viewing as <strong>{{ Auth::user()->name }}</strong>. Switch back to Super Admin.
+                            </p>
+                            <a href="{{ URL::to('admin/return_to_admin') }}" class="btn btn-warning btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-1 shadow-sm py-1.5">
+                              <i class="ti ti-arrow-back-up"></i> Switch Back to Admin
+                            </a>
+                          </div>
+                        @endif
                         @if (Auth::user()->type == 'admin')
                           <a href="{{URL::to('admin/sitesetting')}}" class="d-flex align-items-center gap-3 py-2 px-3 rounded-2 text-dark text-decoration-none bg-hover-light">
                             <i class="ti ti-settings fs-5 text-primary"></i>

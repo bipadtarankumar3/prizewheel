@@ -79,6 +79,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth']], function () {
     Route::get('profile', [UserController::class,'profile']);
     Route::post('profile_update', [UserController::class,'profile_update']);
     Route::get('dashboard_visit/{id}', [UserController::class,'dashboard_visit']);
+    Route::get('return_to_admin', [UserController::class,'return_to_admin'])->name('return_to_admin');
     Route::get('view_qr', [UserController::class,'view_qr']);
     Route::get('print_qr_code', [UserController::class,'print_qr_code']);
     Route::get('generatePDF', [UserController::class,'generatePDF']);
@@ -193,8 +194,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth']], function () {
     Route::any('popup_alert', [PopupalertController::class,'popup_alert']);
     Route::any('add_popup_alert', [PopupalertController::class,'add_popup_alert']);
     // ----------------- Popupalert End------------------------
-
 });
+
+Route::get('return_to_admin', [UserController::class,'return_to_admin'])->middleware('auth');
 
 // Smart redirect fallback: /{user_name} -> /u/{user_name}
 Route::get('/{user_name}', function ($user_name) {

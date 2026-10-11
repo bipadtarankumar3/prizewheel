@@ -1421,13 +1421,57 @@ class UserController extends Controller
     public function dashboard_visit($id){
 
         if(Auth::check()){
+            // If current user is super admin and not already impersonating, remember original admin
+            if (Auth::user()->type == 'admin' && !session()->has('impersonated_by_admin')) {
+                session()->put('impersonated_by_admin', Auth::user()->id);
+                session()->put('impersonated_admin_name', Auth::user()->name);
+            }
             
             $user = User::where('id',$id)->first();
-            Auth::login($user);
+            if ($user) {
+                Auth::login($user);
+                session()->put('adminUserId', $user->id);
+                session()->put('type', $user->type);
+                session()->put('adminName', $user->name);
 
-            return redirect('admin/dashboard');
-            
+                $notification = array(
+                    'messege' => "Viewing as store: {$user->name}. You can switch back to Super Admin at any time.",
+                    'alert-type' => 'info'
+                );
+                return redirect('admin/dashboard')->with($notification);
+            }
+
+            return redirect()->back();
         }
+
+        return redirect('/login');
+    }
+
+    public function return_to_admin(){
+
+        if(Auth::check() && session()->has('impersonated_by_admin')){
+            $adminId = session()->get('impersonated_by_admin');
+            $adminUser = User::find($adminId);
+
+            if ($adminUser) {
+                // Clear impersonation session
+                session()->forget('impersonated_by_admin');
+                session()->forget('impersonated_admin_name');
+
+                Auth::login($adminUser);
+                session()->put('adminUserId', $adminUser->id);
+                session()->put('type', $adminUser->type);
+                session()->put('adminName', $adminUser->name);
+
+                $notification = array(
+                    'messege' => 'Switched back to Super Admin successfully!',
+                    'alert-type' => 'success'
+                );
+                return redirect('admin/sub_user_list')->with($notification);
+            }
+        }
+
+        return redirect('admin/dashboard');
     }
 
     //---------------------------------- Skip Ip ------------------------------------

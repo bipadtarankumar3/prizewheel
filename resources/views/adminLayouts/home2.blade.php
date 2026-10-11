@@ -254,7 +254,16 @@
                 aria-controls="offcanvasWithBothOptions">
                 <i class="ti ti-align-justified fs-7"></i>
               </a> --}}
-              <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-center">
+              <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-center gap-2">
+                @if(session()->has('impersonated_by_admin'))
+                  <li class="nav-item">
+                    <a href="{{ URL::to('admin/return_to_admin') }}" class="btn-return-admin-nav-pill" title="Exit store view and return to Super Admin">
+                      <span class="admin-pulse-dot"></span>
+                      <i class="ti ti-arrow-back-up"></i>
+                      <span>Back to Admin</span>
+                    </a>
+                  </li>
+                @endif
                
                 <li class="nav-item dropdown">
                   <a class="nav-link pe-0" href="javascript:void(0)" id="drop1" data-bs-toggle="dropdown"
@@ -309,6 +318,11 @@
                         
                       </div>
                       <div class="d-grid py-4 px-7 pt-8">
+                        @if(session()->has('impersonated_by_admin'))
+                          <a href="{{URL::to('admin/return_to_admin')}}" class="btn btn-warning mb-2 fw-bold">
+                            <i class="ti ti-arrow-back-up me-1"></i> Switch Back to Admin
+                          </a>
+                        @endif
                         @if (Auth::user()->type  == 'user')
                         <a href="{{URL::to('admin/view_qr')}}" class="btn btn-outline-warning my-2">Download QR</a>
                           <a href="{{URL::to('u/'.Auth::user()->name_url)}}" target="_blank" class="btn btn-outline-success my-2">Visit My Site</a>
