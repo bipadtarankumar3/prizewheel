@@ -13,416 +13,966 @@
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     
   {{-- <link href="https://codepen.io/hexagoncircle/pen/vYxKLOa.css" rel="stylesheet"> --}}
-    <link rel="stylesheet" href="{{asset('adminAssets/libs/datatables.net-bs5/css/dataTables.bootstrap5.min.css')}}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css" integrity="sha512-q3eWabyZPc1XTCmF+8/LuE1ozpg5xxn7iO89yfSOd5/oKvyqLngoNGsx8jq92Y8eXJ/IRxQbEC+FGSYxtk2oiw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="{{asset('frontend/award/css/style.css')}}">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     
+    <!-- Award & Spinner Styles -->
+    <link rel="stylesheet" href="{{asset('frontend/award/css/style.css')}}">
     <link rel="stylesheet" href="{{asset('frontend/spinner/style.css')}}">
     <link rel="stylesheet" href="{{asset('frontend/css/spinn_one/responsive.css')}}">
     <link rel="stylesheet" href="{{asset('frontend/css/spinn_one/my-style.css')}}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
     <style>
       /* Spinning animation */
       .is-spinning .spinner {
         transition: transform <?php echo $rotation_time;?>s cubic-bezier(0.1, -0.01, 0, 1);
       }
+
+      html, body {
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        min-height: 100vh;
+      }
+
+      body {
+        font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        margin: 0;
+        padding: 0;
+        display: block !important;
+      }
+
+      body.default-bg {
+        background-color: #f8fafc !important;
+        background-image: radial-gradient(rgba(148, 163, 184, 0.38) 1.2px, transparent 1.2px) !important;
+        background-size: 26px 26px !important;
+      }
+
+      /* === ATOM PARTICLE CANVAS & BACKGROUND === */
+      #atomCanvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .bg-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background:
+          radial-gradient(ellipse 65% 55% at 20% 25%, rgba(255, 107, 0, 0.08) 0%, transparent 65%),
+          radial-gradient(ellipse 60% 60% at 80% 75%, rgba(99, 102, 241, 0.07) 0%, transparent 65%),
+          radial-gradient(ellipse 50% 50% at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+      }
+
+      .main_page_wrapper {
+        position: relative;
+        z-index: 2;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 0;
+        background: transparent;
+      }
+
+      /* Reset older styles */
+      .camping_box {
+        display: none !important;
+      }
+      .main_box {
+        background: transparent !important;
+        height: auto !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+      }
+
+      /* Campaign Information Card */
+      .campaign_hero_card {
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.85);
+        box-shadow: 0 25px 50px -15px rgba(15, 23, 42, 0.15), 0 0 1px 1px rgba(255, 255, 255, 0.8) inset;
+        border-radius: 28px;
+        padding: 32px 26px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .campaign_hero_card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.2), 0 0 1px 1px rgba(255, 255, 255, 0.9) inset;
+      }
+
+      /* Notice Banner */
+      .notice_banner {
+        display: flex;
+        align-items: center;
+        background: #fef2f2;
+        border: 1px solid #fee2e2;
+        border-radius: 9999px;
+        padding: 6px 14px;
+        margin-bottom: 20px;
+        overflow: hidden;
+      }
+      .notice_badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #ef4444;
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 3px 10px;
+        border-radius: 9999px;
+        white-space: nowrap;
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.35);
+        animation: badgePulse 2s infinite ease-in-out;
+      }
+      @keyframes badgePulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+      .notice_scroll {
+        flex: 1;
+        min-width: 0;
+        margin-left: 10px;
+      }
+      .notice_scroll marquee {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #dc2626;
+        margin: 0;
+        line-height: 1;
+      }
+
+      .brand_logo_wrapper {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 16px;
+      }
+      .brand_logo_card {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #ffffff;
+        padding: 10px 18px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+        transition: transform 0.25s ease;
+      }
+      .brand_logo_card:hover {
+        transform: translateY(-2px) scale(1.02);
+      }
+      .brand_logo_img {
+        max-height: 85px;
+        max-width: 170px;
+        object-fit: contain;
+      }
+
+      .campaign_main_title {
+        font-size: 1.85rem;
+        font-weight: 800;
+        color: #0f172a;
+        text-align: center;
+        margin-bottom: 6px;
+        line-height: 1.25;
+        letter-spacing: -0.01em;
+      }
+      .campaign_sub_title {
+        font-size: 0.95rem;
+        color: #64748b;
+        text-align: center;
+        margin-bottom: 22px;
+        line-height: 1.5;
+      }
+
+      .meta_cards_grid {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .meta_pill {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 18px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        transition: all 0.25s ease;
+      }
+      .meta_pill:hover {
+        background: #ffffff;
+        border-color: #cbd5e1;
+        box-shadow: 0 8px 20px -6px rgba(15, 23, 42, 0.08);
+        transform: translateY(-1px);
+      }
+      .meta_icon_circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+      }
+      .meta_icon_validity {
+        background: rgba(16, 185, 129, 0.12);
+        color: #059669;
+      }
+      .meta_icon_spins {
+        background: rgba(14, 165, 233, 0.12);
+        color: #0284c7;
+      }
+      .meta_pill_content {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+      .meta_pill_label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #94a3b8;
+        margin-bottom: 2px;
+      }
+      .meta_pill_val {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .meta_badge_number {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #2563eb;
+      }
+
+      /* Deal Wheel Showcase */
+      .deal_wheel_wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .deal-wheel {
+        --size: clamp(280px, 76vmin, 500px);
+        position: relative;
+        display: grid;
+        align-items: center;
+        justify-items: center;
+        grid-template-areas: "spinner";
+        filter: drop-shadow(0 25px 50px rgba(15, 23, 42, 0.28));
+        user-select: none;
+        margin: 0 auto 20px auto;
+      }
+
+      .deal-wheel > * {
+        grid-area: spinner;
+      }
+
+      .spinner {
+        position: relative;
+        display: grid;
+        align-items: center;
+        grid-template-areas: "spinner";
+        width: var(--size) !important;
+        height: var(--size) !important;
+        transform: rotate(calc(var(--rotate, 25) * 1deg));
+        border-radius: 50% !important;
+        box-shadow: 0 0 0 8px #f59e0b, 0 0 0 14px rgba(245, 158, 11, 0.35), 0 20px 50px rgba(0, 0, 0, 0.3) !important;
+        list-style-type: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: 4px solid #ffffff !important;
+      }
+
+      .spinner * {
+        grid-area: spinner;
+      }
+
+      .prize {
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: 0 calc(var(--size) / 6.5) 0 calc(var(--size) / 20);
+        width: 50%;
+        height: 50%;
+        transform-origin: center right;
+        transform: rotate(var(--rotate));
+        user-select: none;
+      }
+
+      .prize .text {
+        font-family: 'Outfit', sans-serif !important;
+        font-size: clamp(12px, calc(var(--size) / 23), 18px) !important;
+        font-weight: 800 !important;
+        color: #ffffff !important;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.3) !important;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+      }
+
+      /* Center 3D Spin Button */
+      .cap.start-btn-spin {
+        --cap-size: calc(var(--size) / 3.8);
+        position: relative;
+        justify-self: center;
+        width: var(--cap-size) !important;
+        height: var(--cap-size) !important;
+        background: radial-gradient(circle at 35% 30%, #ffffff 0%, #fef3c7 40%, #f59e0b 85%, #d97706 100%) !important;
+        border-radius: 50% !important;
+        text-align: center !important;
+        justify-content: center !important;
+        align-items: center !important;
+        display: flex !important;
+        flex-direction: column !important;
+        border: 5px solid #ffffff !important;
+        box-shadow: 0 0 0 4px #f59e0b, 0 12px 30px rgba(217, 119, 6, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.9) !important;
+        cursor: pointer !important;
+        font-family: 'Outfit', sans-serif !important;
+        font-weight: 900 !important;
+        font-size: clamp(14px, calc(var(--size) / 15), 24px) !important;
+        letter-spacing: 0.08em !important;
+        color: #78350f !important;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+        text-transform: uppercase !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        animation: capPulse 2.4s infinite !important;
+        z-index: 10 !important;
+      }
+
+      .cap.start-btn-spin:hover {
+        transform: scale(1.08) !important;
+        box-shadow: 0 0 0 6px #f59e0b, 0 16px 36px rgba(217, 119, 6, 0.65) !important;
+        color: #451a03 !important;
+      }
+
+      .cap.start-btn-spin:active {
+        transform: scale(0.96) !important;
+      }
+
+      .cap.start-btn-spin i {
+        font-size: 0.65em;
+        margin-bottom: 2px;
+        animation: bounceArrow 1.5s infinite;
+      }
+
+      @keyframes capPulse {
+        0%, 100% {
+          box-shadow: 0 0 0 4px #f59e0b, 0 8px 20px rgba(217, 119, 6, 0.45);
+        }
+        50% {
+          box-shadow: 0 0 0 8px #f59e0b, 0 14px 34px rgba(217, 119, 6, 0.7);
+        }
+      }
+
+      @keyframes bounceArrow {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-3px); }
+      }
+
+      /* Modern Pointer Needle */
+      .ticker {
+        position: absolute;
+        left: calc(var(--size) / -22) !important;
+        width: calc(var(--size) / 6.5) !important;
+        height: calc(var(--size) / 10) !important;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #991b1b 100%) !important;
+        z-index: 12 !important;
+        clip-path: polygon(15% 0, 100% 50%, 15% 100%, 0% 50%) !important;
+        transform-origin: center left !important;
+        filter: drop-shadow(2px 4px 8px rgba(0, 0, 0, 0.45)) !important;
+        border: 1px solid rgba(255, 255, 255, 0.5) !important;
+      }
+
+      /* CTA Spin Button */
+      .spin_form_btn {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        color: #ffffff !important;
+        font-family: 'Outfit', sans-serif !important;
+        font-size: 1.15rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.05em !important;
+        text-transform: uppercase !important;
+        padding: 15px 48px !important;
+        border-radius: 9999px !important;
+        border: none !important;
+        cursor: pointer !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.5), 0 0 0 4px rgba(16, 185, 129, 0.15) !important;
+      }
+
+      .spin_form_btn:not(:disabled) {
+        animation: spinPulse 2.4s infinite;
+      }
+      .spin_form_btn:hover:not(:disabled) {
+        transform: translateY(-2px) scale(1.03) !important;
+        box-shadow: 0 16px 35px -4px rgba(16, 185, 129, 0.75), 0 0 0 6px rgba(16, 185, 129, 0.25) !important;
+      }
+      .spin_form_btn:active:not(:disabled) {
+        transform: translateY(1px) scale(0.98) !important;
+      }
+      .spin_form_btn:disabled {
+        opacity: 0.65 !important;
+        cursor: not-allowed !important;
+        filter: grayscale(35%) !important;
+        animation: none !important;
+      }
+
+      @keyframes spinPulse {
+        0%, 100% {
+          box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.5), 0 0 0 4px rgba(16, 185, 129, 0.15);
+        }
+        50% {
+          box-shadow: 0 14px 32px -2px rgba(16, 185, 129, 0.7), 0 0 0 8px rgba(16, 185, 129, 0.25);
+        }
+      }
+
+      /* Floating Share Button */
+      .share_floating_bar {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 1050;
+      }
+      .share_toggle_btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        border-radius: 9999px;
+        padding: 10px 18px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #1e293b;
+        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15);
+        cursor: pointer;
+        transition: all 0.25s ease;
+      }
+      .share_toggle_btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px -4px rgba(15, 23, 42, 0.22);
+      }
+      .share_toggle_btn i {
+        color: #3b82f6;
+        font-size: 16px;
+      }
+      .share_options_menu {
+        display: none;
+        position: absolute;
+        bottom: 100%;
+        right: 0;
+        margin-bottom: 12px;
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(16px);
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 8px;
+        box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.2);
+        list-style: none;
+      }
+      .share_options_menu li {
+        margin: 4px 0;
+      }
+      .share_options_menu a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        font-size: 18px;
+        color: #ffffff !important;
+        text-decoration: none;
+        transition: transform 0.2s ease;
+      }
+      .share_options_menu a:hover {
+        transform: scale(1.12);
+      }
+      .share_options_menu .wa_btn {
+        background: #25d366;
+      }
+      .share_options_menu .fb_btn {
+        background: #1877f2;
+      }
+
+      /* Celebration / Blast Overlay */
+      .blast {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(15, 23, 42, 0.85) !important;
+        backdrop-filter: blur(18px) !important;
+        -webkit-backdrop-filter: blur(18px) !important;
+        z-index: 99999 !important;
+        opacity: 1 !important;
+        display: none;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 20px !important;
+        margin: 0 !important;
+      }
+
+      .blast.show-blast, 
+      .blast[style*="display: block"], 
+      .blast[style*="display: flex"] {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        opacity: 1 !important;
+      }
+
+      .blast .content {
+        margin: auto !important;
+        background: #ffffff !important;
+        opacity: 1 !important;
+        border-radius: 32px !important;
+        padding: 40px 32px !important;
+        max-width: 440px !important;
+        width: 92% !important;
+        text-align: center !important;
+        box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.3) inset !important;
+        animation: modalPop 0.45s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        position: relative !important;
+        z-index: 100000 !important;
+      }
+
+      @keyframes modalPop {
+        0% { transform: scale(0.7) translateY(30px); opacity: 0; }
+        100% { transform: scale(1) translateY(0); opacity: 1; }
+      }
+
+      .blast .trophy_img {
+        max-width: 120px !important;
+        height: auto !important;
+        filter: drop-shadow(0 15px 25px rgba(245, 158, 11, 0.45)) !important;
+        animation: trophyFloat 3s ease-in-out infinite !important;
+      }
+
+      @keyframes trophyFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+      }
+
+      .blast .content .text h2 {
+        font-family: 'Outfit', sans-serif !important;
+        font-weight: 800 !important;
+        font-size: 1.55rem !important;
+        color: #0f172a !important;
+        margin: 18px 0 8px 0 !important;
+      }
+
+      .blast .award_text {
+        font-family: 'Outfit', sans-serif !important;
+        font-weight: 900 !important;
+        font-size: 1.85rem !important;
+        background: linear-gradient(135deg, #ff6b00 0%, #ea580c 50%, #f59e0b 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        margin: 8px 0 24px 0 !important;
+        padding: 12px 24px !important;
+        background-color: #fff7ed !important;
+        border-radius: 20px !important;
+        border: 1.5px dashed #fed7aa !important;
+        display: inline-block !important;
+        letter-spacing: -0.01em !important;
+      }
+
+      .reedem-btn {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+        color: #ffffff !important;
+        font-family: 'Outfit', sans-serif !important;
+        font-weight: 800 !important;
+        font-size: 1.15rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        padding: 14px 44px !important;
+        border-radius: 9999px !important;
+        border: none !important;
+        box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.5) !important;
+        transition: all 0.25s ease !important;
+      }
+
+      .reedem-btn:hover {
+        transform: translateY(-2px) scale(1.03) !important;
+        box-shadow: 0 14px 30px -4px rgba(245, 158, 11, 0.65) !important;
+        color: #ffffff !important;
+      }
+
+      /* Modals */
+      .modal-dialog {
+        z-index: 1060 !important;
+      }
+      .modal-content {
+        border: none !important;
+        border-radius: 28px !important;
+        overflow: hidden !important;
+        box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.4) !important;
+        background: #ffffff !important;
+      }
+      #ReedemModal .modal-header,
+      #FormModal .modal-header {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+        padding: 20px 28px !important;
+        border-bottom: none !important;
+      }
+      #ReedemModal .modal-title,
+      #FormModal .modal-title {
+        font-weight: 800 !important;
+        font-size: 1.25rem !important;
+        color: #ffffff !important;
+      }
+      .modal-header .close {
+        color: #ffffff !important;
+        opacity: 0.85 !important;
+        text-shadow: none !important;
+      }
+      .modal-header .close:hover {
+        opacity: 1 !important;
+      }
+      .modal-body {
+        padding: 24px !important;
+      }
+      .FormModal .form-control {
+        border-radius: 14px !important;
+        border: 1.5px solid #e2e8f0 !important;
+        padding: 12px 16px !important;
+        height: auto !important;
+        font-size: 0.95rem !important;
+        color: #1e293b !important;
+        transition: all 0.2s ease !important;
+      }
+      .FormModal .form-control:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15) !important;
+      }
+      .FormModal label {
+        font-size: 0.82rem !important;
+        font-weight: 700 !important;
+        color: #475569 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.04em !important;
+        margin-bottom: 6px !important;
+      }
+      .form_submit_button {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 1.05rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        border-radius: 9999px !important;
+        padding: 14px 42px !important;
+        border: none !important;
+        box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.45) !important;
+        transition: all 0.25s ease !important;
+      }
+      .form_submit_button:hover {
+        transform: translateY(-2px) scale(1.02) !important;
+        box-shadow: 0 14px 30px -4px rgba(37, 99, 235, 0.6) !important;
+      }
+
+      @media (max-width: 991.98px) {
+        .main_page_wrapper {
+          min-height: 100vh;
+          display: block;
+          padding: 12px 0 36px 0;
+        }
+        .spinner_col {
+          margin-bottom: 24px !important;
+        }
+        .deal-wheel {
+          --size: min(84vw, 360px);
+        }
+        .campaign_hero_card {
+          padding: 24px 20px;
+          border-radius: 22px;
+        }
+        .campaign_main_title {
+          font-size: 1.4rem;
+        }
+        .brand_logo_img {
+          max-height: 70px;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .modal-dialog {
+          margin: 12px !important;
+        }
+        .modal-body {
+          padding: 20px 16px !important;
+        }
+        .FormModal .form-control {
+          font-size: 16px !important;
+        }
+        .blast .content {
+          padding: 30px 18px !important;
+          border-radius: 24px !important;
+          max-width: 95% !important;
+        }
+        .blast .trophy_img {
+          max-width: 90px !important;
+        }
+        .blast .content .text h2 {
+          font-size: 1.25rem !important;
+        }
+        .blast .award_text {
+          font-size: 1.4rem !important;
+          padding: 10px 18px !important;
+        }
+        .reedem-btn {
+          font-size: 1.05rem !important;
+          padding: 12px 36px !important;
+        }
+      }
     </style>
 </head>
-<body class="front_background ">
+<body 
+  @if($user->default_background == 'color') style="background:{{$user->background_color}}" 
+  @elseif($user->default_background == 'image' && !empty($user->background_image)) style="background:url('{{$user->background_image}}');background-repeat: no-repeat;background-size: cover;background-position: top;min-height: 100vh;" 
+  @else class="default-bg"
+  @endif >
 
+  <!-- Atom Particle Canvas & Subtle Glow Overlay -->
+  <canvas id="atomCanvas"></canvas>
+  <div class="bg-overlay"></div>
 
-      <div class="container-fluid camping_box">
-        <div class="row my-2" style="margin-top:0px!important">
-          <div class="col-md-12">
+  <div class="main_page_wrapper">
+    <div class="container py-3" id="cn_wheel_main_div">
+      <div class="row align-items-center justify-content-center">
+        <!-- Left Column (Desktop) / Second Section (Mobile): Campaign Information Card -->
+        <div class="col-lg-5 col-md-10 col-12 text_col mb-4 mb-lg-0 order-2 order-lg-1">
+          <div class="campaign_hero_card">
             @php
                 $notice = DB::table('notices')->where('user_id',$user->id)->where('status','active')->first();
             @endphp
             @if ($notice != '' && $notice->status == 'active')
-                <div>
-                  <marquee  direction="left" onmouseover="this.stop();" onmouseleave="this.start();" style="height: 31px;">
-                  <p style="color: red;margin-top: 10px;margin-left: 20px;">
+              <div class="notice_banner">
+                <span class="notice_badge"><i class="fas fa-bullhorn"></i> Notice</span>
+                <div class="notice_scroll">
+                  <marquee direction="left" onmouseover="this.stop();" onmouseleave="this.start();">
                     {{$notice->notice}}
-                  </p>
-                </marquee>
+                  </marquee>
                 </div>
+              </div>
             @endif
-            <div class="img_box">
-              <img src="{{$user->logo}}" class="logo_image" alt="">
+
+            <div class="brand_logo_wrapper">
+              <div class="brand_logo_card">
+                <img src="{{$user->logo}}" class="brand_logo_img" alt="Logo">
+              </div>
             </div>
+
             @if ($Camping->title_status == 'on')
-                 <h4 class="mt-2">{{$Camping->title}}</h4>
+              <h1 class="campaign_main_title">{{$Camping->title}}</h1>
             @endif
 
             @if ($Camping->sub_title_status == 'on')
-                <p style="padding: 0px;margin:0px">{{$Camping->sub_title}}</p>
+              <p class="campaign_sub_title">{{$Camping->sub_title}}</p>
             @endif
 
+            <div class="meta_cards_grid">
+              @if ($Camping->validity_status == 'on')
+                <div class="meta_pill">
+                  <div class="meta_icon_circle meta_icon_validity">
+                    <i class="far fa-calendar-alt"></i>
+                  </div>
+                  <div class="meta_pill_content">
+                    <span class="meta_pill_label">Offer Validity</span>
+                    <span class="meta_pill_val">
+                      @php
+                        $startDate = date_create($Camping->start_date);
+                        $endDate = date_create($Camping->end_date);
+                      @endphp
+                      {{ date_format($startDate, "d M Y") }} &mdash; {{ date_format($endDate, "d M Y") }}
+                    </span>
+                  </div>
+                </div>
+              @endif
 
-            @if ($Camping->validity_status == 'on')
-                <h3 style="padding: 0px;margin:0px">Offer Valid From : 
-                  <span style="color: green">
-                    <?php
-                      $date=date_create($Camping->start_date);
-                      echo date_format($date,"d/m/Y");
-                    ?>
-                  </span> To 
-                  <span style="color: red">
-                    <?php
-                      $date=date_create($Camping->end_date);
-                      echo date_format($date,"d/m/Y");
-                    ?>
-                  </span>
-                </h3>
-            @endif
-
-            @if ($SpinnerFormAccessCount == 'NO_LIMIT')
-                
-            @else
-              <p class="spin_time">Total Spin Times Limit : 
-                <span style="color: red" class="spin_time_count"> 
-                    @php
-                    echo $count = $user->spin_whell_round - $SpinnerFormAccessCount;
-                    @endphp
-                </span>
-              </p>
-            @endif
-
-            
-            
-            
+              @if ($SpinnerFormAccessCount != 'NO_LIMIT')
+                <div class="meta_pill">
+                  <div class="meta_icon_circle meta_icon_spins">
+                    <i class="fas fa-sync-alt fa-spin-hover"></i>
+                  </div>
+                  <div class="meta_pill_content">
+                    <span class="meta_pill_label">Spin Limit Remaining</span>
+                    <span class="meta_pill_val meta_badge_number">
+                      <span class="spin_time_count">
+                        @php
+                          echo $count = $user->spin_whell_round - $SpinnerFormAccessCount;
+                        @endphp
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              @endif
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="main_box" @if($user->default_background == 'color') style="background:{{$user->background_color}}" @else style="background:url('{{$user->background_image}}');background-repeat: no-repeat;
-        background-size: cover;background-position: top;"  @endif>
-        
+        <!-- Right Column (Desktop) / First Section (Mobile): Deal Wheel -->
+        <div class="col-lg-7 col-12 spinner_col text-center order-1 order-lg-2">
+          <div class="deal_wheel_wrapper">
+            <div class="deal-wheel">
+              <ul class="spinner"></ul>
+              <figure class="cap start-btn-spin">
+                <div class="grim-reaper" data-reaction="dancing" xmlns="http://www.w3.org/2000/svg"></div>
+                <i class="fas fa-play" style="font-size: 13px; margin-bottom: 2px;"></i>
+                <span>SPIN</span>
+              </figure>
+              <div class="ticker"></div>
+            </div>
 
-        <div class="deal-wheel">
-          <ul class="spinner"></ul>
-            <figure class="cap start-btn-spin" style="    background: white;
-            border-radius: 50%;
-            text-align: center;
-            justify-content: center;
-            align-items: center;
-            display: flex;">
-
-            <div  class="grim-reaper" data-reaction="dancing" xmlns="http://www.w3.org/2000/svg"></div>
-            {{-- <svg class="grim-reaper" data-reaction="dancing" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 582 653">
-              <defs>
-                <clipPath id="clip-path">
-                  <circle class="cls-1" cx="295.6" cy="286.3" r="286.3"></circle>
-                </clipPath>
-                <clipPath id="clip-path-2">
-                  <path class="cls-1" d="M460 250c0 130-126 222-151 209-39-22-194-110-194-239S280 54 356 54c33 1 104 66 104 196z"></path>
-                </clipPath>
-                <clipPath id="clip-path-3">
-                  <path class="cls-1" d="M122 426l-100 7s28 161 167 156c37-2 69-27 66-31s-28 13-71-13c-58-35-62-119-62-119z"></path>
-                </clipPath>
-                <style>
-                  .cls-1,
-                  .cls-17 {
-                    fill: none
-                  }
-            
-                  .cls-4 {
-                    fill: #141414
-                  }
-            
-                  .cls-5 {
-                    fill: #111010
-                  }
-            
-                  .cls-6 {
-                    fill: #fff
-                  }
-            
-                  .cls-7 {
-                    fill: #5c382b
-                  }
-            
-                  .cls-9 {
-                    fill: #232323
-                  }
-            
-                  .cls-15 {
-                    fill: #2d221e
-                  }
-            
-                  .cls-16 {
-                    fill: #4f2610;
-                    opacity: .6;
-                  }
-            
-                  .cls-17 {
-                    stroke: #9b8029;
-                    stroke-miterlimit: 10;
-                    stroke-width: 2.5px
-                  }
-            
-                  .cls-18 {
-                    fill: #a7a9ad
-                  }
-            
-                  .cls-20 {
-                    fill: #fafafa
-                  }
-                </style>
-              </defs>
-              <circle id="BG" cx="295.6" cy="286.3" r="286.3" fill="#960b0a"></circle>
-              <g data-animate="body">
-                <g id="ROBE">
-                  <path class="cls-4" d="M489 371s-9-1-18 6c-15 12-35 38-35 38l46 58s0-8-4-22c-4-15-5-58 2-73 2-5 9-7 9-7z"></path>
-                  <path class="cls-5" d="M483 487c-3 0-8-1-5-26 1-6-3-14-4-43-2-48 15-47 15-47s22-2 2 59c-11 32-5 57-8 57zM168 464c0 37-27 67-27 67s-34-30-49-64c-9-21-12-65-2-68 34-11 78 28 78 65z"></path>
-                </g>
-                <g id="LEFT_ARM">
-                  <path class="cls-6" d="M473 440l-2-1a1 1 0 010-1l5-24 7-26a1 1 0 011-1l3 1a1 1 0 010 1 133 133 0 00-9 25 171 171 0 00-4 25l-1 1z"></path>
-                  <path class="cls-6" d="M472 439l2 1a1 1 0 001-1l8-24 8-25a1 1 0 00-1-1l-3-1a1 1 0 00-1 1 132 132 0 01-5 26 170 170 0 01-9 23v1z"></path>
-                </g>
-                <g id="RIGHT_ARM">
-                  <path class="cls-6" d="M177 521l5-3a2 2 0 000-2l-22-49-27-49a2 2 0 00-2-1l-6 3a2 2 0 000 2c11 15 22 31 30 47a362 362 0 0120 50l2 2z"></path>
-                  <path class="cls-6" d="M180 518l-5 3a2 2 0 01-2-1l-28-46-26-49a2 2 0 010-3l6-3a2 2 0 012 1c6 18 13 35 23 51a363 363 0 0030 45v2z"></path>
-                </g>
-                <path id="SCYTHE-SNATH" class="cls-7" d="M22 433l493-45a6 6 0 016 3 6 6 0 01-5 8L27 455z"></path>
-              </g>
-              <g clip-path="url(#clip-path)" id="ROBE-BOTTOM-CLIP-PATH">
-                <g data-animate="body" id="ROBE-BOTTOM">
-                  <path class="cls-4" d="M478 479c0-8 1-27-1-34-3-9 1-42 1-42l-36 4-6 8s-9 4-39-12c-20-10-70 52-70 52s74 93 105 90c6-1 21-1 16-10-4-7 11-37 30-44 4-1 5-3 6-6 0 0-6 4-6-6z"></path>
-                  <path class="cls-9" d="M381 396c-18-20-50-3-85-11-25-5-36 4-41 21l-14 1c-20 3-39 30-49 48l-13-18-37 5s8 19 4 35c-8 32 8 73 8 73h30v10h18c-24 28 51 22 108 22 61 0 110 13 116-7 17-50-3-133-45-179z"></path>
-                </g>
-              </g>
-              <g data-animate="body">
-                <path id="HOOD" class="cls-5" d="M460 250c0 130-126 222-151 209-39-22-194-110-194-239S280 54 356 54c33 1 104 66 104 196z"></path>
-                <g id="TIE" clip-path="url(#clip-path-2)">
-                  <path d="M352 431a120 120 0 00-17-38 19 19 0 009-18c-1-10-40-4-39 6 2 9 10 15 19 15-1 9-4 24-7 33-4 12-21 30-21 30l25 55a4 4 0 007 2l25-31s5-29-1-54z" fill="#da193f"></path>
-                  <path d="M301 460s13 1 35-13a47 47 0 0016-16 59 59 0 012 14l1 16z" fill="#bc0f39"></path>
-                </g>
-                <g id="SCYTHE-2">
-                  <path class="cls-18" d="M122 426l-100 7s28 161 167 156c37-2 69-27 66-31s-28 13-71-13c-58-35-62-119-62-119z"></path>
-                  <g clip-path="url(#clip-path-3)">
-                    <path class="cls-20" d="M116 588l-32 7 44-142 32-7-44 142zM133 595l-8 2 44-142 8-2-44 142z"></path>
-                    <path d="M255 558s-50 29-108-1c-64-34-72-113-72-113" stroke="#969799" stroke-miterlimit="10" stroke-width="2.5" fill="none"></path>
-                  </g>
-                  <path class="cls-7" d="M10 434l121-10 4 18-123 13a11 11 0 01-12-8 11 11 0 0110-13z"></path>
-                </g>
-                <g id="KEY">
-                  <path d="M244 570a26 26 0 011 4 30 30 0 01-3 17c-2 5-7 9-12 9a14 14 0 01-1 1c-5 0-9-3-13-6a30 30 0 01-7-17c-1-13 5-22 15-24 8-1 12 3 16 5a33 33 0 01-5 1h-5c-9-3-15 8-14 18a23 23 0 005 12c3 3 6 4 8 4s6-3 7-6c2-4 3-9 2-14z" fill="#9b8029"></path>
-                  <path class="cls-18" d="M210 619h13v32h-12a1 1 0 01-1-1v-31z" transform="rotate(19 217 635)"></path>
-                  <path d="M217 590h16a12 12 0 0112 13v26a1 1 0 01-1 2h-38a1 1 0 01-1-2v-26a12 12 0 0112-13z" transform="rotate(19 225 611)" fill="#1e1e1e"></path>
-                </g>
-                <g id="LEFT_HAND">
-                  <path class="cls-6" d="M492 411c-5-2 2-10-6-17s-4-14 1-17c6-3 14 1 15 10s9 5 10 10-12 17-20 14zM526 419h1a1 1 0 000-2l-9-12a3 3 0 00-4-1l-17 10a3 3 0 00-1 4l5 14a1 1 0 001 1l2-1a1 1 0 000-1 29 29 0 01-3-7v-6c1 0 4 0 6 4l2 7a1 1 0 001 1l2-1a1 1 0 000-2 24 24 0 01-3-6c-2-5-3-6-2-7s5 1 7 5l3 6a1 1 0 001 1l2-1a1 1 0 000-1 62 62 0 01-5-8c-1-3-2-5-1-6s4 0 7 3l3 6a1 1 0 002 0zM489 428h-2v-1a35 35 0 002-6 60 60 0 001-8l3 1a27 27 0 00-2 7l-1 7h-1zM504 444h-2a22 22 0 000-5v-5l2-1v1a17 17 0 000 5v5zM513 441h-2l-1-1a19 19 0 001-4l-1-5h1l2-1a15 15 0 000 5 93 93 0 000 6zM521 437h-3v-1a19 19 0 000-4v-5l2-1 1 1a15 15 0 00-1 4l1 5v1z"></path>
-                  <path class="cls-6" d="M528 429h-2v-1-3l-1-4 1-1h2a15 15 0 000 5 14 14 0 001 3l-1 1zM499 451l-1-1a13 13 0 002-3l2-2h1l1 1c1 0 1 0 0 0a10 10 0 00-2 2l-2 3h-1zM509 449l-2-1v-1a13 13 0 002-2l2-3s0-1 0 0h2a10 10 0 00-2 3l-2 4zM518 446h-2v-1a13 13 0 001-3l1-3h2a10 10 0 00-1 3l-1 4zM526 438l-2-1a13 13 0 001-4l1-3h2a10 10 0 00-1 4v3l-1 1zM493 436l-3 2v-1l-1-3-2-4v-1h3a10 10 0 001 4l2 3zM496 443a22 22 0 01-2 1l-1-2a6 6 0 00-1-2v-1l1-1h1a10 10 0 001 3 8 8 0 001 2z"></path>
-                </g>
-                <g id="RIGHT_HAND">
-                  <path class="cls-6" d="M106 435c9 1 2-16 19-21s-31-17-36-10 3 31 17 31zM49 426l-1-2a2 2 0 010-2l22-12a5 5 0 017 2l17 26a5 5 0 010 5l-18 18a1 1 0 01-2 0l-1-2a1 1 0 010-1l10-9c3-5 4-7 3-9s-6-2-11 3l-8 8a1 1 0 01-3 0l-1-2a1 1 0 010-2 38 38 0 0010-8c5-5 8-7 7-9s-8-1-13 3l-9 7a1 1 0 01-2 0l-2-2a1 1 0 010-2 102 102 0 0012-8c5-3 8-6 7-8s-7-2-13 0l-9 6a2 2 0 01-2 0zM96 463l4 1a1 1 0 001 0 58 58 0 012-11 98 98 0 013-12 1 1 0 00-1-1h-4a1 1 0 000 1 45 45 0 01-2 11l-3 11zM64 476l3 2a1 1 0 001 0 36 36 0 013-8l3-6v-1l-2-2a1 1 0 00-1 0 28 28 0 01-3 8l-4 7zM53 466l3 1a1 1 0 001 0 32 32 0 013-7l4-7h-1l-2-3a1 1 0 00-1 1 25 25 0 01-3 7l-4 7a1 1 0 000 1zM44 455l4 1a32 32 0 013-7l4-7-1-1-2-2a1 1 0 00-1 1 25 25 0 01-3 7l-4 7a1 1 0 000 1zM39 438l3 1a1 1 0 001 0l2-5c3-4 3-7 3-7l-3-2a25 25 0 01-3 7 23 23 0 01-4 5l1 1zM66 491l3-1s1 0 0 0a21 21 0 01-2-6l-1-5h-4a16 16 0 012 6l1 6h1zM54 481l3-1h1a21 21 0 01-2-6v-5l-1-1h-3a16 16 0 011 6v6l1 1zM42 471h4a21 21 0 010-6l1-5-1-1-2-1h-1a16 16 0 010 6l-1 6v1zM35 452l3 1 1-1a21 21 0 011-5l1-6-3-2-1 1a16 16 0 010 6l-2 5v1zM86 473l3 4h1s0-2 3-4l6-5v-1l-3-2h-1a16 16 0 01-4 5l-5 3zM76 481a35 35 0 003 3l2-2a10 10 0 014-3l1-1-2-3h-1a17 17 0 01-4 4 12 12 0 01-3 2z"></path>
-                  <path class="cls-9" id="ROBE-4" data-name="ROBE" d="M90 399s25-19 58 0c17 10 23 21 23 21l-42 4-6-7c-11-15-33-18-33-18z"></path>
-                </g>
-              </g>
-              <g data-animate="head">
-                <g id="SKULL_TOP">
-                    <path class="cls-6" d="M299 218a31 31 0 01-8 3 1 1 0 001 2 33 33 0 008-3 1 1 0 001-2 1 1 0 00-2 0zM320 186a1 1 0 00-1 1 41 41 0 01-13 27 1 1 0 000 2 1 1 0 001 0 1 1 0 001 0 44 44 0 0013-29 1 1 0 00-1-1z"></path>
-                    <path class="cls-6" d="M415 186c7-21 2-35-3-43-10-19-20-25-38-26-14-2-13 2-24-1a166 166 0 00-38-3h-2l-2 1a35 35 0 00-13-4c-11-1-20 3-28 11-5 5-13 11-21 13s-38 11-41 25c-1 8-3 23-3 35s3 26 7 42a33 33 0 0028 24c7 1 34-3 46 17 4 5 5 10 9 12 3 0 10 1 14-9a3 3 0 015 0c0 1 3 6 11 6 6 0 10-3 11-8a3 3 0 015 0c0 5 3 7 9 7 7 0 10-4 11-9a2 2 0 013-2 3 3 0 012 2c0 1 3 8 13 5 8-3 9-18 9-18s1 2 6 2 15-5 21-21c10-26-4-37 3-58zm-127 41c-18-2-32-21-30-42s19-38 37-37 33 21 31 43-19 38-38 36zm62 17c-5 2-13-5-13-5s-6 9-11 7 4-42 12-42 17 38 12 40zm27-21c-14 3-29-11-32-31s6-35 20-37 29 8 33 28-6 38-21 40z"></path>
-                    <path class="cls-6" d="M391 178a1 1 0 00-1 1c2 14 0 26-7 33a13 13 0 01-11 4 1 1 0 00-1 1 1 1 0 001 1 14 14 0 002 1 15 15 0 0011-5c7-8 10-21 7-35a1 1 0 00-1-1z"></path>
-                  </g>
-                <g id="MUSTACHE">
-                  <path class="cls-15" d="M339 253v8a1 1 0 01-1 1l-27 1a1 1 0 010-1l27-9a1 1 0 011 0zM342 254l-1 7a1 1 0 001 1l28 2a1 1 0 000-1l-27-10a1 1 0 00-1 1z"></path>
-                </g>
-                <g id="AVIATORS">
-                  <path class="cls-16" d="M235 185c-16 27 7 73 43 70 37-3 67-62 55-78s-83-19-98 8z"></path>
-                  <path class="cls-17" d="M235 185c-16 27 7 73 43 70 37-3 67-62 55-78s-83-19-98 8z"></path>
-                  <path class="cls-16" d="M424 188c17 20-7 66-37 64-31-3-50-62-39-76s63-4 76 12z"></path>
-                  <path class="cls-17" d="M424 188c17 20-7 66-37 64-31-3-50-62-39-76s63-4 76 12z"></path>
-                  <path class="cls-17" d="M286 165s15-1 53 1 51 6 51 6M335 181s0-5 5-5 5 5 5 5"></path>
-                </g>
-                <g data-animate="jaw" id="SKULL_BOTTOM_CIGAR">
-                  <path id="SKULL_BOTTOM" class="cls-6" d="M257 274c-3 0 0 1 1 3 7 8 19 11 6 68-3 16 33 38 68 41 32 2 43-8 57-35 11-22 9-57-1-64-13-9-42 14-48 14s-1-6-10-6c-12-1-22 9-37 7-15-1-14-16-22-24-4-5-10-5-14-4z"></path>
-                  <g id="CIGAR">
-                    <path d="M322 296a56 56 0 00-44-7c-13 3-19 8-19 8a59 59 0 0021 20c10 5 5 13 7 14s11-15 14-21 13-12 13-12z" fill="#755e51"></path>
-                    <path d="M281 306c8 9 13 18 8 23s-13 4-22-4-13-22-8-28 15 1 22 9z" fill="#6d5241"></path>
-                  </g>
-                </g>
-              </g>
-              <path data-animate="body" id="HOOD_FRONT" class="cls-9" d="M356 54s-100 18-131 96c-40 100 86 310 86 310s-108-45-166-137a432 432 0 01-36-71c-2-6-16 46-23 23-9-33 7-88 31-126 65-103 239-95 239-95z"></path>
-            </svg> --}}
-            Spin
-            </figure>
-            <div class="ticker"></div>
-            {{-- <button class="btn-spin">Spin the wheel</button> --}}
-        </div>
-      </div>
-
-      <div class="share_button">
-        {{-- <a href="https://wa.me/?text={{URL::to('/')}}" target="_blank">
-          <span><i class="fab fa-whatsapp"></i></span>
-        </a> --}}
-        <div class="sticky_share_btn">
-          <div class="fixed_share">
-            <span class="share-toggle">
-              <i class="fa fa-share-alt"></i>
-            </span>
-            <ul class="listing">
-              <li class="facebook">
-                <a href="http://www.facebook.com/share.php?u={{url()->current()}}" target="_blank">
-                  <i class="fab fa-facebook"></i>
-                </a>
-              </li>
-              
-              <li class="whatsapp">
-                <a href="https://wa.me/?text={{url()->current()}}" target="_blank">
-                  <i class="fab fa-whatsapp"></i>
-                </a>
-              </li>
-            </ul>
-            
+            <div class="mt-2">
+              <button class="btn spin_form_btn start-btn-spin" type="button">
+                <i class="fas fa-play-circle mr-2"></i> SPIN TO WIN
+              </button>
+            </div>
           </div>
-        </div>
-      </div>
-
-      {{-- <div class="click_to_spain">
-        <h3>Click to Spin Popup</h3>
-      </div> --}}
-
-      
-      {{-- <div class="row">
-          <div class="col-md-3">
-              
-          </div>
-          <div class="col-md-6">
-              
-          </div>
-          <div class="col-md-3">
-              
-          </div>
-      </div> --}}
-
-
-    <div class="blast" style="display: none">
-      <div class="content">
-          <div class="trophy">
-              <img src="https://i.ibb.co/kVZ3CN6/trophy.png" class="trophy_img" alt="trophy">
-              <br>
-              <img src="" alt="" srcset="" class="spinner_image_show" width="40%">
-          </div>
-          <div class="text text-center">
-              <h2 class="my-3">Congratulations, you won!</h2>
-              <h1 class="award_text">Award</h1>
-          </div>
-          <div class="text text-center">
-              <button class="btn btn-warning reedem-btn" onclick="check_user_spinner_submit()" >Reedem</button>
-          </div>
-
-      </div>
-    </div>
-
-    <audio  id="player" controls>
-      <source src="{{asset('mp3/wheel2.wav')}}" type="audio/mpeg">
-        
-    </audio>
-    <audio  id="error" controls>
-      <source src="{{asset('mp3/error.mp3')}}" type="audio/mpeg">
-        
-    </audio>
-    <audio  id="own" controls>
-      <source src="{{asset('mp3/won.mp3')}}" type="audio/mpeg">
-        
-    </audio>
-{{-- 
-    <audio id="player" src="{{asset('mp3/wheel2.wav')}}"> </audio>
-    <audio id="error" src="{{asset('mp3/error.mp3')}}"> </audio>
-    <audio id="own" src="{{asset('mp3/won.mp3')}}"> </audio>
- --}}
-
-      
-  <!-- Modal -->
-  <div class="modal fade" id="ReedemModal" tabindex="-1" role="dialog" aria-labelledby="ReedemModalTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLongTitle">Reedem Gift</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-            @if (!empty($FormFields) && $FormFields->screenshot == 'on')
-              <h5>If you have a Screenshot then please click on Next button and if have not Please Take Screenshot.</h5>
-              <p>
-                यदि आप Screenshot लेकर नहीं रखे है तो 
-                कृपया Screenshot लेकर Next दबाए और आगे अपलोड करे !
-              </p>
-            @else
-              <h5>धन्यवाद! आपने Prize Wheel के माध्यम से अपना ऑफर सुनिश्चित किया है 
-                उसको Reedem के लिए कृपया Next दबाकर अपना डिटेल डाले |</h5>
-            @endif
-        </div>
-        <div class="modal-footer">
-            @if (!empty($FormFields) && $FormFields->screenshot == 'on')
-              <button type="button" class="btn btn-secondary take_screenshot" data-dismiss="modal">Take Screenshot</button>
-            @endif
-          
-          <button type="button" class="btn btn-success"  onclick="open_form_modal()">Next</button>
         </div>
       </div>
     </div>
   </div>
 
-  {{-- <div class="modal fade" id="ReedemModal" tabindex="-1" role="dialog" aria-labelledby="ReedemModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+  <!-- Modern Floating Share Button -->
+  <div class="share_floating_bar">
+    <div class="share_toggle_btn sticky_share_btn">
+      <i class="fas fa-share-alt"></i>
+      <span>Share</span>
+    </div>
+    <ul class="share_options_menu listing">
+      <li>
+        <a href="https://wa.me/?text={{url()->current()}}" target="_blank" class="wa_btn" title="Share on WhatsApp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+      <li>
+        <a href="http://www.facebook.com/share.php?u={{url()->current()}}" target="_blank" class="fb_btn" title="Share on Facebook">
+          <i class="fab fa-facebook-f"></i>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Winner Celebration Overlay -->
+  <div class="blast" id="blast" style="display: none">
+    <div class="content">
+      <div class="trophy">
+        <img src="https://i.ibb.co/kVZ3CN6/trophy.png" class="trophy_img" alt="trophy">
+        <br>
+        <img src="" alt="" class="spinner_image_show mt-3" style="max-height: 90px; object-fit: contain; display: none;">
+      </div>
+      <div class="text text-center">
+        <h2>Congratulations, you won!</h2>
+        <div class="award_text">Award</div>
+      </div>
+      <div class="text text-center mt-3">
+        <button class="btn reedem-btn" onclick="check_user_spinner_submit()">Redeem Prize</button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="player" style="display: none;">
+    <source src="{{asset('mp3/wheel2.wav')}}" type="audio/mpeg">
+  </audio>
+  <audio id="error" style="display: none;">
+    <source src="{{asset('mp3/error.mp3')}}" type="audio/mpeg">
+  </audio>
+  <audio id="own" style="display: none;">
+    <source src="{{asset('mp3/won.mp3')}}" type="audio/mpeg">
+  </audio>
+
+  <!-- Redeem Modal -->
+  <div class="modal fade" id="ReedemModal" tabindex="-1" role="dialog" aria-labelledby="ReedemModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="ReedemModalLabel">Reedem Gift</h5>
+          <h5 class="modal-title" id="exampleModalLongTitle"><i class="fas fa-gift mr-2 text-warning"></i> Redeem Gift</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body">
-          <div class="container">
-            <div class="row">
-              <div class="col-md-12">
-                <h5>If you have screen then please click on Yes button and if have not the click Take Screenshot button.</h5>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-6">
-                <button  class="btn btn-warning take_screenshot" data-dismiss="modal" aria-label="Close">Take Screenshot</button>
-              </div>
-              <div class="col-md-6 float-right">
-                <button class="btn btn-success" onclick="open_form_modal()">Yes</button>
-              </div>
-            </div>
-          </div>
+        <div class="modal-body p-4 text-center">
+          @if (!empty($FormFields) && $FormFields->screenshot == 'on')
+            <h5 class="font-weight-bold text-dark mb-2">If you have a Screenshot then please click on Next button and if have not Please Take Screenshot.</h5>
+            <p class="text-muted mb-0">
+              यदि आप Screenshot लेकर नहीं रखे है तो 
+              कृपया Screenshot लेकर Next दबाए और आगे अपलोड करे !
+            </p>
+          @else
+            <h5 class="font-weight-bold text-dark mb-2">धन्यवाद! आपने Prize Wheel के माध्यम से अपना ऑफर सुनिश्चित किया है!</h5>
+            <p class="text-muted mb-0" style="font-size: 1.05rem;">
+              ऑफर को Redeem करने के लिए कृपया <b>Next</b> दबाकर अपना डिटेल भरें।
+            </p>
+          @endif
         </div>
-
+        <div class="modal-footer justify-content-between">
+          @if (!empty($FormFields) && $FormFields->screenshot == 'on')
+            <button type="button" class="btn btn-secondary take_screenshot" data-dismiss="modal">Take Screenshot</button>
+          @else
+            <div></div>
+          @endif
+          <button type="button" class="btn btn-success px-4 font-weight-bold" style="border-radius: 9999px; padding: 10px 28px;" onclick="open_form_modal()">Next <i class="fas fa-arrow-right ml-1"></i></button>
+        </div>
       </div>
     </div>
-  </div> --}}
+  </div>
 
-
-    <!-- Modal -->
-    <div class="modal fade bd-example-modal-lg FormModal" id="FormModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-header" style="background: #fff;">
+  <!-- Form Details Modal -->
+  <div class="modal fade bd-example-modal-lg FormModal" id="FormModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLongTitle">Submit your details</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-content">
-          <form class="my-4 p-4" action="{{URL::to('u/spinner_form/post')}}" method="POST" id="spinner_form" enctype="multipart/form-data">
+        <div class="modal-body p-4">
+          <form action="{{URL::to('u/spinner_form/post')}}" method="POST" id="spinner_form" enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="spinner_id" id="spinner_id">
             <input type="hidden" name="spinner_name" id="spinner_name">
             <input type="hidden" name="spinner_value" id="spinner_value">
-            <div class="form-row">
-              <div class="form-group col-md-3"></div>
-              <div class="form-group col-md-6 text-center">
-                <img src="" alt="" srcset="" class="spinner_image" width="40%">
-                <h3>Congratulations, you won!</h3>
-                
-                <h3 class="spinner_name_text"></h3>
+            <div class="form-row text-center mb-3">
+              <div class="col-12">
+                <img src="" alt="" class="spinner_image mb-2" style="max-height: 85px; object-fit: contain; display: none;">
+                <h4 class="font-weight-bold text-success mb-1">Congratulations, you won!</h4>
+                <h3 class="spinner_name_text font-weight-bold text-dark"></h3>
               </div>
-              <div class="form-group col-md-3"></div>
             </div>
             <div class="form-row">
               <div class="form-group col-md-6">
@@ -431,69 +981,63 @@
               </div>
               <div class="form-group col-md-6">
                 <label for="phone">Mobile Number</label>
-                <input type="text" name="phone" class="form-control" id="phone" min="10"  onkeyup="numOnly(this)" onblur="numOnly(this)" maxlength="10" placeholder="Mobile Number" required>
-                <span id="phone_error"  style="color:red"></span>
+                <input type="text" name="phone" class="form-control" id="phone" min="10" onkeyup="numOnly(this)" onblur="numOnly(this)" maxlength="10" placeholder="Mobile Number" required>
+                <span id="phone_error" style="color:red"></span>
               </div>
-              
-              
             </div>
             <div class="form-row">
               @if (!empty($FormFields) && $FormFields->whatsapp_no == 'on')
               <div class="form-group col-md-4">
                 <label for="whatsapp_number">Whatsapp Number</label>
-                <input type="text" name="whatsapp_number" class="form-control" min="10"  onkeyup="wpNumOnly(this)" onblur="numOnly(this)"  maxlength="10" id="whatsapp_number" placeholder="whatsapp Number" required>
-                <span id="wp_phone_error"  style="color:red"></span>
+                <input type="text" name="whatsapp_number" class="form-control" min="10" onkeyup="wpNumOnly(this)" onblur="numOnly(this)" maxlength="10" id="whatsapp_number" placeholder="Whatsapp Number" required>
+                <span id="wp_phone_error" style="color:red"></span>
               </div>
               @endif
               @if (!empty($FormFields) && $FormFields->email == 'on')
-                  
-              
               <div class="form-group col-md-4">
                 <label for="email">Email</label>
                 <input type="email" name="email" class="form-control" id="email" placeholder="Email">
               </div>
               @endif
               @if (!empty($FormFields) && $FormFields->address == 'on')
-                  
-              
-              <div class="form-group  col-md-4">
+              <div class="form-group col-md-4">
                 <label for="address">Address</label>
-                <input type="text" name="address" class="form-control" id="address" placeholder="">
+                <input type="text" name="address" class="form-control" id="address" placeholder="Address">
               </div>
               @endif
             </div>
             <div class="form-row">
-
               @if (!empty($FormFields) && $FormFields->choose_option == 'on')
-
               @if (count($BikeModel) > 0)
-                  <div class="form-group col-md-6">
-                    <label for="screenshot">Are You Interested in</label>
-                    <select name="bike_model_id" id="bike_model_id" class="form-control" required>
-                      <option value="">Select</option>
-                      @foreach ($BikeModel as $item)
-                      <option value="{{$item->id}}">{{$item->name}}</option>
-                      @endforeach
-                    </select>
-                  </div>
+                <div class="form-group col-md-6">
+                  <label for="bike_model_id">Are You Interested in</label>
+                  <select name="bike_model_id" id="bike_model_id" class="form-control" required>
+                    <option value="">Select</option>
+                    @foreach ($BikeModel as $item)
+                    <option value="{{$item->id}}">{{$item->name}}</option>
+                    @endforeach
+                  </select>
+                </div>
               @endif
               @endif
               @if (!empty($FormFields) && $FormFields->screenshot == 'on')
               <div class="form-group col-md-6">
                 <label for="screenshot">Screenshot </label>
-                <input type="file" name="screenshot" class="form-control" @if (!empty($FormFields) && $FormFields->screenshot_required == 'on') required @endif id="screenshot" placeholder="Screenshot">
+                <input type="file" name="screenshot" class="form-control" @if (!empty($FormFields) && $FormFields->screenshot_required == 'on') required @endif id="screenshot">
               </div>
               @endif
-             
             </div>
-            @if (!empty($FormFields) && $FormFields->screenshot == 'on')
-            <button type="button" class="btn btn-secondary form_take_screenshot" data-dismiss="modal">Take Screenshot</button>
-            @endif
-            <button type="submit" class="btn btn-primary form_submit_button">Submit</button>
+            <div class="text-right mt-3">
+              @if (!empty($FormFields) && $FormFields->screenshot == 'on')
+              <button type="button" class="btn btn-secondary form_take_screenshot mr-2" data-dismiss="modal">Take Screenshot</button>
+              @endif
+              <button type="submit" class="btn btn-primary form_submit_button">Submit</button>
+            </div>
           </form>
         </div>
       </div>
     </div>
+  </div>
 
 
     
@@ -754,7 +1298,7 @@ const selectPrize = () => {
               $('#confetti-canvas').show();
               blast_fun();
               $('.award_text').html(prizes[selected].text);
-              $('.blast').show();
+              $('#blast').addClass('show-blast').css('display', 'flex').show();
 
               if (prizes[selected].image !='') {
                   $('.spinner_image_show').attr('src',prizes[selected].image);
@@ -947,8 +1491,13 @@ setupWheel();
 
 
 
+    let proceedingToForm = false;
     function open_form_modal(){
-      $('#FormModal').modal('show');
+      proceedingToForm = true;
+      $('#ReedemModal').one('hidden.bs.modal', function(){
+        $('#FormModal').modal('show');
+        setTimeout(function(){ proceedingToForm = false; }, 400);
+      }).modal('hide');
     }
 
       $("#spinner_form").on('submit',(function(e) {
@@ -1019,37 +1568,16 @@ setupWheel();
 
 
       function check_user_spinner_submit(){
-        // $.ajax({
-        //   url: "{{URL::to('u/spinner_form_check/post')}}",
-        //   type: 'post',
-        //   // dataType: 'application/json',
-        //   data:  {
-        //     id:''
-        //   },
-        //   headers: {'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')},
-        //   success: function(data) {
-        //     if (data.message == 'AlreadyInserted') {
-        //       swal({
-        //         title: "Error!",
-        //         text: "<h2>Already Submitted</h2><p style='margin:7px'><b>Helpline Number</b></p><a href='tel:{{$user->phone}}'><p><i class='fas fa-phone'></i> {{$user->phone}}</a>",
-        //         html: true,
-        //         type: "error",
-        //         confirmButtonText: "Ok"
-        //       });
-
-        //       document.getElementById('error').play();
-        //   playing = true;
-
-        //     }else {
-        //       $('#ReedemModal').modal('show');
-        //     }
-              
-        //   }
-        // });
-
-        $('#ReedemModal').modal('show');
-
+        $('#blast').removeClass('show-blast').fadeOut(250, function(){
+          $('#ReedemModal').modal('show');
+        });
       }
+
+      $('#ReedemModal').on('hidden.bs.modal', function () {
+        if (!proceedingToForm && !$('#FormModal').hasClass('show') && !$('.FormModal').hasClass('show') && !$('#FormModal').is(':visible')) {
+          $('#blast').addClass('show-blast').fadeIn(200);
+        }
+      });
 
 
       jQuery(".sticky_share_btn").click(function () {
@@ -1136,6 +1664,251 @@ setupWheel();
           @endphp
           $('.newsShowPopupModal').modal('hide');
       } 
+
+      $(document).on('click', '.spin_form_btn', function() {
+        trigger.click();
+      });
+
+      // ===================================================
+      // ATOM PARTICLE CANVAS & BOHR ATOMIC SIMULATION
+      // ===================================================
+      (function initAtomCanvas() {
+        const canvas = document.getElementById('atomCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        let W, H, animFrame;
+        const PARTICLE_COUNT = 75;
+        const CONNECTION_DIST = 140;
+        const MOUSE = { x: -9999, y: -9999 };
+
+        window.addEventListener('mousemove', e => {
+          MOUSE.x = e.clientX;
+          MOUSE.y = e.clientY;
+        });
+
+        function resize() {
+          W = canvas.width = window.innerWidth;
+          H = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+          constructor() { this.reset(true); }
+          reset(init) {
+            this.x = Math.random() * W;
+            this.y = init ? Math.random() * H : -10;
+            this.r = 1.8 + Math.random() * 2.6;
+            const speed = 0.25 + Math.random() * 0.45;
+            const angle = Math.random() * Math.PI * 2;
+            this.vx = Math.cos(angle) * speed;
+            this.vy = Math.sin(angle) * speed * 0.6 + 0.1;
+            this.alpha = 0.35 + Math.random() * 0.45;
+            
+            const palette = [
+              `rgba(255, 107, 0, ${this.alpha})`,
+              `rgba(249, 115, 22, ${this.alpha * 0.9})`,
+              `rgba(245, 158, 11, ${this.alpha * 0.85})`,
+              `rgba(99, 102, 241, ${this.alpha * 0.75})`,
+              `rgba(14, 165, 233, ${this.alpha * 0.7})`
+            ];
+            this.color = palette[Math.floor(Math.random() * palette.length)];
+          }
+          update() {
+            const dx = MOUSE.x - this.x;
+            const dy = MOUSE.y - this.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 180) {
+              this.vx += dx * 0.00015;
+              this.vy += dy * 0.00015;
+            }
+
+            this.x += this.vx;
+            this.y += this.vy;
+            this.vx *= 0.998;
+            this.vy *= 0.998;
+
+            if (this.x < -20) this.x = W + 10;
+            if (this.x > W + 20) this.x = -10;
+            if (this.y < -20) this.y = H + 10;
+            if (this.y > H + 20) this.y = -10;
+          }
+          draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+          }
+        }
+
+        class AtomModel {
+          constructor(x, y, scale = 1.0) {
+            this.x = x;
+            this.y = y;
+            this.scale = scale;
+            this.coreR = (4.5 + Math.random() * 3) * scale;
+            this.pulse = Math.random() * Math.PI * 2;
+            
+            this.orbits = [
+              { r: 42 * scale, tilt: 0.45, angle: 0, rotAngle: 0.2, speed: 0.016, color: 'rgba(255, 107, 0, 0.45)', electronColor: '#ff6b00' },
+              { r: 72 * scale, tilt: 0.50, angle: Math.PI / 3, rotAngle: 1.25, speed: -0.012, color: 'rgba(99, 102, 241, 0.40)', electronColor: '#6366f1' },
+              { r: 104 * scale, tilt: 0.42, angle: (Math.PI * 2) / 3, rotAngle: 2.35, speed: 0.009, color: 'rgba(245, 158, 11, 0.42)', electronColor: '#f59e0b' }
+            ];
+
+            this.baseX = x;
+            this.baseY = y;
+            this.floatAngle = Math.random() * Math.PI * 2;
+            this.floatSpeed = 0.008 + Math.random() * 0.006;
+            this.floatAmpX = 14 + Math.random() * 10;
+            this.floatAmpY = 16 + Math.random() * 12;
+          }
+
+          update() {
+            this.pulse += 0.035;
+            this.floatAngle += this.floatSpeed;
+            this.x = this.baseX + Math.cos(this.floatAngle) * this.floatAmpX;
+            this.y = this.baseY + Math.sin(this.floatAngle * 0.8) * this.floatAmpY;
+
+            this.orbits.forEach(orb => {
+              orb.angle += orb.speed;
+            });
+          }
+
+          draw() {
+            const pulseFactor = 0.85 + 0.25 * Math.sin(this.pulse);
+
+            // 1. Halo
+            const haloGrad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.coreR * 6 * pulseFactor);
+            haloGrad.addColorStop(0, 'rgba(255, 107, 0, 0.35)');
+            haloGrad.addColorStop(0.5, 'rgba(249, 115, 22, 0.12)');
+            haloGrad.addColorStop(1, 'rgba(255, 107, 0, 0)');
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.coreR * 6 * pulseFactor, 0, Math.PI * 2);
+            ctx.fillStyle = haloGrad;
+            ctx.fill();
+
+            // 2. Core
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.coreR * pulseFactor, 0, Math.PI * 2);
+            ctx.fillStyle = '#ff6b00';
+            ctx.fill();
+
+            // Highlight
+            ctx.beginPath();
+            ctx.arc(this.x - this.coreR * 0.3, this.y - this.coreR * 0.3, this.coreR * 0.4, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+
+            // 3. Orbits & Electrons
+            this.orbits.forEach(orb => {
+              ctx.save();
+              ctx.translate(this.x, this.y);
+              ctx.rotate(orb.rotAngle);
+              ctx.scale(1, orb.tilt);
+
+              ctx.beginPath();
+              ctx.arc(0, 0, orb.r, 0, Math.PI * 2);
+              ctx.strokeStyle = orb.color;
+              ctx.lineWidth = 1.4;
+              ctx.stroke();
+
+              const ex = Math.cos(orb.angle) * orb.r;
+              const ey = Math.sin(orb.angle) * orb.r;
+
+              ctx.beginPath();
+              ctx.arc(ex, ey, 5.5, 0, Math.PI * 2);
+              ctx.fillStyle = orb.color;
+              ctx.fill();
+
+              ctx.beginPath();
+              ctx.arc(ex, ey, 2.8, 0, Math.PI * 2);
+              ctx.fillStyle = orb.electronColor;
+              ctx.fill();
+
+              ctx.beginPath();
+              ctx.arc(ex, ey, 1.2, 0, Math.PI * 2);
+              ctx.fillStyle = '#ffffff';
+              ctx.fill();
+
+              ctx.restore();
+            });
+          }
+        }
+
+        const particles = Array.from({ length: PARTICLE_COUNT }, () => new Particle());
+        let atomModels = [];
+
+        function createAtoms() {
+          atomModels = [];
+          atomModels.push(new AtomModel(W * 0.14, H * 0.22, 1.15));
+          atomModels.push(new AtomModel(W * 0.86, H * 0.28, 1.1));
+          atomModels.push(new AtomModel(W * 0.18, H * 0.80, 1.2));
+          atomModels.push(new AtomModel(W * 0.82, H * 0.78, 1.0));
+          if (W > 1024) {
+            atomModels.push(new AtomModel(W * 0.50, H * 0.12, 0.9));
+          }
+        }
+
+        createAtoms();
+        window.addEventListener('resize', createAtoms);
+
+        function drawConnections() {
+          for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+              const dx = particles[i].x - particles[j].x;
+              const dy = particles[i].y - particles[j].y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              if (dist < CONNECTION_DIST) {
+                const alpha = (1 - dist / CONNECTION_DIST) * 0.42;
+                ctx.beginPath();
+                ctx.moveTo(particles[i].x, particles[i].y);
+                ctx.lineTo(particles[j].x, particles[j].y);
+                ctx.strokeStyle = `rgba(255, 107, 0, ${alpha})`;
+                ctx.lineWidth = 1.0;
+                ctx.stroke();
+              }
+            }
+          }
+
+          if (MOUSE.x > 0 && MOUSE.y > 0) {
+            for (let i = 0; i < particles.length; i++) {
+              const dx = particles[i].x - MOUSE.x;
+              const dy = particles[i].y - MOUSE.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              if (dist < 160) {
+                const alpha = (1 - dist / 160) * 0.55;
+                ctx.beginPath();
+                ctx.moveTo(particles[i].x, particles[i].y);
+                ctx.lineTo(MOUSE.x, MOUSE.y);
+                ctx.strokeStyle = `rgba(255, 107, 0, ${alpha})`;
+                ctx.lineWidth = 1.3;
+                ctx.stroke();
+              }
+            }
+          }
+        }
+
+        function animate() {
+          ctx.clearRect(0, 0, W, H);
+
+          atomModels.forEach(atom => {
+            atom.update();
+            atom.draw();
+          });
+
+          drawConnections();
+
+          particles.forEach(p => {
+            p.update();
+            p.draw();
+          });
+
+          animFrame = requestAnimationFrame(animate);
+        }
+
+        animate();
+      })();
 
     </script>
   </body>
