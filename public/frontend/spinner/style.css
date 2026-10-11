@@ -10,9 +10,8 @@ body {
 }
 
 body {
-  display: grid;
-  place-items: center;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .deal-wheel {

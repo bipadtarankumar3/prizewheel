@@ -71,16 +71,13 @@ class FrontendController extends Controller
                                     'reaction'=>"shocked",
                                     'price'=>$value->value,
                                     'image'=>$value->image,
+                                    'chances'=>$value->chances !== null ? (float)$value->chances : null,
+                                    'skip'=>$value->skip,
                                 );
                                 $spinner_data[] =  $arr ;
-                                if ($value->skip == 'Yes') {
-                                    $spinner_skip_data[] =$value->name ;
-                                }else{
-                                    if ($value->value == 0) {
-                                        $spinner_skip_data[] =$value->name ;
-                                    }
+                                if ($value->skip == 'Yes' || (float)$value->value <= 0 || ($value->chances !== null && (float)$value->chances <= 0)) {
+                                    $spinner_skip_data[] = $value->name;
                                 }
-                                
                             }
         
                             $spinner_data_json = json_encode( $spinner_data );
@@ -138,17 +135,13 @@ class FrontendController extends Controller
                                     'reaction'=>"shocked",
                                     'price'=>$value->value,
                                     'image'=>$value->image,
-                                    'chances'=>$value->chances,
+                                    'chances'=>$value->chances !== null ? (float)$value->chances : null,
+                                    'skip'=>$value->skip,
                                 );
                                 $spinner_data[] =  $arr ;
-                                if ($value->skip == 'Yes') {
-                                    $spinner_skip_data[] =$value->name ;
-                                }else{
-                                    if ($value->value == 0) {
-                                        $spinner_skip_data[] =$value->name ;
-                                    }
+                                if ($value->skip == 'Yes' || (float)$value->value <= 0 || ($value->chances !== null && (float)$value->chances <= 0)) {
+                                    $spinner_skip_data[] = $value->name;
                                 }
-                                
                             }
     
                             $spinner_data_json = json_encode( $spinner_data );
@@ -226,108 +219,83 @@ class FrontendController extends Controller
 
         $Spinner = Spinner::where('camping_id', $request->campaign_id)->where('status','active')->orderBy('id','desc')->get()->toArray();
 
-        // echo count($Spinner);die;
-
         $count = count($Spinner);
-        // $degree = count($Spinner)/360;
-        if ($count > 0) {
-            // Calculate degree for each segment
-            $degreeIncrement = 360 / $count; // Each segment gets an equal part of the wheel
-        
-            // Define the prizes with their respective fillStyle, text, weight, max_qty, and dynamic degrees
-            $prizes = [];
-
-            // echo $degreeIncrement;die;
-            $i = 1;
-            foreach ($Spinner as $key => $value) {
-
-                $prizes[] = [
-                    'fillStyle' => $value['color'],
-                    'text' => $value['name'],
-                    'weight' => $value['chances'],
-                    'max_qty' => $value['value'],
-                    'degree' => $degreeIncrement * $i// Dynamic degree based on index
-                ];
-                $i++;
-            }
-
-        }
-
-        // dd($prizes);
-
-
-        // // Define the prizes with their respective fillStyle, text, weight, max_qty, and degree
-        // $prizes = [
-        //     ['fillStyle' => '#5bdc7b', 'text' => 'Vip Bag', 'weight' => 0.13, 'max_qty' => 80, 'degree' => 36], 
-        //     ['fillStyle' => '#f8300d', 'text' => 'Pressure Cooker', 'weight' => 0.1, 'max_qty' => 130, 'degree' => 72],
-        //     ['fillStyle' => '#d0ea10', 'text' => 'Monte Carlo Blanket', 'weight' => 0.2, 'max_qty' => 100, 'degree' => 108],
-        //     ['fillStyle' => '#0af59b', 'text' => 'Non Stick Fry Pan', 'weight' => 0, 'max_qty' => 40, 'degree' => 144],
-        //     ['fillStyle' => '#0b27f4', 'text' => 'Copper Water Bottle', 'weight' => 0, 'max_qty' => 45, 'degree' => 180],
-        //     ['fillStyle' => '#0deef2', 'text' => 'Hand Blender', 'weight' => 0, 'max_qty' => 14, 'degree' => 216],
-        //     ['fillStyle' => '#067bf9', 'text' => 'Titan Watch', 'weight' => 0, 'max_qty' => 20, 'degree' => 252],
-        //     ['fillStyle' => '#d707f2', 'text' => 'VIP Suitcase', 'weight' => 0, 'max_qty' => 4, 'degree' => 288],
-        //     ['fillStyle' => '#f70808', 'text' => 'Steam Iron', 'weight' => 0, 'max_qty' => 2, 'degree' => 324],
-        //     ['fillStyle' => '#f66504', 'text' => 'Gas Stove', 'weight' => 0, 'max_qty' => 1, 'degree' => 360],
-        // ];
-        
-        // Calculate the total weight of all non-zero weight prizes
-        $totalWeight = array_sum(array_column($prizes, 'weight'));
-
-        // dd($totalWeight);
-        
-        
-        // Function to select a prize based on the weight
-        function selectPrizeByWeight($prizes, $totalWeight)
-        {
-            // If total weight is 0, return null
-            if ($totalWeight == 0) {
-                return null; // No prize can be selected
-            }
-    
-            // Generate a random number between 0 and total weight
-            $randomWeight = mt_rand(0, $totalWeight * 100) / 100; // More precision by multiplying by 100
-
-          
-    
-            $cumulativeWeight = 0;
-    
-            foreach ($prizes as $prize) {
-                $cumulativeWeight += $prize['weight'];
-                if ($randomWeight <= $cumulativeWeight && $prize['weight'] > 0 && $prize['max_qty'] > 0 ) {
-                    return $prize; // Return the selected prize
-                }
-            }
-    
-            return null; // Fallback in case no prize is selected
-        }
-
-        //dd(selectPrizeByWeight($prizes, $totalWeight));
-    
-        // Select a prize based on weight
-        $selectedPrize = selectPrizeByWeight($prizes, $totalWeight);
-    
-        //  dd($selectedPrize);
-
-        // If no prize is selected, return an error
-        if (!$selectedPrize) {
+        if ($count <= 0) {
             return response()->json([
                 'success' => false,
-                'message' => 'No prize available for selection.',
+                'message' => 'No active prizes found for this campaign.',
             ]);
         }
-    
-        // Calculate angle based on the selected prize's degree
+
+        $degreeIncrement = 360 / $count;
+        $prizes = [];
+        $i = 1;
+        foreach ($Spinner as $key => $value) {
+            $prizes[] = [
+                'segment_number' => $i,
+                'fillStyle' => $value['color'],
+                'text' => $value['name'],
+                'weight' => $value['chances'] !== null ? (float)$value['chances'] : null,
+                'max_qty' => (int)$value['value'],
+                'skip' => $value['skip'] ?? 'No',
+                'degree' => $degreeIncrement * $i,
+            ];
+            $i++;
+        }
+
+        // STRICT FILTER: Eligible prizes ONLY!
+        // 1. skip must NOT be 'Yes'
+        // 2. max_qty must be > 0 (in stock)
+        // 3. chances/weight if configured must be > 0 (chances <= 0 are NEVER selected!)
+        $eligiblePrizes = [];
+        $totalWeight = 0;
+        foreach ($prizes as $prize) {
+            $isSkipped = ($prize['skip'] === 'Yes');
+            $noStock = ($prize['max_qty'] <= 0);
+            $hasChancesConfigured = ($prize['weight'] !== null);
+            $chancesVal = $hasChancesConfigured ? (float)$prize['weight'] : 1.0;
+
+            // Never select if skipped, zero stock, or chances <= 0
+            if (!$isSkipped && !$noStock && $chancesVal > 0) {
+                $eligiblePrizes[] = array_merge($prize, ['calc_weight' => $chancesVal]);
+                $totalWeight += $chancesVal;
+            }
+        }
+
+        if (empty($eligiblePrizes) || $totalWeight <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No prize available for selection at this time.',
+            ]);
+        }
+
+        // Weighted random selection strictly among eligible items
+        $rand = (mt_rand(1, 100000) / 100000) * $totalWeight;
+        $cumulative = 0;
+        $selectedPrize = null;
+        foreach ($eligiblePrizes as $prize) {
+            $cumulative += $prize['calc_weight'];
+            if ($rand <= $cumulative) {
+                $selectedPrize = $prize;
+                break;
+            }
+        }
+
+        if (!$selectedPrize) {
+            $selectedPrize = $eligiblePrizes[array_rand($eligiblePrizes)];
+        }
+
         $after_angle = $selectedPrize['degree'];
-    
-        // Prepare the response data
+
         return response()->json([
             'success' => true,
             'data' => [
-                'code' => 'ABC123', // Example code, replace as necessary
-                'after_angle' => $after_angle, // Use degree directly for animation angle
-                'seg_angle' => $selectedPrize['degree'], // Adjust based on prize degree
-                'name' => $selectedPrize['text'], // Adjust based on prize degree
-                'degree' => $degreeIncrement, // Adjust based on prize degree
+                'code' => 'WIN' . strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6)),
+                'segment_number' => $selectedPrize['segment_number'],
+                'after_angle' => $after_angle,
+                'seg_angle' => $selectedPrize['degree'],
+                'name' => $selectedPrize['text'],
+                'degree' => $degreeIncrement,
             ]
         ]);
     }
@@ -607,7 +575,7 @@ class FrontendController extends Controller
         try {
             $spinner_id = decrypt($request->spinner_id);
             $Spinner = Spinner::where('id',$spinner_id)->first();
-            if ($Spinner && $Spinner->value >= 1) {
+            if ($Spinner && $Spinner->value >= 1 && $Spinner->skip !== 'Yes' && ($Spinner->chances === null || (float)$Spinner->chances > 0)) {
 
                 // $SpinnerUpdate = Spinner::where('id',$spinner_id)->update(['value'=>$Spinner->value-1]);
                 $Camping = Camping::where('id',$Spinner->camping_id)->first();

@@ -852,22 +852,61 @@ swal({
               return;
 
             }else{
-                document.getElementById('player').play();
-                  playing = true;
-                  $(this).text("stop sound");
+                const getEligibleTargetIndex = () => {
+                  const eligible = [];
+                  prizes.forEach((p, idx) => {
+                    const isSkipped = skip_data.some(s => s && s.trim().toLowerCase() === p.text.trim().toLowerCase());
+                    const noStock = (p.price !== undefined && p.price !== null && Number(p.price) <= 0);
+                    const zeroChance = (p.chances !== undefined && p.chances !== null && Number(p.chances) <= 0);
+                    if (!isSkipped && !noStock && !zeroChance) {
+                      eligible.push(idx);
+                    }
+                  });
+                  if (eligible.length === 0) return -1;
 
-                  if (reaper.dataset.reaction !== "resting") {
-                    reaper.dataset.reaction = "resting";
+                  const hasWeights = eligible.some(idx => prizes[idx].chances !== undefined && Number(prizes[idx].chances) > 0);
+                  if (hasWeights) {
+                    let total = 0;
+                    eligible.forEach(idx => {
+                      const c = Number(prizes[idx].chances) || 0;
+                      total += (c > 0 ? c : 1);
+                    });
+                    let rand = Math.random() * total;
+                    for (let idx of eligible) {
+                      const c = Number(prizes[idx].chances) || 0;
+                      const w = (c > 0 ? c : 1);
+                      if (rand <= w) return idx;
+                      rand -= w;
+                    }
                   }
+                  return eligible[Math.floor(Math.random() * eligible.length)];
+                };
+
+                const targetIdx = getEligibleTargetIndex();
+                if (targetIdx === -1) {
+                  swal("Notice", "Currently no prizes are available. Please try again later.", "info");
+                  $('.confirm').removeAttr('disabled');
+                  return;
+                }
+
+                try {
+                  let playerAudio = document.getElementById('player');
+                  if (playerAudio) playerAudio.play().catch(e => console.log('Audio play error:', e));
+                } catch(e){}
+                playing = true;
+
+                if (reaper && reaper.dataset && reaper.dataset.reaction !== "resting") {
+                  reaper.dataset.reaction = "resting";
+                }
 
                 trigger.disabled = true;
-                rotation = Math.floor(Math.random() * 360 + spinertia(2000, 5000));
-
-                console.log(rotation);
+                const fullSpins = spinertia(6, 9) * 360;
+                const sliceCenter = (targetIdx * prizeSlice) + (prizeSlice / 2);
+                const jitter = (Math.random() - 0.5) * (prizeSlice * 0.4);
+                rotation = fullSpins + sliceCenter + jitter;
 
                 prizeNodes.forEach((prize) =>{
                   prize.classList.remove(selectedClass);
-                  
                 });
                 wheel.classList.add(spinClass);
                 spinner.style.setProperty("--rotate", rotation);
@@ -899,32 +938,9 @@ spinner.addEventListener("transitionend", () => {
   trigger.focus();
   rotation %= 360;
 
-  const selected = Math.floor(rotation / prizeSlice);
-
-  if (skip_data.includes(prizes[selected].text)) {
-
-    document.getElementById('player').play();
-          playing = true;
-          $(this).text("stop sound");
-
-    trigger.disabled = true;
-    rotation = Math.floor(Math.random() * 360 + spinertia(2000, 5000));
-    console.log(rotation);
-    prizeNodes.forEach((prize) =>{
-      prize.classList.remove(selectedClass);
-      
-    });
-    wheel.classList.add(spinClass);
-    spinner.style.setProperty("--rotate", rotation);
-    ticker.style.animation = "none";
-    runTickerAnimation();
-    
-  }
-
   selectPrize();
   wheel.classList.remove(spinClass);
   spinner.style.setProperty("--rotate", rotation);
-  
 });
 
 setupWheel();
