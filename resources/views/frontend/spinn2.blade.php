@@ -61,23 +61,31 @@
       }
 
       .main_page_wrapper {
+        position: relative;
         min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 24px 0;
+        background: radial-gradient(circle at 12% 18%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                    radial-gradient(circle at 88% 82%, rgba(236, 72, 153, 0.08) 0%, transparent 40%),
+                    radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.04) 0%, transparent 60%);
       }
 
       /* Campaign Information Card */
       .campaign_hero_card {
         background: rgba(255, 255, 255, 0.94);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.8);
-        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15), 0 0 1px 1px rgba(255, 255, 255, 0.8) inset;
+        box-shadow: 0 25px 50px -15px rgba(15, 23, 42, 0.15), 0 0 1px 1px rgba(255, 255, 255, 0.8) inset;
         border-radius: 28px;
-        padding: 28px 24px;
-        transition: transform 0.3s ease;
+        padding: 32px 26px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .campaign_hero_card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.2), 0 0 1px 1px rgba(255, 255, 255, 0.9) inset;
       }
 
       /* Notice Banner */
@@ -88,8 +96,9 @@
         border: 1px solid #fee2e2;
         border-radius: 9999px;
         padding: 6px 14px;
-        margin-bottom: 18px;
+        margin-bottom: 20px;
         overflow: hidden;
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.06);
       }
       .notice_badge {
         background: #ef4444;
@@ -97,13 +106,13 @@
         font-size: 0.72rem;
         font-weight: 700;
         text-transform: uppercase;
-        padding: 3px 8px;
+        padding: 4px 10px;
         border-radius: 9999px;
         margin-right: 10px;
         flex-shrink: 0;
         display: inline-flex;
         align-items: center;
-        gap: 4px;
+        gap: 5px;
       }
       .notice_scroll {
         flex-grow: 1;
@@ -115,18 +124,22 @@
 
       /* Brand Logo */
       .brand_logo_wrapper {
-        margin-bottom: 14px;
+        margin-bottom: 16px;
       }
       .brand_logo_img {
-        max-height: 80px;
-        max-width: 170px;
+        max-height: 85px;
+        max-width: 180px;
         object-fit: contain;
-        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.08));
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.08));
+        transition: transform 0.25s ease;
+      }
+      .brand_logo_img:hover {
+        transform: scale(1.04);
       }
 
       /* Campaign Titles */
       .campaign_main_title {
-        font-size: clamp(1.35rem, 3.5vw, 1.85rem);
+        font-size: clamp(1.4rem, 3.5vw, 1.95rem);
         font-weight: 800;
         color: #0f172a;
         line-height: 1.25;
@@ -135,28 +148,35 @@
       }
       .campaign_sub_title {
         color: #64748b;
-        font-size: 0.95rem;
+        font-size: 0.96rem;
         line-height: 1.5;
-        margin-bottom: 20px;
+        margin-bottom: 22px;
       }
 
       /* Meta Pills */
       .campaign_meta_pills {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 12px;
       }
       .meta_pill {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
         background: #f8fafc;
         border: 1px solid #e2e8f0;
-        border-radius: 16px;
-        padding: 10px 16px;
+        border-radius: 18px;
+        padding: 12px 18px;
+        transition: all 0.25s ease;
+      }
+      .meta_pill:hover {
+        background: #ffffff;
+        border-color: #cbd5e1;
+        transform: translateX(3px);
+        box-shadow: 0 6px 16px -4px rgba(15, 23, 42, 0.08);
       }
       .meta_pill .meta_icon {
-        font-size: 1.25rem;
+        font-size: 1.35rem;
       }
       .meta_pill .meta_text {
         display: flex;
@@ -166,17 +186,17 @@
       .meta_pill .meta_label {
         font-size: 0.72rem;
         text-transform: uppercase;
-        font-weight: 600;
+        font-weight: 700;
         color: #94a3b8;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.06em;
       }
       .meta_pill .meta_dates {
-        font-size: 0.92rem;
+        font-size: 0.95rem;
         font-weight: 700;
         color: #1e293b;
       }
       .meta_pill .meta_count {
-        font-size: 1.15rem;
+        font-size: 1.25rem;
         font-weight: 800;
         color: #2563eb;
       }
@@ -190,51 +210,250 @@
         justify-content: center;
       }
 
+      div.the_wheel {
+        filter: drop-shadow(0 25px 45px rgba(0, 0, 0, 0.28));
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      div.the_wheel:hover {
+        transform: scale(1.015);
+      }
+
+      #new_pin_div img {
+        filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
+      }
+
+      /* Spin Button & Pulse Animation */
+      @keyframes spinPulse {
+        0%, 100% {
+          box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.5), 0 0 0 0 rgba(16, 185, 129, 0.4);
+        }
+        50% {
+          box-shadow: 0 16px 32px -4px rgba(16, 185, 129, 0.7), 0 0 0 10px rgba(16, 185, 129, 0);
+        }
+      }
+
       .spin_form_btn {
         background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
         color: #ffffff !important;
-        font-size: 1.2rem !important;
+        font-size: 1.25rem !important;
         font-weight: 800 !important;
         letter-spacing: 0.05em !important;
         text-transform: uppercase !important;
-        padding: 14px 44px !important;
+        padding: 15px 48px !important;
         border-radius: 9999px !important;
         border: none !important;
-        box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.5), 0 0 0 4px rgba(16, 185, 129, 0.15) !important;
         cursor: pointer !important;
         transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
+        box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.5), 0 0 0 4px rgba(16, 185, 129, 0.15) !important;
+      }
+      .spin_form_btn:not(:disabled) {
+        animation: spinPulse 2.4s infinite;
       }
       .spin_form_btn:hover:not(:disabled) {
         transform: translateY(-2px) scale(1.03) !important;
-        box-shadow: 0 14px 30px -4px rgba(16, 185, 129, 0.65), 0 0 0 6px rgba(16, 185, 129, 0.2) !important;
+        box-shadow: 0 16px 35px -4px rgba(16, 185, 129, 0.75), 0 0 0 6px rgba(16, 185, 129, 0.25) !important;
       }
       .spin_form_btn:active:not(:disabled) {
         transform: translateY(1px) scale(0.98) !important;
       }
       .spin_form_btn:disabled {
-        opacity: 0.6 !important;
+        opacity: 0.65 !important;
         cursor: not-allowed !important;
-        filter: grayscale(40%) !important;
+        filter: grayscale(35%) !important;
+        animation: none !important;
+      }
+
+      /* Celebration / Blast Overlay */
+      .blast {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(15, 23, 42, 0.85) !important;
+        backdrop-filter: blur(18px) !important;
+        -webkit-backdrop-filter: blur(18px) !important;
+        z-index: 99999 !important;
+        display: none;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 20px !important;
+      }
+      .blast.show-blast,
+      .blast[style*="display: block"],
+      .blast[style*="display: flex"] {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+      .blast .content {
+        margin: auto !important;
+        background: #ffffff !important;
+        border-radius: 32px !important;
+        padding: 40px 32px !important;
+        max-width: 460px !important;
+        width: 92% !important;
+        box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.3) inset !important;
+        text-align: center !important;
+        position: relative !important;
+        animation: blastPopIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      }
+      @keyframes blastPopIn {
+        0% { transform: scale(0.85); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+      }
+      .blast .trophy_img {
+        max-width: 110px !important;
+        height: auto !important;
+        filter: drop-shadow(0 12px 24px rgba(245, 158, 11, 0.45)) !important;
+        animation: trophyFloat 3s ease-in-out infinite !important;
+      }
+      @keyframes trophyFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+      }
+      .blast .content .text h2 {
+        font-size: 1.45rem !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
+        margin-top: 18px !important;
+        margin-bottom: 8px !important;
+      }
+      .blast .award_text {
+        font-size: 1.85rem !important;
+        font-weight: 800 !important;
+        color: #059669 !important;
+        text-shadow: none !important;
+        background: #ecfdf5 !important;
+        border: 2px dashed #10b981 !important;
+        border-radius: 20px !important;
+        padding: 12px 24px !important;
+        margin: 14px 0 24px 0 !important;
+        display: inline-block !important;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15) !important;
+      }
+      .reedem-btn {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 1.15rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        border: none !important;
+        border-radius: 9999px !important;
+        padding: 14px 44px !important;
+        box-shadow: 0 12px 28px -6px rgba(245, 158, 11, 0.5) !important;
+        transition: all 0.25s ease !important;
+        cursor: pointer !important;
+      }
+      .reedem-btn:hover {
+        transform: translateY(-2px) scale(1.03) !important;
+        box-shadow: 0 16px 35px -4px rgba(245, 158, 11, 0.65) !important;
+      }
+
+      /* Modals: FormModal & ReedemModal */
+      .modal-content {
+        border: none !important;
+        border-radius: 26px !important;
+        overflow: hidden !important;
+        box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.3) !important;
+      }
+      .modal-header {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+        color: #ffffff !important;
+        padding: 18px 24px !important;
+        border-bottom: none !important;
+      }
+      .modal-title {
+        font-weight: 800 !important;
+        font-size: 1.25rem !important;
+        color: #ffffff !important;
+      }
+      .modal-header .close {
+        color: #ffffff !important;
+        opacity: 0.8 !important;
+        text-shadow: none !important;
+        outline: none !important;
+      }
+      .modal-header .close:hover {
+        opacity: 1 !important;
+      }
+      .modal-body {
+        padding: 24px !important;
+      }
+      .FormModal .form-control {
+        border-radius: 14px !important;
+        border: 1.5px solid #e2e8f0 !important;
+        padding: 12px 16px !important;
+        height: auto !important;
+        font-size: 0.95rem !important;
+        color: #1e293b !important;
+        transition: all 0.2s ease !important;
+      }
+      .FormModal .form-control:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15) !important;
+      }
+      .FormModal label {
+        font-size: 0.82rem !important;
+        font-weight: 700 !important;
+        color: #475569 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.04em !important;
+        margin-bottom: 6px !important;
+      }
+      .form_submit_button {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 1.05rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        border-radius: 9999px !important;
+        padding: 14px 42px !important;
+        border: none !important;
+        box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.45) !important;
+        transition: all 0.25s ease !important;
+      }
+      .form_submit_button:hover {
+        transform: translateY(-2px) scale(1.02) !important;
+        box-shadow: 0 14px 30px -4px rgba(37, 99, 235, 0.6) !important;
+      }
+      .take_screen_button {
+        border-radius: 9999px !important;
+        padding: 14px 32px !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        border: 1.5px solid #cbd5e1 !important;
+        background: #f8fafc !important;
+        color: #334155 !important;
+        transition: all 0.2s ease !important;
+      }
+      .take_screen_button:hover {
+        background: #f1f5f9 !important;
+        border-color: #94a3b8 !important;
       }
 
       /* Popup Announcement Modal */
       .newsShowPopupModal .modal-content {
-        border: none;
-        border-radius: 24px;
-        overflow: hidden;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        border: none !important;
+        border-radius: 24px !important;
+        overflow: hidden !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
       }
       .newsShowPopupModal .modal-body {
-        padding: 24px;
-        position: relative;
+        padding: 24px !important;
+        position: relative !important;
       }
       .popup_close {
         position: absolute;
-        top: 12px;
-        right: 12px;
+        top: 14px;
+        right: 14px;
         width: 36px;
         height: 36px;
         border-radius: 50%;
@@ -268,14 +487,45 @@
           width: min(86vw, 360px);
         }
         .campaign_hero_card {
-          padding: 22px 18px;
+          padding: 24px 20px;
           border-radius: 22px;
         }
         .campaign_main_title {
-          font-size: 1.35rem;
+          font-size: 1.4rem;
         }
         .brand_logo_img {
-          max-height: 65px;
+          max-height: 70px;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .modal-dialog {
+          margin: 12px !important;
+        }
+        .modal-body {
+          padding: 20px 16px !important;
+        }
+        .FormModal .form-control {
+          font-size: 16px !important; /* Prevents iOS auto-zoom on input focus */
+        }
+        .blast .content {
+          padding: 30px 18px !important;
+          border-radius: 24px !important;
+          max-width: 95% !important;
+        }
+        .blast .trophy_img {
+          max-width: 90px !important;
+        }
+        .blast .content .text h2 {
+          font-size: 1.25rem !important;
+        }
+        .blast .award_text {
+          font-size: 1.4rem !important;
+          padding: 10px 18px !important;
+        }
+        .reedem-btn {
+          font-size: 1.05rem !important;
+          padding: 12px 36px !important;
         }
       }
 
@@ -290,6 +540,22 @@
         .notice_banner {
           padding: 4px 10px;
           margin-bottom: 14px;
+        }
+        .campaign_hero_card {
+          padding: 20px 16px;
+        }
+        .meta_pill {
+          padding: 10px 14px;
+        }
+      }
+
+      @media (max-width: 360px) {
+        div.the_wheel {
+          width: min(88vw, 290px);
+        }
+        .spin_form_btn {
+          font-size: 0.95rem !important;
+          padding: 10px 24px !important;
         }
       }
     </style>
@@ -452,7 +718,7 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLongTitle">Reedem Gift</h5>
+          <h5 class="modal-title" id="exampleModalLongTitle"><i class="fas fa-gift mr-2 text-warning"></i> Redeem Your Prize</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -466,15 +732,15 @@
               </p>
             @else
               <h5>धन्यवाद! आपने Prize Wheel के माध्यम से अपना ऑफर सुनिश्चित किया है 
-                उसको Reedem के लिए कृपया Next दबाकर अपना डिटेल डाले |</h5>
+                उसको Redeem के लिए कृपया Next दबाकर अपना डिटेल डाले |</h5>
             @endif
         </div>
-        <div class="modal-footer">
+        <div class="modal-footer" style="border-top: 1px solid #f1f5f9; padding: 16px 24px;">
             @if (!empty($FormFields) && $FormFields->screenshot == 'on')
               {{-- <button type="button" class="btn btn-secondary take_screenshot" data-dismiss="modal">Take Screenshot</button> --}}
             @endif
           
-          <button type="button" class="btn btn-success"  onclick="open_form_modal()">Next</button>
+          <button type="button" class="btn btn-success" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 9999px; padding: 12px 32px; font-weight: 700; border: none;" onclick="open_form_modal()">Next <i class="fas fa-arrow-right ml-1"></i></button>
         </div>
       </div>
     </div>
@@ -483,105 +749,107 @@
 
 
   
-    <!-- Modal -->
+    <!-- Form Modal -->
     <div class="modal fade bd-example-modal-lg FormModal" id="FormModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-header" style="background: #fff;">
-            <h5 class="modal-title" id="exampleModalLongTitle">Submit your details</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
+        <div class="modal-dialog modal-lg modal-dialog-centered">
           <div class="modal-content">
-            <form class="my-4 p-4" action="{{URL::to('u/spinner_form/post')}}" method="POST" id="spinner_form" enctype="multipart/form-data">
-              @csrf
-              <input type="hidden" name="spinner_id" id="spinner_id">
-              <input type="hidden" name="spinner_name" id="spinner_name">
-              <input type="hidden" name="spinner_value" id="spinner_value">
-              <input type="hidden" id="screenshot-input" name="screenshot-file">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle"><i class="fas fa-trophy mr-2 text-warning"></i> Claim Your Prize — Enter Details</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body p-4">
+              <form action="{{URL::to('u/spinner_form/post')}}" method="POST" id="spinner_form" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" name="spinner_id" id="spinner_id">
+                <input type="hidden" name="spinner_name" id="spinner_name">
+                <input type="hidden" name="spinner_value" id="spinner_value">
+                <input type="hidden" id="screenshot-input" name="screenshot-file">
 
-              <div class="form-row">
-                <div class="form-group col-md-3"></div>
-                <div class="form-group col-md-6 text-center">
-                  <img src="" alt="" srcset="" class="spinner_image" width="40%">
-                  <h3>Congratulations, you won!</h3>
-                  
-                  <h3 class="spinner_name_text"></h3>
+                <div class="text-center mb-4">
+                  <img src="" alt="Prize" class="spinner_image mb-2" style="max-height: 85px; max-width: 130px; object-fit: contain;">
+                  <h3 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin-bottom: 6px;">Congratulations, you won!</h3>
+                  <div style="background: #ecfdf5; border: 1.5px dashed #10b981; border-radius: 9999px; display: inline-block; padding: 6px 24px;">
+                    <span class="spinner_name_text" style="font-size: 1.25rem; font-weight: 800; color: #059669;"></span>
+                  </div>
                 </div>
-                <div class="form-group col-md-3"></div>
-              </div>
-              <div class="form-row">
-                <div class="form-group col-md-6">
-                  <label for="name">Name</label>
-                  <input type="text" name="name" class="form-control" id="name" placeholder="Name" required>
+
+                <div class="form-row">
+                  <div class="form-group col-md-6 col-12">
+                    <label for="name">Name</label>
+                    <input type="text" name="name" class="form-control" id="name" placeholder="Enter your full name" required>
+                  </div>
+                  <div class="form-group col-md-6 col-12">
+                    <label for="phone">Mobile Number</label>
+                    <input type="text" name="phone" class="form-control" id="phone" min="10" onkeyup="numOnly(this)" onblur="numOnly(this)" maxlength="10" placeholder="10 Digit Mobile Number" required>
+                    <span id="phone_error" style="color: #ef4444; font-size: 0.8rem; font-weight: 600;"></span>
+                  </div>
                 </div>
-                <div class="form-group col-md-6">
-                  <label for="phone">Mobile Number</label>
-                  <input type="text" name="phone" class="form-control" id="phone" min="10"  onkeyup="numOnly(this)" onblur="numOnly(this)" maxlength="10" placeholder="Mobile Number" required>
-                  <span id="phone_error"  style="color:red"></span>
-                </div>
-                
-                
-              </div>
-              <div class="form-row">
-                @if (!empty($FormFields) && $FormFields->whatsapp_no == 'on')
-                <div class="form-group col-md-4">
-                  <label for="whatsapp_number">Whatsapp Number</label>
-                  <input type="text" name="whatsapp_number" class="form-control" min="10"  onkeyup="wpNumOnly(this)" onblur="numOnly(this)"  maxlength="10" id="whatsapp_number" placeholder="whatsapp Number" required>
-                  <span id="wp_phone_error"  style="color:red"></span>
+
+                @php
+                  $hasWhatsapp = (!empty($FormFields) && $FormFields->whatsapp_no == 'on');
+                  $hasEmail = (!empty($FormFields) && $FormFields->email == 'on');
+                @endphp
+
+                @if ($hasWhatsapp || $hasEmail)
+                <div class="form-row">
+                  @if ($hasWhatsapp)
+                  <div class="form-group {{ $hasEmail ? 'col-md-6 col-12' : 'col-12' }}">
+                    <label for="whatsapp_number">WhatsApp Number</label>
+                    <input type="text" name="whatsapp_number" class="form-control" min="10" onkeyup="wpNumOnly(this)" onblur="numOnly(this)" maxlength="10" id="whatsapp_number" placeholder="10 Digit WhatsApp Number" required>
+                    <span id="wp_phone_error" style="color: #ef4444; font-size: 0.8rem; font-weight: 600;"></span>
+                  </div>
+                  @endif
+
+                  @if ($hasEmail)
+                  <div class="form-group {{ $hasWhatsapp ? 'col-md-6 col-12' : 'col-12' }}">
+                    <label for="email">Email Address</label>
+                    <input type="email" name="email" class="form-control" id="email" placeholder="example@gmail.com">
+                  </div>
+                  @endif
                 </div>
                 @endif
-                @if (!empty($FormFields) && $FormFields->email == 'on')
-                    
-                
-                <div class="form-group col-md-4">
-                  <label for="email">Email</label>
-                  <input type="email" name="email" class="form-control" id="email" placeholder="Email">
-                </div>
-                @endif
+
                 @if (!empty($FormFields) && $FormFields->address == 'on')
-                    
-                
-                <div class="form-group  col-md-4">
-                  <label for="address">Address</label>
-                  <input type="text" name="address" class="form-control" id="address" placeholder="">
+                <div class="form-row">
+                  <div class="form-group col-12">
+                    <label for="address">Address</label>
+                    <input type="text" name="address" class="form-control" id="address" placeholder="Enter your address">
+                  </div>
                 </div>
                 @endif
-              </div>
-              <div class="form-row">
-  
-                @if (!empty($FormFields) && $FormFields->choose_option == 'on')
-  
-                @if (count($BikeModel) > 0)
-                    <div class="form-group col-md-6">
-                      <label for="screenshot">Are You Interested in</label>
-                      <select name="bike_model_id" id="bike_model_id" class="form-control" required>
-                        <option value="">Select</option>
-                        @foreach ($BikeModel as $item)
+
+                @if (!empty($FormFields) && $FormFields->choose_option == 'on' && count($BikeModel) > 0)
+                <div class="form-row">
+                  <div class="form-group col-12">
+                    <label for="bike_model_id">Are You Interested In</label>
+                    <select name="bike_model_id" id="bike_model_id" class="form-control" required>
+                      <option value="">Select an option</option>
+                      @foreach ($BikeModel as $item)
                         <option value="{{$item->id}}">{{$item->name}}</option>
-                        @endforeach
-                      </select>
-                    </div>
+                      @endforeach
+                    </select>
+                  </div>
+                </div>
                 @endif
-                @endif
-                @if (!empty($FormFields) && $FormFields->screenshot == 'on')
-                {{-- <div class="form-group col-md-6">
-                  <label for="screenshot">Screenshot </label>
-                  <input type="file" name="screenshot" class="form-control" @if (!empty($FormFields) && $FormFields->screenshot_required == 'on') required @endif id="screenshot" placeholder="Screenshot">
-                </div> --}}
-                @endif
-               
-              </div>
-              @if (!empty($FormFields) && $FormFields->screenshot == 'on')
-              {{-- <button type="button" class="btn btn-secondary form_take_screenshot" data-dismiss="modal">Take Screenshot</button> --}}
-              <button type="button" class="btn btn-secondary take_screen_button" onclick="captureScreenshot('blast','screenshot-input')">Take Screenshot</button>
-              
-              <button type="submit" class="btn btn-primary form_submit_button" style="display: none">Submit</button>
-              
-              @else
-              <button type="submit" class="btn btn-primary form_submit_button">Submit</button>
-              @endif
-            </form>
+
+                <div class="text-center mt-4">
+                  @if (!empty($FormFields) && $FormFields->screenshot == 'on')
+                    <button type="button" class="btn btn-secondary take_screen_button mr-2" onclick="captureScreenshot('blast','screenshot-input')">
+                      <i class="fas fa-camera mr-1"></i> Take Screenshot
+                    </button>
+                    <button type="submit" class="btn btn-primary form_submit_button" style="display: none">
+                      <i class="fas fa-paper-plane mr-1"></i> Submit
+                    </button>
+                  @else
+                    <button type="submit" class="btn btn-primary form_submit_button">
+                      <i class="fas fa-paper-plane mr-1"></i> Submit
+                    </button>
+                  @endif
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>
@@ -999,7 +1267,7 @@
 
                 blast_fun();
                 $('.award_text').html(indicatedSegment.text);
-                $('.blast').show();
+                $('#blast').addClass('show-blast').fadeIn(300);
 
                 if (indicatedSegment.image && indicatedSegment.image != '') {
                     $('.spinner_image_show').attr('src', indicatedSegment.image);
@@ -1048,10 +1316,14 @@
 
 
 
-          //--------------------------------------------------------
-          
+    var proceedingToForm = false;
+
     function open_form_modal(){
-      $('#FormModal').modal('show');
+      proceedingToForm = true;
+      $('#ReedemModal').one('hidden.bs.modal', function(){
+        $('#FormModal').modal('show');
+        setTimeout(function(){ proceedingToForm = false; }, 400);
+      }).modal('hide');
     }
 
       $("#spinner_form").on('submit',(function(e) {
@@ -1150,9 +1422,16 @@
         //   }
         // });
 
-        $('#ReedemModal').modal('show');
-
+        $('#blast').removeClass('show-blast').fadeOut(250, function(){
+          $('#ReedemModal').modal('show');
+        });
       }
+
+      $('#ReedemModal').on('hidden.bs.modal', function () {
+        if (!proceedingToForm && !$('#FormModal').hasClass('show') && !$('.FormModal').hasClass('show') && !$('#FormModal').is(':visible')) {
+          $('#blast').addClass('show-blast').fadeIn(200);
+        }
+      });
 
 
       jQuery(".sticky_share_btn").click(function () {

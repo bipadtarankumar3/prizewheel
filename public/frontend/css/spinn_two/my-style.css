@@ -72,23 +72,7 @@
 background: linear-gradient(3deg, rgba(34,145,195,1) 0%, rgba(131,223,123,1) 100%);
 }
 
-.blast {
 
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #fff;
-    opacity: 0.8;
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-    display: flex;
-}
-.reedem-btn{
-    color: black;
-}
 
 /* Modal--------- */
 #ReedemModal .modal-header{

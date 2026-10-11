@@ -21,11 +21,7 @@
     }
 }
 
-@media (max-width: 768px) {
-    .blast {
-        opacity: 0.95;
-    }
-}
+
 
 @media (max-width: 575px) {
     .spinner_col {
@@ -43,9 +39,7 @@
     .deal-wheel {
         --size: clamp(250px, 72vmin, 700px);
     }
-    .content .text h1{
-        font-size: 4rem;
-    }
+
     .camping_box {
         height: 238px  !important;
     }
