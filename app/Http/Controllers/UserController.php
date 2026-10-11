@@ -115,11 +115,11 @@ class UserController extends Controller
             'phone' => $request->phone ?? '',
             'type' => 'user',
             'status' => 'active',
-            'expiry_date' => date('Y-m-d', strtotime('+30 days')),
+            'expiry_date' => date('Y-m-d', strtotime('+1 day')),
             'spin_whell_round' => 100,
             'default_background' => 'on',
             'default_spinn' => '1',
-            'note' => 'Self-registered customer account',
+            'note' => 'Self-registered customer account (1-Day Trial)',
             'otp' => '123456',
             'otp_link_status' => 'yes',
         ]);
@@ -139,7 +139,7 @@ class UserController extends Controller
     public function google_redirect(Request $request)
     {
         $clientId = env('GOOGLE_CLIENT_ID');
-        $redirectUri = url('auth/google/callback');
+        $redirectUri = env('GOOGLE_REDIRECT_URI') ?: url('auth/google/callback');
 
         if ($clientId) {
             $url = "https://accounts.google.com/o/oauth2/v2/auth?" . http_build_query([
@@ -166,11 +166,11 @@ class UserController extends Controller
                 'phone' => '+91 98765 43210',
                 'type' => 'user',
                 'status' => 'active',
-                'expiry_date' => date('Y-m-d', strtotime('+30 days')),
+                'expiry_date' => date('Y-m-d', strtotime('+1 day')),
                 'spin_whell_round' => 100,
                 'default_background' => 'on',
                 'default_spinn' => '1',
-                'note' => 'Google Authenticated User',
+                'note' => 'Google Authenticated User (1-Day Trial)',
                 'otp' => '123456',
                 'otp_link_status' => 'yes',
             ]);
@@ -181,7 +181,7 @@ class UserController extends Controller
         session()->put('adminName', $user->name);
 
         $notification = array(
-            'messege' => 'Logged in successfully with Google!',
+            'messege' => 'Logged in successfully with Google! (1-Day Trial Active)',
             'alert-type' => 'success'
         );
         return redirect('admin/dashboard')->with($notification);
@@ -189,10 +189,17 @@ class UserController extends Controller
 
     public function google_callback(Request $request)
     {
+        if ($request->has('error')) {
+            return redirect('login')->with([
+                'messege' => 'Google Sign-In cancelled: ' . $request->get('error'),
+                'alert-type' => 'warning'
+            ]);
+        }
+
         $code = $request->get('code');
         $clientId = env('GOOGLE_CLIENT_ID');
         $clientSecret = env('GOOGLE_CLIENT_SECRET');
-        $redirectUri = url('auth/google/callback');
+        $redirectUri = env('GOOGLE_REDIRECT_URI') ?: url('auth/google/callback');
 
         if ($code && $clientId && $clientSecret) {
             try {
@@ -238,11 +245,11 @@ class UserController extends Controller
                                 'phone' => '',
                                 'type' => 'user',
                                 'status' => 'active',
-                                'expiry_date' => date('Y-m-d', strtotime('+30 days')),
+                                'expiry_date' => date('Y-m-d', strtotime('+1 day')),
                                 'spin_whell_round' => 100,
                                 'default_background' => 'on',
                                 'default_spinn' => '1',
-                                'note' => 'Google SSO User',
+                                'note' => 'Google SSO User (1-Day Trial)',
                                 'otp' => '123456',
                                 'otp_link_status' => 'yes',
                             ]);

@@ -59,7 +59,9 @@
 
     body {
       font-family: var(--font-main);
-      background: var(--bg-page);
+      background-color: #f8fafc;
+      background-image: radial-gradient(rgba(148, 163, 184, 0.4) 1.2px, transparent 1.2px);
+      background-size: 26px 26px;
       color: var(--text-dark);
       min-height: 100vh;
       display: flex;
@@ -69,35 +71,35 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* === ATOM PARTICLE CANVAS (light mode — subtle) === */
+    /* === ATOM PARTICLE CANVAS === */
     #atomCanvas {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 0;
+      z-index: 2;
       pointer-events: none;
     }
 
-    /* Light page overlay — very subtle warm tint */
+    /* Subtle radiant warmth behind showcase */
     .bg-overlay {
       position: fixed;
       inset: 0;
-      z-index: 0;
+      z-index: 1;
       background:
-        radial-gradient(ellipse 70% 50% at 15% 10%, rgba(255, 107, 0, 0.04) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 60% at 85% 90%, rgba(99, 102, 241, 0.04) 0%, transparent 60%);
+        radial-gradient(ellipse 65% 55% at 25% 30%, rgba(255, 107, 0, 0.08) 0%, transparent 65%),
+        radial-gradient(ellipse 55% 55% at 65% 70%, rgba(99, 102, 241, 0.06) 0%, transparent 60%);
       pointer-events: none;
     }
 
     .vertical-guide-line { display: none; }
 
-    /* Top & Bottom Floating Badges */
+    /* Top & Bottom Floating Badges (anchored in showcase) */
     .top-float-badge {
-      position: fixed;
-      top: 20px;
-      right: 24px;
+      position: absolute;
+      top: 24px;
+      left: 32px;
       z-index: 20;
       display: inline-flex;
       align-items: center;
@@ -135,9 +137,9 @@
     }
 
     .bottom-float-badge {
-      position: fixed;
-      bottom: 20px;
-      right: 24px;
+      position: absolute;
+      bottom: 24px;
+      left: 32px;
       z-index: 20;
       display: inline-flex;
       align-items: center;
@@ -204,14 +206,15 @@
 
     /* LEFT 70% — Showcase with atom bg */
     .split-left {
-      flex: 0 0 70%;
+      flex: 1 1 70%;
       width: 70%;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 40px 48px;
       position: relative;
-      background: linear-gradient(140deg, #ffffff 0%, #f8faff 50%, #fff7f0 100%);
+      background: transparent;
+      z-index: 4;
     }
 
     /* Vertical Divider */
@@ -222,13 +225,13 @@
         transparent 0%,
         #e2e8f0 10%,
         #fed7aa 40%,
-        #f97316 50%,
+        #ff6b00 50%,
         #fed7aa 60%,
         #e2e8f0 90%,
         transparent 100%
       );
       position: relative;
-      z-index: 6;
+      z-index: 10;
       align-self: stretch;
     }
 
@@ -236,12 +239,15 @@
     .split-right {
       flex: 0 0 30%;
       width: 30%;
+      min-width: 380px;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 40px 32px;
+      padding: 40px 28px;
       background: #ffffff;
       position: relative;
+      z-index: 10;
+      box-shadow: -8px 0 32px rgba(15, 23, 42, 0.04);
     }
 
     /* On mobile: stack vertically */
@@ -335,18 +341,18 @@
     .phone-mockup-wrapper {
       position: relative;
       width: 100%;
-      max-width: 290px;
-      margin: 0 auto 24px;
+      max-width: 320px;
+      margin: 0 auto 20px;
     }
 
     .phone-mockup {
       width: 100%;
-      height: 460px;
+      height: 540px;
       background: #0f172a;
-      border-radius: 44px;
-      padding: 10px;
+      border-radius: 48px;
+      padding: 11px;
       box-shadow: 
-        0 25px 60px -15px rgba(15, 23, 42, 0.32),
+        0 28px 70px -15px rgba(15, 23, 42, 0.35),
         0 0 0 1px rgba(255, 255, 255, 0.15) inset,
         0 0 0 4px #1e293b;
       position: relative;
@@ -358,11 +364,11 @@
     /* Dynamic Island */
     .phone-island {
       position: absolute;
-      top: 16px;
+      top: 17px;
       left: 50%;
       transform: translateX(-50%);
-      width: 82px;
-      height: 20px;
+      width: 86px;
+      height: 22px;
       background: #000000;
       border-radius: 20px;
       z-index: 10;
@@ -373,8 +379,8 @@
     }
 
     .phone-lens {
-      width: 7px;
-      height: 7px;
+      width: 7.5px;
+      height: 7.5px;
       background: #1e293b;
       border-radius: 50%;
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -384,7 +390,7 @@
       width: 100%;
       height: 100%;
       background: #ffffff;
-      border-radius: 34px;
+      border-radius: 38px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -443,8 +449,8 @@
 
     .wheel-canvas-container {
       position: relative;
-      width: 216px;
-      height: 216px;
+      width: 236px;
+      height: 236px;
       margin: 0 auto;
       display: flex;
       align-items: center;
@@ -457,8 +463,8 @@
       top: -12px;
       left: 50%;
       transform: translateX(-50%);
-      width: 26px;
-      height: 28px;
+      width: 28px;
+      height: 30px;
       z-index: 15;
       filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25));
     }
@@ -471,11 +477,11 @@
 
     /* Rotating Wheel Disc */
     .wheel-disc {
-      width: 206px;
-      height: 206px;
+      width: 226px;
+      height: 226px;
       border-radius: 50%;
       position: relative;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 0 0 6px #ffffff, 0 0 0 8px #fed7aa;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16), 0 0 0 6px #ffffff, 0 0 0 8px #fed7aa;
       transition: transform 4s cubic-bezier(0.17, 0.97, 0.38, 1);
       cursor: pointer;
     }
@@ -492,8 +498,8 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 56px;
-      height: 56px;
+      width: 60px;
+      height: 60px;
       background: radial-gradient(circle, #ffffff 40%, #fff7ed 100%);
       border-radius: 50%;
       border: 3px solid var(--primary);
@@ -712,13 +718,13 @@
     }
 
     .side-float-left {
-      top: 36%;
-      left: -42px;
+      top: 34%;
+      left: -44px;
     }
 
     .side-float-right {
-      top: 56%;
-      right: -36px;
+      top: 54%;
+      right: -38px;
       animation-delay: 1.8s;
     }
 
@@ -1469,23 +1475,6 @@
   <!-- Dark Gradient Overlay -->
   <div class="bg-overlay"></div>
 
-  <!-- Top Floating Badge -->
-  <div class="top-float-badge">
-    <span class="pulse-dot"></span>
-    <span>7-Day Free Trial</span>
-  </div>
-
-  <!-- Bottom Floating Badge -->
-  <div class="bottom-float-badge">
-    <div class="icon-wrap">
-      <i class="fa-solid fa-bolt"></i>
-    </div>
-    <div class="badge-text-group">
-      <span>Smart NFC & QR</span>
-      <span class="badge-sub">Instant Feedback</span>
-    </div>
-  </div>
-
   <!-- Main Viewport -->
   <main class="app-viewport">
     <div class="split-grid">
@@ -1494,6 +1483,24 @@
            LEFT 70%: CAROUSEL SHOWCASE
            ======================================================== -->
       <div class="split-left">
+
+        <!-- Top Floating Badge in Showcase -->
+        <div class="top-float-badge">
+          <span class="pulse-dot"></span>
+          <span>1-Day Free Trial</span>
+        </div>
+
+        <!-- Bottom Floating Badge in Showcase -->
+        <div class="bottom-float-badge">
+          <div class="icon-wrap">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <div class="badge-text-group">
+            <span>Smart NFC & QR</span>
+            <span class="badge-sub">Instant Feedback</span>
+          </div>
+        </div>
+
       <section class="showcase-card" id="showcaseContainer">
         
         <div class="carousel-wrapper">
@@ -1992,7 +1999,7 @@
             <div style="text-align:center;">
               <div class="form-mode-tag">
                 <i class="fa-solid fa-rocket"></i>
-                <span>7-Day Free Trial</span>
+                <span>1-Day Free Trial</span>
               </div>
               <h1 class="auth-heading">Create Account</h1>
               <p class="auth-subheading">
@@ -2135,7 +2142,7 @@
               </div>
 
               <button type="submit" class="auth-submit-btn">
-                <span>Create Account & Start Trial</span>
+                <span>Create Account & Start 1-Day Trial</span>
                 <i class="fa-solid fa-arrow-right"></i>
               </button>
             </form>
@@ -2147,7 +2154,7 @@
 
             <div class="ssl-security-footer">
               <i class="fa-solid fa-shield-check"></i>
-              <span>256-Bit SSL Encrypted • No Credit Card Required for Trial</span>
+              <span>256-Bit SSL Encrypted • 1-Day Full Access Trial</span>
             </div>
 
           </div>
@@ -2358,8 +2365,9 @@
     }
 
     // ===================================================
-    // ATOM PARTICLE CANVAS BACKGROUND ANIMATION
-    // Interactive molecular/orbital particle system
+    // ATOM & ORBITAL BOHR SIMULATION CANVAS ANIMATION
+    // High-visibility animated atomic nuclei, electron orbits,
+    // and interactive molecular particle plexus
     // ===================================================
     (function initAtomCanvas() {
       const canvas = document.getElementById('atomCanvas');
@@ -2367,12 +2375,12 @@
       const ctx = canvas.getContext('2d');
 
       let W, H, animFrame;
-      const PARTICLE_COUNT = 70;
-      const CONNECTION_DIST = 130;
+      const PARTICLE_COUNT = 75;
+      const CONNECTION_DIST = 140;
       const MOUSE = { x: -9999, y: -9999 };
 
       // Track mouse for interactivity
-      document.addEventListener('mousemove', e => {
+      window.addEventListener('mousemove', e => {
         MOUSE.x = e.clientX;
         MOUSE.y = e.clientY;
       });
@@ -2384,60 +2392,51 @@
       window.addEventListener('resize', resize);
       resize();
 
-      // Particle class
+      // Free-floating particle class
       class Particle {
         constructor() { this.reset(true); }
         reset(init) {
-          this.x = Math.random() * W;
+          // Concentrate particles mostly in showcase left 70%
+          const maxStartX = window.innerWidth > 1024 ? W * 0.72 : W;
+          this.x = Math.random() * maxStartX;
           this.y = init ? Math.random() * H : -10;
-          this.r = 1.2 + Math.random() * 2.5;
-          const speed = 0.18 + Math.random() * 0.32;
+          this.r = 1.8 + Math.random() * 2.6;
+          const speed = 0.25 + Math.random() * 0.45;
           const angle = Math.random() * Math.PI * 2;
           this.vx = Math.cos(angle) * speed;
-          this.vy = Math.sin(angle) * speed * 0.6 + 0.08;
-          this.alpha = 0.08 + Math.random() * 0.22;
-          // Light-mode palette: muted orange, soft blue, warm peach
+          this.vy = Math.sin(angle) * speed * 0.6 + 0.1;
+          this.alpha = 0.35 + Math.random() * 0.45;
+          
+          // High-visibility orange / warm amber / indigo palette
           const palette = [
-            `rgba(255,107,0,${this.alpha})`,
-            `rgba(255,140,60,${this.alpha * 0.85})`,
-            `rgba(99,102,241,${this.alpha * 0.55})`,
-            `rgba(249,115,22,${this.alpha * 0.6})`,
-            `rgba(251,191,36,${this.alpha * 0.5})`,
+            `rgba(255, 107, 0, ${this.alpha})`,
+            `rgba(249, 115, 22, ${this.alpha * 0.9})`,
+            `rgba(245, 158, 11, ${this.alpha * 0.85})`,
+            `rgba(99, 102, 241, ${this.alpha * 0.75})`,
+            `rgba(14, 165, 233, ${this.alpha * 0.7})`
           ];
           this.color = palette[Math.floor(Math.random() * palette.length)];
-          // Atom ring orbit params
-          this.orbitR = 0;
-          this.orbitSpeed = 0;
-          this.orbitAngle = 0;
-          this.orbitCX = 0;
-          this.orbitCY = 0;
-          this.isOrbiting = false;
         }
         update() {
-          if (this.isOrbiting) {
-            this.orbitAngle += this.orbitSpeed;
-            this.x = this.orbitCX + Math.cos(this.orbitAngle) * this.orbitR;
-            this.y = this.orbitCY + Math.sin(this.orbitAngle) * this.orbitR * 0.42;
-          } else {
-            // Drift toward mouse slightly
-            const dx = MOUSE.x - this.x;
-            const dy = MOUSE.y - this.y;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < 180) {
-              this.vx += dx * 0.00008;
-              this.vy += dy * 0.00008;
-            }
-            this.x += this.vx;
-            this.y += this.vy;
-            // Damp speed
-            this.vx *= 0.999;
-            this.vy *= 0.999;
-            // Wrap around edges
-            if (this.x < -20) this.x = W + 10;
-            if (this.x > W + 20) this.x = -10;
-            if (this.y < -20) this.y = H + 10;
-            if (this.y > H + 20) this.y = -10;
+          // React to mouse proximity
+          const dx = MOUSE.x - this.x;
+          const dy = MOUSE.y - this.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 180) {
+            this.vx += dx * 0.00015;
+            this.vy += dy * 0.00015;
           }
+
+          this.x += this.vx;
+          this.y += this.vy;
+          this.vx *= 0.998;
+          this.vy *= 0.998;
+
+          const maxX = window.innerWidth > 1024 ? W * 0.73 : W + 20;
+          if (this.x < -20) this.x = maxX - 10;
+          if (this.x > maxX) this.x = -10;
+          if (this.y < -20) this.y = H + 10;
+          if (this.y > H + 20) this.y = -10;
         }
         draw() {
           ctx.beginPath();
@@ -2447,98 +2446,163 @@
         }
       }
 
-      // Atom nucleus class (stationary glowing cores)
-      class Nucleus {
-        constructor() {
-          this.x = 80 + Math.random() * (W - 160);
-          this.y = 80 + Math.random() * (H - 160);
-          this.r = 3 + Math.random() * 4;
-          this.pulseT = Math.random() * Math.PI * 2;
-          this.rings = 1 + Math.floor(Math.random() * 2);
-          this.ringR = [35 + Math.random() * 50, 70 + Math.random() * 60];
-          this.ringTilt = [Math.random() * 0.7, Math.random() * 0.5 + 0.2];
-          this.ringAngle = [Math.random() * Math.PI * 2, Math.random() * Math.PI * 2];
-          this.ringSpeed = [0.004 + Math.random() * 0.006, 0.003 + Math.random() * 0.004];
-          this.color = Math.random() > 0.5 ? '#ff8c3a' : '#818cf8';
-          this.glowColor = Math.random() > 0.5 ? 'rgba(255,107,0,' : 'rgba(99,102,241,';
+      // Enhanced Bohr Atomic Model Class
+      // Distinct glowing nucleus with 3 rotating orbital rings and orbiting electrons
+      class AtomModel {
+        constructor(x, y, scale = 1.0) {
+          this.x = x;
+          this.y = y;
+          this.scale = scale;
+          this.coreR = (4.5 + Math.random() * 3) * scale;
+          this.pulse = Math.random() * Math.PI * 2;
+          
+          // 3 Distinct orbital rings with varied tilts and angles
+          this.orbits = [
+            { r: 42 * scale, tilt: 0.45, angle: 0, rotAngle: 0.2, speed: 0.016, color: 'rgba(255, 107, 0, 0.45)', electronColor: '#ff6b00' },
+            { r: 72 * scale, tilt: 0.50, angle: Math.PI / 3, rotAngle: 1.25, speed: -0.012, color: 'rgba(99, 102, 241, 0.40)', electronColor: '#6366f1' },
+            { r: 104 * scale, tilt: 0.42, angle: (Math.PI * 2) / 3, rotAngle: 2.35, speed: 0.009, color: 'rgba(245, 158, 11, 0.42)', electronColor: '#f59e0b' }
+          ];
+
+          // Gentle floating motion
+          this.baseX = x;
+          this.baseY = y;
+          this.floatAngle = Math.random() * Math.PI * 2;
+          this.floatSpeed = 0.008 + Math.random() * 0.006;
+          this.floatAmpX = 14 + Math.random() * 10;
+          this.floatAmpY = 16 + Math.random() * 12;
         }
+
         update() {
-          this.pulseT += 0.025;
-          for (let i = 0; i < this.rings; i++) {
-            this.ringAngle[i] += this.ringSpeed[i];
-          }
+          this.pulse += 0.035;
+          this.floatAngle += this.floatSpeed;
+          this.x = this.baseX + Math.cos(this.floatAngle) * this.floatAmpX;
+          this.y = this.baseY + Math.sin(this.floatAngle * 0.8) * this.floatAmpY;
+
+          // Update orbital angles for electrons
+          this.orbits.forEach(orb => {
+            orb.angle += orb.speed;
+          });
         }
+
         draw() {
-          const pulse = 0.55 + 0.45 * Math.sin(this.pulseT);
+          const pulseFactor = 0.85 + 0.25 * Math.sin(this.pulse);
 
-          // Glow
-          const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 7);
-          grad.addColorStop(0, this.glowColor + (0.35 * pulse) + ')');
-          grad.addColorStop(1, this.glowColor + '0)');
+          // 1. Nucleus Outer Halo
+          const haloGrad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.coreR * 6 * pulseFactor);
+          haloGrad.addColorStop(0, 'rgba(255, 107, 0, 0.35)');
+          haloGrad.addColorStop(0.5, 'rgba(249, 115, 22, 0.12)');
+          haloGrad.addColorStop(1, 'rgba(255, 107, 0, 0)');
           ctx.beginPath();
-          ctx.arc(this.x, this.y, this.r * 7, 0, Math.PI * 2);
-          ctx.fillStyle = grad;
+          ctx.arc(this.x, this.y, this.coreR * 6 * pulseFactor, 0, Math.PI * 2);
+          ctx.fillStyle = haloGrad;
           ctx.fill();
 
-          // Nucleus core
+          // 2. Nucleus Core
           ctx.beginPath();
-          ctx.arc(this.x, this.y, this.r * pulse, 0, Math.PI * 2);
-          ctx.fillStyle = this.color;
-          ctx.globalAlpha = 0.9;
+          ctx.arc(this.x, this.y, this.coreR * pulseFactor, 0, Math.PI * 2);
+          ctx.fillStyle = '#ff6b00';
           ctx.fill();
-          ctx.globalAlpha = 1;
 
-          // Orbital rings
-          for (let i = 0; i < this.rings; i++) {
+          // Core inner highlight
+          ctx.beginPath();
+          ctx.arc(this.x - this.coreR * 0.3, this.y - this.coreR * 0.3, this.coreR * 0.4, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+
+          // 3. Orbital Elliptical Rings & Orbiting Electrons
+          this.orbits.forEach(orb => {
             ctx.save();
             ctx.translate(this.x, this.y);
-            ctx.rotate(this.ringAngle[i] * 0.3);
-            ctx.scale(1, this.ringTilt[i]);
+            ctx.rotate(orb.rotAngle);
+            ctx.scale(1, orb.tilt);
 
+            // Orbit line
             ctx.beginPath();
-            ctx.ellipse(0, 0, this.ringR[i], this.ringR[i], 0, 0, Math.PI * 2);
-            ctx.strokeStyle = i === 0
-              ? 'rgba(255,107,0,0.18)'
-              : 'rgba(130,100,255,0.14)';
-            ctx.lineWidth = 1;
+            ctx.arc(0, 0, orb.r, 0, Math.PI * 2);
+            ctx.strokeStyle = orb.color;
+            ctx.lineWidth = 1.4;
             ctx.stroke();
 
-            // Electron on orbit
-            const ex = Math.cos(this.ringAngle[i]) * this.ringR[i];
-            const ey = Math.sin(this.ringAngle[i]) * this.ringR[i] * this.ringTilt[i];
-            ctx.restore();
+            // Orbiting electron position along ellipse
+            const ex = Math.cos(orb.angle) * orb.r;
+            const ey = Math.sin(orb.angle) * orb.r;
 
-            // Actual electron (in screen space)
-            const screenEX = this.x + Math.cos(this.ringAngle[i]) * this.ringR[i];
-            const screenEY = this.y + Math.sin(this.ringAngle[i]) * this.ringR[i] * this.ringTilt[i];
+            // Electron glow
             ctx.beginPath();
-            ctx.arc(screenEX, screenEY, 2.5, 0, Math.PI * 2);
-            ctx.fillStyle = i === 0 ? '#ff9a4d' : '#a590ff';
-            ctx.globalAlpha = 0.85;
+            ctx.arc(ex, ey, 5.5, 0, Math.PI * 2);
+            ctx.fillStyle = orb.color;
             ctx.fill();
-            ctx.globalAlpha = 1;
-          }
+
+            // Electron particle
+            ctx.beginPath();
+            ctx.arc(ex, ey, 2.8, 0, Math.PI * 2);
+            ctx.fillStyle = orb.electronColor;
+            ctx.fill();
+
+            // Electron bright center
+            ctx.beginPath();
+            ctx.arc(ex, ey, 1.2, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+
+            ctx.restore();
+          });
         }
       }
 
-      // Initialize
+      // Initialize Particles & Atom Models
       const particles = Array.from({ length: PARTICLE_COUNT }, () => new Particle());
-      const NUCLEUS_COUNT = Math.max(2, Math.floor(W / 500));
-      let nuclei = Array.from({ length: NUCLEUS_COUNT }, () => new Nucleus());
+      let atomModels = [];
+
+      function createAtoms() {
+        atomModels = [];
+        const isDesktop = W > 1024;
+        const showcaseW = isDesktop ? W * 0.68 : W;
+
+        // Position recognizable Bohr atoms across showcase space
+        atomModels.push(new AtomModel(showcaseW * 0.18, H * 0.25, 1.15));
+        atomModels.push(new AtomModel(showcaseW * 0.82, H * 0.32, 1.05));
+        atomModels.push(new AtomModel(showcaseW * 0.22, H * 0.78, 1.2));
+        atomModels.push(new AtomModel(showcaseW * 0.78, H * 0.75, 0.95));
+      }
+
+      createAtoms();
+      window.addEventListener('resize', createAtoms);
 
       function drawConnections() {
+        const maxX = window.innerWidth > 1024 ? W * 0.72 : W;
+
+        // Draw connections between nearby particles
         for (let i = 0; i < particles.length; i++) {
           for (let j = i + 1; j < particles.length; j++) {
             const dx = particles[i].x - particles[j].x;
             const dy = particles[i].y - particles[j].y;
             const dist = Math.sqrt(dx * dx + dy * dy);
             if (dist < CONNECTION_DIST) {
-              const alpha = (1 - dist / CONNECTION_DIST) * 0.18;
+              const alpha = (1 - dist / CONNECTION_DIST) * 0.42;
               ctx.beginPath();
               ctx.moveTo(particles[i].x, particles[i].y);
               ctx.lineTo(particles[j].x, particles[j].y);
-              ctx.strokeStyle = `rgba(255,130,50,${alpha})`;
-              ctx.lineWidth = 0.7;
+              ctx.strokeStyle = `rgba(255, 107, 0, ${alpha})`;
+              ctx.lineWidth = 1.0;
+              ctx.stroke();
+            }
+          }
+        }
+
+        // Draw dynamic connections to mouse cursor
+        if (MOUSE.x > 0 && MOUSE.y > 0 && MOUSE.x < maxX) {
+          for (let i = 0; i < particles.length; i++) {
+            const dx = particles[i].x - MOUSE.x;
+            const dy = particles[i].y - MOUSE.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 160) {
+              const alpha = (1 - dist / 160) * 0.55;
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(MOUSE.x, MOUSE.y);
+              ctx.strokeStyle = `rgba(255, 107, 0, ${alpha})`;
+              ctx.lineWidth = 1.3;
               ctx.stroke();
             }
           }
@@ -2548,24 +2612,25 @@
       function animate() {
         ctx.clearRect(0, 0, W, H);
 
-        // Draw nuclei first (behind particles)
-        nuclei.forEach(n => { n.update(); n.draw(); });
+        // Draw Bohr atomic models
+        atomModels.forEach(atom => {
+          atom.update();
+          atom.draw();
+        });
 
-        // Draw connections
+        // Draw inter-particle plexus connections
         drawConnections();
 
-        // Draw & update particles
-        particles.forEach(p => { p.update(); p.draw(); });
+        // Draw & update floating particles
+        particles.forEach(p => {
+          p.update();
+          p.draw();
+        });
 
         animFrame = requestAnimationFrame(animate);
       }
 
       animate();
-
-      // Rebuild nuclei on resize
-      window.addEventListener('resize', () => {
-        nuclei = Array.from({ length: Math.max(2, Math.floor(W / 500)) }, () => new Nucleus());
-      });
     })();
   </script>
 </body>
