@@ -56,15 +56,25 @@
     <aside class="left-sidebar">
         <!-- Sidebar scroll-->
         <div>
+          <!-- Brand Logo -->
           <div class="brand-logo d-flex align-items-center justify-content-between">
-            <a href="{{URL::to('admin/dashboard')}}" class="text-nowrap logo-img" style="height: 90px">
-              <img src="{{Auth::user()->logo}}" class="dark-logo" style="height: 90px" width="90px" alt="" />
-              {{-- <img src="https://demos.adminmart.com/premium/bootstrap/modernize-bootstrap/package/dist/images/logos/light-logo.svg" class="light-logo"  width="180" alt="" /> --}}
+            <a href="{{URL::to('admin/dashboard')}}" class="sidebar-brand-link">
+              @if(!empty(Auth::user()->logo))
+                <img src="{{Auth::user()->logo}}" class="rounded-3 shadow-sm" style="height: 38px; width: 38px; object-fit: cover;" alt="Logo" />
+              @else
+                <div class="sidebar-brand-icon">
+                  <i class="ti ti-aperture"></i>
+                </div>
+              @endif
+              <div class="sidebar-brand-text">
+                Prize<span>Wheel</span>
+              </div>
             </a>
             <div class="close-btn d-lg-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
               <i class="ti ti-x fs-8 text-muted"></i>
             </div>
           </div>
+
           <!-- Sidebar navigation-->
           <nav class="sidebar-nav scroll-sidebar" data-simplebar>
             <ul id="sidebarnav">
@@ -79,140 +89,138 @@
               <!-- Dashboard -->
               <!-- =================== -->
               @if (Auth::user()->type  == 'admin')
-                <li class="sidebar-item">
-                  <a class="sidebar-link" href="{{URL::to('admin/dashboard')}}" aria-expanded="false">
+                <li class="sidebar-item {{ Request::is('admin/dashboard*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/dashboard*') ? 'active' : '' }}" href="{{URL::to('admin/dashboard')}}" aria-expanded="false">
                     <span>
-                      <i class="ti ti-aperture"></i>
+                      <i class="ti ti-layout-dashboard"></i>
                     </span>
                     <span class="hide-menu">Dashboard</span>
                   </a>
                 </li>
-                <li class="sidebar-item">
-                  <a class="sidebar-link" href="{{URL::to('admin/sub_user_list')}}" aria-expanded="false">
+                <li class="sidebar-item {{ Request::is('admin/sub_user_list*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/sub_user_list*') ? 'active' : '' }}" href="{{URL::to('admin/sub_user_list')}}" aria-expanded="false">
                     <span>
-                      <i class="ti ti-user-circle text-white" style="font-size: 30px;"></i>
+                      <i class="ti ti-users"></i>
                     </span>
                     <span class="hide-menu">User</span>
                   </a>
                 </li>
-                <li class="sidebar-item">
-                  <a class="sidebar-link" href="{{URL::to('admin/notice')}}" aria-expanded="false">
+                <li class="sidebar-item {{ Request::is('admin/notice*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/notice*') ? 'active' : '' }}" href="{{URL::to('admin/notice')}}" aria-expanded="false">
                     <span>
-                      <i class="ti ti-rotate-clockwise-2" style="font-size: 30px;"></i>
+                      <i class="ti ti-speakerphone"></i>
                     </span>
                     <span class="hide-menu">Notice</span>
                   </a>
                 </li>
-                <li class="sidebar-item">
-                  <a class="sidebar-link" href="{{URL::to('admin/popup_alert')}}" aria-expanded="false">
+                <li class="sidebar-item {{ Request::is('admin/popup_alert*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/popup_alert*') ? 'active' : '' }}" href="{{URL::to('admin/popup_alert')}}" aria-expanded="false">
                     <span>
-                      <i class="ti ti-circle-dotted"></i>
+                      <i class="ti ti-device-desktop"></i>
                     </span>
                     <span class="hide-menu">Popup</span>
                   </a>
                 </li>
-                <li class="sidebar-item">
-                  <a class="sidebar-link" href="{{URL::to('admin/expired_camping_list')}}" aria-expanded="false">
+                <li class="sidebar-item {{ Request::is('admin/expired_camping_list*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/expired_camping_list*') ? 'active' : '' }}" href="{{URL::to('admin/expired_camping_list')}}" aria-expanded="false">
                     <span>
-                      <i class="ti ti-circle-dotted"></i>
+                      <i class="ti ti-calendar-off"></i>
                     </span>
                     <span class="hide-menu">Expired camping list</span>
                   </a>
                 </li>
-                
-                    
               @else
-              <li class="sidebar-item">
-                <a class="sidebar-link" href="{{URL::to('admin/dashboard')}}" aria-expanded="false">
-                  <span>
-                    <i class="ti ti-aperture"></i>
-                  </span>
-                  <span class="hide-menu">Dashboard</span>
-                </a>
-              </li>
-                <li class="sidebar-item">
-                  <a class="sidebar-link" href="{{URL::to('admin/camping_list')}}" aria-expanded="false">
+                <li class="sidebar-item {{ Request::is('admin/dashboard*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/dashboard*') ? 'active' : '' }}" href="{{URL::to('admin/dashboard')}}" aria-expanded="false">
                     <span>
-                      <i class="ti ti-caravan"></i>
+                      <i class="ti ti-layout-dashboard"></i>
+                    </span>
+                    <span class="hide-menu">Dashboard</span>
+                  </a>
+                </li>
+                <li class="sidebar-item {{ Request::is('admin/camping_list*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/camping_list*') ? 'active' : '' }}" href="{{URL::to('admin/camping_list')}}" aria-expanded="false">
+                    <span>
+                      <i class="ti ti-sparkles"></i>
                     </span>
                     <span class="hide-menu">Campaign</span>
                   </a>
                 </li>
-                <li class="sidebar-item">
-                  <a class="sidebar-link" href="{{URL::to('admin/spinner_list')}}" aria-expanded="false">
+                <li class="sidebar-item {{ Request::is('admin/spinner_list*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/spinner_list*') ? 'active' : '' }}" href="{{URL::to('admin/spinner_list')}}" aria-expanded="false">
                     <span>
-                      <i class="ti ti-circle-dotted"></i>
+                      <i class="ti ti-disc"></i>
                     </span>
                     <span class="hide-menu">Spinner</span>
                   </a>
                 </li>
-                <li class="sidebar-item">
-                  <a class="sidebar-link" href="{{URL::to('admin/spinner_form_camping_list')}}" aria-expanded="false">
+                <li class="sidebar-item {{ Request::is('admin/spinner_form_camping_list*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/spinner_form_camping_list*') ? 'active' : '' }}" href="{{URL::to('admin/spinner_form_camping_list')}}" aria-expanded="false">
                     <span>
-                      <i class="ti ti-rotate-clockwise-2"></i>
+                      <i class="ti ti-forms"></i>
                     </span>
                     <span class="hide-menu">Spinner Enquiry</span>
                   </a>
                 </li>
-                <li class="sidebar-item">
-                  <a class="sidebar-link" href="{{URL::to('admin/bike_model')}}" aria-expanded="false">
+                <li class="sidebar-item {{ Request::is('admin/bike_model*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/bike_model*') ? 'active' : '' }}" href="{{URL::to('admin/bike_model')}}" aria-expanded="false">
                     <span>
-                      <i class="ti ti-rotate-clockwise-2"></i>
+                      <i class="ti ti-adjustments"></i>
                     </span>
                     <span class="hide-menu">Choose Option</span>
                   </a>
                 </li>
-                <li class="sidebar-item">
-                  <a class="sidebar-link" href="{{URL::to('admin/form_access')}}" aria-expanded="false">
+                <li class="sidebar-item {{ Request::is('admin/form_access*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/form_access*') ? 'active' : '' }}" href="{{URL::to('admin/form_access')}}" aria-expanded="false">
                     <span>
                       <i class="ti ti-list-details"></i>
                     </span>
                     <span class="hide-menu">Form Fields Access</span>
                   </a>
                 </li>
-                <li class="sidebar-item">
-                  <a class="sidebar-link" href="{{URL::to('admin/ip_skip')}}" aria-expanded="false">
+                <li class="sidebar-item {{ Request::is('admin/ip_skip*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/ip_skip*') ? 'active' : '' }}" href="{{URL::to('admin/ip_skip')}}" aria-expanded="false">
                     <span>
-                      <i class="ti ti-notes"></i>
+                      <i class="ti ti-shield-lock"></i>
                     </span>
                     <span class="hide-menu">IP Skip</span>
                   </a>
                 </li>
-                <li class="sidebar-item">
-                  <a class="sidebar-link" href="{{URL::to('admin/notice')}}" aria-expanded="false">
+                <li class="sidebar-item {{ Request::is('admin/notice*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/notice*') ? 'active' : '' }}" href="{{URL::to('admin/notice')}}" aria-expanded="false">
                     <span>
-                      <i class="ti ti-rotate-clockwise-2" style="font-size: 30px;"></i>
+                      <i class="ti ti-speakerphone"></i>
                     </span>
                     <span class="hide-menu">Notice</span>
                   </a>
                 </li>
-                <li class="sidebar-item">
-                  <a class="sidebar-link" href="{{URL::to('admin/popup_alert')}}" aria-expanded="false">
+                <li class="sidebar-item {{ Request::is('admin/popup_alert*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/popup_alert*') ? 'active' : '' }}" href="{{URL::to('admin/popup_alert')}}" aria-expanded="false">
                     <span>
-                      <i class="ti ti-circle-dotted"></i>
+                      <i class="ti ti-device-desktop"></i>
                     </span>
                     <span class="hide-menu">Popup</span>
                   </a>
                 </li>
               @endif
             </ul>
-            
           </nav>
-          <div class="fixed-profile p-3 bg-light-secondary rounded sidebar-ad mt-3">
-            <div class="hstack gap-3">
-              <div class="john-img">
-                <img src="../../dist/images/profile/user-1.jpg" class="rounded-circle" width="40" height="40" alt="">
-              </div>
-              <div class="john-title">
-                <h6 class="mb-0 fs-4 fw-semibold">Mathew</h6>
-                <span class="fs-2 text-dark">Designer</span>
-              </div>
-              <button class="border-0 bg-transparent text-primary ms-auto" tabindex="0" type="button" aria-label="logout" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="logout">
-                <i class="ti ti-power fs-6"></i>
-              </button>
+
+          <!-- Sidebar user footer card -->
+          <div class="sidebar-user-footer-card">
+            <div class="sidebar-user-avatar">
+              {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
+              <span class="sidebar-user-online-dot"></span>
             </div>
-          </div>  
-          <!-- End Sidebar navigation -->
+            <div class="sidebar-user-details">
+              <span class="sidebar-user-name" title="{{ Auth::user()->name }}">{{ Auth::user()->name }}</span>
+              <span class="sidebar-user-badge">{{ Auth::user()->type == 'admin' ? 'Super Admin' : '1-Day Trial' }}</span>
+            </div>
+            <a href="{{ URL::to('logout') }}" class="sidebar-user-logout" title="Sign Out">
+              <i class="ti ti-logout"></i>
+            </a>
+          </div>
+
         </div>
         <!-- End Sidebar scroll-->
       </aside>
@@ -223,145 +231,245 @@
     <div class="body-wrapper">
 
       <!-- Header Start -->
-
       <header class="app-header">
         <nav class="navbar navbar-expand-lg navbar-light">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link sidebartoggler nav-icon-hover ms-n3" id="headerCollapse" href="javascript:void(0)">
-                <i class="ti ti-menu-2"></i>
-              </a>
-            </li>
-            
-          </ul>
-
-   
           
-         
-          <div class="d-block" style="width: 60%;">
+          <!-- Left: Hamburger Toggler & Greeting -->
+          <div class="d-flex align-items-center gap-2">
+            <a class="nav-link sidebartoggler p-1 text-dark" id="headerCollapse" href="javascript:void(0)" title="Toggle Sidebar">
+              <i class="ti ti-menu-2 fs-6"></i>
+            </a>
+            <div class="d-none d-lg-flex flex-column ms-1" style="line-height: 1.2;">
+              <span class="text-muted" style="font-size: 11px;">Welcome back,</span>
+              <span class="fw-bold text-dark text-truncate" style="font-size: 13.5px; max-width: 180px;">{{ Auth::user()->name }}</span>
+            </div>
+          </div>
+
+          <!-- Center: Notice Announcement Ticker -->
+          <div class="d-none d-xl-flex align-items-center ms-3 flex-grow-1" style="max-width: 360px;">
             @php
-                  $notice = DB::table('notices')->first();
+              $notice = DB::table('notices')->first();
             @endphp
             @if ($notice != '' && $notice->status == 'active')
-                <div>
-                  <marquee  direction="left" onmouseover="this.stop();" onmouseleave="this.start();">
-                  <p style="color: rgb(0, 0, 0);margin-top: 10px;margin-left: 20px;">
-                    {{$notice->notice}}
-                  </p>
-                </marquee>
-                </div>
+              <div class="header-notice-pill">
+                <span class="badge rounded-pill bg-danger text-white me-2 px-2 py-1" style="font-size:10px;"><i class="ti ti-speakerphone me-1"></i> NOTICE</span>
+                <span class="text-truncate" style="max-width: 250px;">{{ $notice->notice }}</span>
+              </div>
             @endif
-            {{-- <img src="https://demos.adminmart.com/premium/bootstrap/modernize-bootstrap/package/dist/images/logos/dark-logo.svg" width="180" alt="" /> --}}
           </div>
-          <button class="navbar-toggler p-0 border-0" type="button" data-bs-toggle="collapse"
+
+          <!-- Mobile Toggler -->
+          <button class="navbar-toggler p-0 border-0 d-lg-none" type="button" data-bs-toggle="collapse"
             data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="p-2">
-              <i class="ti ti-dots fs-7"></i>
-            </span>
+            <span class="p-2"><i class="ti ti-dots fs-7"></i></span>
           </button>
+
+          <!-- Right: Badges, Actions, Profile -->
           <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
             <div class="d-flex align-items-center justify-content-between">
-              {{-- <a href="javascript:void(0)" class="nav-link d-flex d-lg-none align-items-center justify-content-center"
-                type="button" data-bs-toggle="offcanvas" data-bs-target="#mobilenavbar"
-                aria-controls="offcanvasWithBothOptions">
-                <i class="ti ti-align-justified fs-7"></i>
-              </a> --}}
-              <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-center">
+              <ul class="navbar-nav flex-row ms-auto align-items-center gap-2">
 
                 @if(Auth::user()->type == 'user')
-                <li class="nav-item dropdown">
-                  <form action="{{URL::to('admin/change_spin_mode')}}" method="POST">
-                    @csrf
-                    <div style="display: flex;border-radius: 5px;box-shadow: 0 0 5px rgba(0, 0, 0, 0.9);padding: 5px;background: #fff">
-                      <label for="Skip Mode" style="margin-right: 5px">Skip Mode</label>
-                      <div class="form-check form-switch">
+                  <!-- TRIAL ACCESS EXPIRATION BUTTON -->
+                  @php
+                    $userExpiry = Auth::user()->expiry_date;
+                    $daysRemaining = 1;
+                    if (!empty($userExpiry)) {
+                        $expiryDate = \Carbon\Carbon::parse($userExpiry)->endOfDay();
+                        $nowDate = \Carbon\Carbon::now();
+                        $daysRemaining = max(0, (int)$nowDate->diffInDays($expiryDate, false));
+                    }
+                  @endphp
+
+                  <li class="nav-item">
+                    <a href="{{URL::to('admin/profile')}}" class="trial-expiry-pill-btn" title="View your subscription & account details">
+                      <span class="trial-pulse-dot"></span>
+                      @if($daysRemaining <= 1)
+                        <span>Only <strong>1 day left</strong> to expire your account access</span>
+                      @else
+                        <span><strong>{{ $daysRemaining }} days left</strong> to expire access</span>
+                      @endif
+                      <span class="trial-renew-action">Renew <i class="ti ti-arrow-right"></i></span>
+                    </a>
+                  </li>
+
+                  <!-- Customer Spin Mode Dropdown Trigger & Modal -->
+                  <li class="nav-item dropdown d-none d-lg-block">
+                    <a class="qr-flow-trigger-btn" href="javascript:void(0)" id="qrFlowDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Switch Spin Wheel Mode">
+                      <span class="qr-flow-dot"></span>
+                      @if(Auth::user()->default_spinn == 2)
+                        <i class="ti ti-chart-pie fs-4"></i>
+                        <span>Chances Mode</span>
+                      @else
+                        <i class="ti ti-bolt fs-4"></i>
+                        <span>Skip Mode</span>
+                      @endif
+                    </a>
+
+                    <div class="dropdown-menu dropdown-menu-end qr-flow-dropdown dropdown-menu-animate-up border-0" aria-labelledby="qrFlowDropdown">
                       
-                        <input class="form-check-input" type="checkbox" name="spin_mode" role="switch" id="spin_mode" @if(Auth::user()->default_spinn == 2) checked @endif  onchange="this.form.submit()">
-                        <label class="form-check-label" for="spin_mode">
-                          
-                          Chances Mode 
-                        
-                        </label>
+                      <!-- Header -->
+                      <div class="qr-flow-header">
+                        <div class="d-flex align-items-center justify-content-between">
+                          <div class="d-flex align-items-center gap-2">
+                            <div class="qr-flow-header-icon">
+                              <i class="ti ti-disc"></i>
+                            </div>
+                            <span class="fw-bold fs-4 text-white">Spin Wheel Algorithm</span>
+                          </div>
+                          <span class="qr-flow-badge-landing">Wheel Mode</span>
+                        </div>
+                        <p class="mb-0 text-white-50 fs-2 mt-2">
+                          Choose how winning slices are calculated for customer spins:
+                        </p>
                       </div>
+
+                      <!-- Body Cards -->
+                      <div class="qr-flow-body">
+                        
+                        <!-- Option 1: Chances Mode -->
+                        <div class="qr-flow-card {{ Auth::user()->default_spinn == 2 ? 'active' : '' }}">
+                          <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                              <div class="qr-flow-icon-circle qr-flow-icon-star">
+                                <i class="ti ti-percentage"></i>
+                              </div>
+                              <span class="fw-bold text-dark fs-3">Chances Mode</span>
+                              <span class="qr-flow-tag-recommended">Recommended</span>
+                            </div>
+                            <div>
+                              @if(Auth::user()->default_spinn == 2)
+                                <span class="qr-flow-btn-active-badge"><i class="ti ti-check"></i> ACTIVE</span>
+                              @else
+                                <form action="{{ URL::to('admin/change_spin_mode') }}" method="POST" class="m-0">
+                                  @csrf
+                                  <input type="hidden" name="spin_mode" value="2">
+                                  <button type="submit" class="qr-flow-btn-activate">Activate</button>
+                                </form>
+                              @endif
+                            </div>
+                          </div>
+                          <div class="d-flex align-items-center gap-2 fs-2 text-dark mb-1">
+                            <i class="ti ti-circle-check text-success fs-3"></i>
+                            <span><strong>Probability control:</strong> Wins calculated by set % chances</span>
+                          </div>
+                          <div class="d-flex align-items-center gap-2 fs-2 text-dark">
+                            <i class="ti ti-shield-check text-warning fs-3"></i>
+                            <span><strong>Balanced gifts:</strong> Ideal for tiered inventory & budget control</span>
+                          </div>
+                        </div>
+
+                        <!-- Option 2: Skip Mode -->
+                        <div class="qr-flow-card {{ Auth::user()->default_spinn == 1 ? 'active' : '' }}">
+                          <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                              <div class="qr-flow-icon-circle qr-flow-icon-bolt">
+                                <i class="ti ti-bolt"></i>
+                              </div>
+                              <span class="fw-bold text-dark fs-3">Skip Mode</span>
+                              <span class="qr-flow-tag-direct">Direct</span>
+                            </div>
+                            <div>
+                              @if(Auth::user()->default_spinn == 1)
+                                <span class="qr-flow-btn-active-badge"><i class="ti ti-check"></i> ACTIVE</span>
+                              @else
+                                <form action="{{ URL::to('admin/change_spin_mode') }}" method="POST" class="m-0">
+                                  @csrf
+                                  <input type="hidden" name="spin_mode" value="1">
+                                  <button type="submit" class="qr-flow-btn-activate">Activate</button>
+                                </form>
+                              @endif
+                            </div>
+                          </div>
+                          <div class="d-flex align-items-center gap-2 fs-2 text-primary mb-1">
+                            <i class="ti ti-bolt text-primary fs-3"></i>
+                            <span><strong>Skip logic:</strong> Skips 0-value & flagged skip slices</span>
+                          </div>
+                          <div class="d-flex align-items-center gap-2 fs-2 text-primary">
+                            <i class="ti ti-external-link text-primary fs-3"></i>
+                            <span>Guarantees customer lands on available valid prizes</span>
+                          </div>
+                        </div>
+
+                      </div>
+
+                      <!-- Footer Action -->
+                      <div class="qr-flow-footer">
+                        <a href="{{ URL::to('u/' . Auth::user()->name_url) }}" target="_blank" class="qr-flow-preview-btn">
+                          <i class="ti ti-external-link"></i> Test & Preview Live Spin Wheel
+                        </a>
+                      </div>
+
                     </div>
-                    
-                  </form>
-                  
-                </li>
+                  </li>
                 @endif
 
-                <li class="nav-item dropdown">
-                  <a class="nav-link pe-0" href="javascript:void(0)" id="drop1" data-bs-toggle="dropdown"
-                    aria-expanded="false">
-                    <div class="d-flex align-items-center">
-                      <div class="user-profile-img">
-                        <img src="{{asset('adminAssets/images/profile/user-1.jpg')}}" class="rounded-circle" width="35" height="35"
-                          alt="" />
-                      </div>
-                    </div>
+                <!-- User Profile Dropdown -->
+                <li class="nav-item dropdown ms-1">
+                  <a class="header-profile-btn" href="javascript:void(0)" id="drop1" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="{{ !empty(Auth::user()->logo) ? Auth::user()->logo : asset('adminAssets/images/profile/user-1.jpg') }}" class="header-profile-avatar" alt="Avatar" />
+                    <span class="header-profile-name d-none d-md-inline-block">{{ Str::limit(Auth::user()->name, 12) }}</span>
+                    <i class="ti ti-chevron-down header-profile-chevron"></i>
                   </a>
-                  <div class="dropdown-menu content-dd dropdown-menu-end dropdown-menu-animate-up"
-                    aria-labelledby="drop1">
-                    <div class="profile-dropdown position-relative" data-simplebar>
-                      <div class="py-3 px-7 pb-0">
-                        <h5 class="mb-0 fs-5 fw-semibold">User Profile</h5>
-                      </div>
-                      <div class="d-flex align-items-center py-9 mx-7 border-bottom">
-                        <img src="{{asset('adminAssets/images/profile/user-1.jpg')}}" class="rounded-circle" width="80" height="80"
-                          alt="" />
-                        <div class="ms-3">
-                          <h5 class="mb-1 fs-3">{{Auth::user()->name}}</h5>
-                          {{-- <span class="mb-1 d-block text-dark">Designer</span> --}}
-                          <p class="mb-0 d-flex text-dark align-items-center gap-2">
-                            <i class="ti ti-mail fs-4"></i> {{Auth::user()->email}}
-                          </p>
+
+                  <div class="dropdown-menu content-dd dropdown-menu-end dropdown-menu-animate-up shadow-lg border-0" style="border-radius: 14px;" aria-labelledby="drop1">
+                    <div class="profile-dropdown position-relative p-3" data-simplebar>
+                      
+                      <div class="d-flex align-items-center p-3 rounded-3 bg-light mb-3">
+                        <img src="{{ !empty(Auth::user()->logo) ? Auth::user()->logo : asset('adminAssets/images/profile/user-1.jpg') }}" class="rounded-circle shadow-sm" width="56" height="56" style="object-fit:cover;" alt="" />
+                        <div class="ms-3 overflow-hidden">
+                          <h6 class="mb-1 text-dark fw-bold text-truncate">{{ Auth::user()->name }}</h6>
+                          <p class="mb-1 text-muted fs-2 text-truncate">{{ Auth::user()->email }}</p>
+                          <span class="badge bg-warning-subtle text-warning fw-bold fs-1 rounded-pill">
+                            {{ Auth::user()->type == 'admin' ? 'Administrator' : '1-Day Free Trial' }}
+                          </span>
                         </div>
                       </div>
+
                       <div class="message-body">
                         @if (Auth::user()->type == 'admin')
-                        <a href="{{URL::to('admin/sitesetting')}}" class="py-8 px-7 mt-8 d-flex align-items-center">
-                          <span class="d-flex align-items-center justify-content-center bg-light rounded-1 p-6">
-                            <img src="https://demos.adminmart.com/premium/bootstrap/modernize-bootstrap/package/dist/images/svgs/icon-account.svg" alt="" width="24" height="24">
-                          </span>
-                          <div class="w-75 d-inline-block v-middle ps-3">
-                            <h6 class="mb-1 bg-hover-primary fw-semibold"> Site Settings </h6>
-                            {{-- <span class="d-block text-dark">Account Settings</span> --}}
-                          </div>
-                        </a>
+                          <a href="{{URL::to('admin/sitesetting')}}" class="d-flex align-items-center gap-3 py-2 px-3 rounded-2 text-dark text-decoration-none bg-hover-light">
+                            <i class="ti ti-settings fs-5 text-primary"></i>
+                            <span class="fw-semibold fs-3">Site Settings</span>
+                          </a>
                         @endif
 
-                        <a href="{{URL::to('admin/profile')}}" class="py-8 px-7 mt-8 d-flex align-items-center">
-                          <span class="d-flex align-items-center justify-content-center bg-light rounded-1 p-6">
-                            <img src="https://demos.adminmart.com/premium/bootstrap/modernize-bootstrap/package/dist/images/svgs/icon-account.svg" alt="" width="24" height="24">
-                          </span>
-                          <div class="w-75 d-inline-block v-middle ps-3">
-                            <h6 class="mb-1 bg-hover-primary fw-semibold"> Settings </h6>
-                            {{-- <span class="d-block text-dark">Account Settings</span> --}}
-                          </div>
+                        <a href="{{URL::to('admin/profile')}}" class="d-flex align-items-center gap-3 py-2 px-3 rounded-2 text-dark text-decoration-none bg-hover-light">
+                          <i class="ti ti-user fs-5 text-primary"></i>
+                          <span class="fw-semibold fs-3">Account & Profile</span>
                         </a>
-                       
-                        
+
+                        @if (Auth::user()->type == 'user')
+                          <a href="{{URL::to('admin/print_qr_code')}}" target="_blank" class="d-flex align-items-center gap-3 py-2 px-3 rounded-2 text-dark text-decoration-none bg-hover-light">
+                            <i class="ti ti-qrcode fs-5 text-warning"></i>
+                            <span class="fw-semibold fs-3">Download QR Stand</span>
+                          </a>
+                          <a href="{{URL::to('u/'.Auth::user()->name_url)}}" target="_blank" class="d-flex align-items-center gap-3 py-2 px-3 rounded-2 text-dark text-decoration-none bg-hover-light">
+                            <i class="ti ti-world fs-5 text-success"></i>
+                            <span class="fw-semibold fs-3">Visit Live Site</span>
+                          </a>
+                          <a href="javascript:void(0)" onclick="clearAllSpain()" class="d-flex align-items-center gap-3 py-2 px-3 rounded-2 text-danger text-decoration-none bg-hover-light">
+                            <i class="ti ti-trash fs-5"></i>
+                            <span class="fw-semibold fs-3">Clear Test Cookies</span>
+                          </a>
+                        @endif
                       </div>
-                      <div class="d-grid py-4 px-7 pt-8">
-                        @if (Auth::user()->type  == 'user')
-                        <a href="{{URL::to('admin/print_qr_code')}}"  target="_blank" class="btn btn-outline-warning my-2">Download QR</a>
-                       
-                          <a href="{{URL::to('u/'.Auth::user()->name_url)}}" target="_blank" class="btn btn-outline-success my-2">Visit My Site</a>
-                        
-                          <a href="#" onclick="clearAllSpain()" class="btn btn-outline-danger my-2" >Clear Cookie </a>
-                        
-                          @endif
-                        <a href="{{URL::to('logout')}}" class="btn btn-outline-primary">Log Out</a>
+
+                      <div class="pt-3 mt-2 border-top">
+                        <a href="{{URL::to('logout')}}" class="btn btn-outline-danger w-100 fw-bold py-2 rounded-2">
+                          <i class="ti ti-logout me-1"></i> Sign Out
+                        </a>
                       </div>
+
                     </div>
                   </div>
                 </li>
+
               </ul>
             </div>
           </div>
         </nav>
       </header>
-
       <!-- Header End -->
       
         @yield('content')
@@ -722,9 +830,13 @@
   <!-- core files -->
   <script src="{{asset('adminAssets/js/app.min.js')}}"></script>
   <script src="{{asset('adminAssets/js/app.minisidebar.init.js')}}"></script>
-  <script src="{{asset('adminAssets/js/app-style-switcher.js')}}"></script>
   <script src="{{asset('adminAssets/js/sidebarmenu.js')}}"></script>
   <script src="{{asset('adminAssets/js/custom.js')}}"></script>
+  <script>
+    $(function () {
+      $("#main-wrapper").attr("data-sidebartype", "full").removeClass("mini-sidebar");
+    });
+  </script>
   <!-- current page js files -->
   <script src="{{asset('adminAssets/libs/apexcharts/dist/apexcharts.min.js')}}"></script>
   <script src="{{asset('adminAssets/js/dashboard4.js')}}"></script>
@@ -835,9 +947,88 @@
       }
     }
 
+    @if(Auth::check() && Auth::user()->type == 'user' && (session('google_first_login_modal') || empty(Auth::user()->phone)))
+      $(document).ready(function() {
+        if ($('#firstLoginModal').length) {
+          $('#firstLoginModal').modal({
+            backdrop: 'static',
+            keyboard: false
+          });
+          $('#firstLoginModal').modal('show');
+        }
+      });
+    @endif
 
   </script>
 
+  @if(Auth::check() && Auth::user()->type == 'user' && (session('google_first_login_modal') || empty(Auth::user()->phone)))
+  <!-- Mandatory First Login Profile Completion Modal -->
+  <div class="modal fade" id="firstLoginModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="firstLoginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
+      <div class="modal-content first-login-modal-content border-0 shadow-lg">
+        <div class="modal-header first-login-modal-header border-0 flex-column align-items-start position-relative">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="badge bg-white text-dark fw-bold px-3 py-1 rounded-pill" style="font-size: 11px;">
+              <i class="ti ti-rocket text-primary me-1"></i> 1-Day Trial Active
+            </span>
+          </div>
+          <h4 class="modal-title fw-bold text-white mb-1" id="firstLoginModalLabel">
+            Complete Your Business Profile
+          </h4>
+          <p class="text-white-50 fs-3 mb-0" style="line-height: 1.4;">
+            Welcome to PrizeWheel! Please fill in your contact & business details to activate your 1-day free trial dashboard.
+          </p>
+        </div>
+        <form action="{{ route('complete_first_login_profile') }}" method="POST">
+          @csrf
+          <div class="modal-body first-login-modal-body p-4">
+            
+            <div class="mb-3">
+              <label class="form-label fw-bold text-dark fs-3 mb-1">Business / Store Name <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="ti ti-building-store"></i></span>
+                <input type="text" name="name" class="form-control border-start-0" value="{{ Auth::user()->name }}" required placeholder="e.g. Apex Dental Clinic" />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-dark fs-3 mb-1">WhatsApp / Contact Number <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="ti ti-brand-whatsapp text-success"></i></span>
+                <input type="tel" name="phone" class="form-control border-start-0" value="{{ Auth::user()->phone }}" required placeholder="+91 98765 43210" />
+              </div>
+              <small class="text-muted fs-2">We send spin notifications and customer leads to this WhatsApp number.</small>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-dark fs-3 mb-1">Custom URL Slug <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 fs-2 text-muted">/u/</span>
+                <input type="text" name="name_url" class="form-control border-start-0" value="{{ Auth::user()->name_url }}" required placeholder="my_business" />
+              </div>
+              <small class="text-muted fs-2">Your public customer link: <strong>{{ url('u/' . (Auth::user()->name_url ?: 'my_business')) }}</strong></small>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label fw-bold text-dark fs-3 mb-1">WhatsApp Cloud API Key <span class="text-muted fw-normal">(Optional)</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="ti ti-key"></i></span>
+                <input type="text" name="wp_key" class="form-control border-start-0" value="{{ Auth::user()->wp_key }}" placeholder="Paste your gateway key (optional)" />
+              </div>
+            </div>
+
+          </div>
+          <div class="modal-footer bg-light border-0 px-4 py-3 justify-content-between">
+            <span class="text-muted fs-2"><i class="ti ti-shield-check text-success"></i> Secure & encrypted</span>
+            <button type="submit" class="btn btn-primary px-4 py-2 fw-bold" style="background: linear-gradient(135deg, #ff6b00 0%, #ea580c 100%); border: none;">
+              <span>Activate & Launch Dashboard</span> <i class="ti ti-arrow-right ms-1"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  @endif
 
 </body>
 

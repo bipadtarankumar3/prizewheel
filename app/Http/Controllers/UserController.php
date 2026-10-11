@@ -179,6 +179,9 @@ class UserController extends Controller
         session()->put('adminUserId', $user->id);
         session()->put('type', $user->type);
         session()->put('adminName', $user->name);
+        if (empty($user->phone)) {
+            session()->put('google_first_login_modal', true);
+        }
 
         $notification = array(
             'messege' => 'Logged in successfully with Google! (1-Day Trial Active)',
@@ -258,6 +261,9 @@ class UserController extends Controller
                         session()->put('adminUserId', $user->id);
                         session()->put('type', $user->type);
                         session()->put('adminName', $user->name);
+                        if (empty($user->phone)) {
+                            session()->put('google_first_login_modal', true);
+                        }
 
                         return redirect('admin/dashboard')->with([
                             'messege' => 'Signed in with Google successfully!',
@@ -277,6 +283,47 @@ class UserController extends Controller
             'messege' => 'Google authorization failed.',
             'alert-type' => 'error'
         ]);
+    }
+
+    public function complete_first_login_profile(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|string|min:6|max:25',
+            'name' => 'required|string|max:255',
+        ]);
+
+        $user = Auth::user();
+        if ($user) {
+            $user->name = $request->name;
+            $user->phone = $request->phone;
+
+            if ($request->filled('name_url')) {
+                $newSlug = Str::slug($request->name_url, '_');
+                if (!empty($newSlug)) {
+                    $slugExists = User::where('name_url', $newSlug)->where('id', '!=', $user->id)->exists();
+                    if (!$slugExists) {
+                        $user->name_url = $newSlug;
+                    }
+                }
+            }
+
+            if ($request->filled('wp_key')) {
+                $user->wp_key = $request->wp_key;
+            }
+
+            $user->save();
+
+            session()->forget('google_first_login_modal');
+            session()->put('adminName', $user->name);
+
+            $notification = [
+                'messege' => 'Profile details saved successfully! Welcome to your dashboard.',
+                'alert-type' => 'success'
+            ];
+            return redirect('admin/dashboard')->with($notification);
+        }
+
+        return redirect('login');
     }
 
     public function login_post(Request $request)
@@ -1085,7 +1132,7 @@ class UserController extends Controller
  
             $user = User::find($id);
 
-            if ($request->spin_mode == 'on') {
+            if ($request->spin_mode == 'on' || $request->spin_mode == '2') {
                 $user->default_spinn = '2';
             } else {
                 $user->default_spinn = '1';
@@ -1093,9 +1140,8 @@ class UserController extends Controller
             
             $user->save();
 
-            
             $notification = array(
-                'messege'=>'Spin Mode Updated successfully',
+                'messege'=>'Customer QR Flow Mode updated successfully',
                 'alert-type'=>'success'
             );
             return back()->with($notification);

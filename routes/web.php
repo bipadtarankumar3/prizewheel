@@ -63,6 +63,7 @@ Route::post('form_submit',[FrontendController::class,'submitForm']);
 
 Route::group(['prefix' => 'admin', 'middleware' => ['auth']], function () {
     Route::get('dashboard', [UserController::class,'dashboard']);
+    Route::post('complete_first_login_profile', [UserController::class,'complete_first_login_profile'])->name('complete_first_login_profile');
     Route::get('profile', [UserController::class,'profile']);
     Route::post('profile_update', [UserController::class,'profile_update']);
     Route::get('logout', [UserController::class,'logout']);
