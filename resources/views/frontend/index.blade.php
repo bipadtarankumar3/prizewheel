@@ -54,7 +54,7 @@
         background-size: 26px 26px !important;
       }
 
-      /* === ATOM PARTICLE CANVAS & BACKGROUND === */
+      /* === ATOM PARTICLE CANVAS & BACKGROUND (BLURRED) === */
       #atomCanvas {
         position: fixed;
         top: 0;
@@ -63,6 +63,10 @@
         height: 100%;
         z-index: 1;
         pointer-events: none;
+        filter: blur(4.5px);
+        -webkit-filter: blur(4.5px);
+        opacity: 0.78;
+        transform: scale(1.03);
       }
 
       .bg-overlay {
@@ -98,15 +102,17 @@
         padding: 0 !important;
       }
 
-      /* Campaign Information Card */
+      /* Campaign Information Card (Compact & Modern) */
       .campaign_hero_card {
         background: rgba(255, 255, 255, 0.94);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.85);
         box-shadow: 0 25px 50px -15px rgba(15, 23, 42, 0.15), 0 0 1px 1px rgba(255, 255, 255, 0.8) inset;
-        border-radius: 28px;
-        padding: 32px 26px;
+        border-radius: 24px;
+        padding: 22px 20px;
+        max-width: 410px;
+        margin: 0 auto;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
       }
       .campaign_hero_card:hover {
@@ -121,21 +127,21 @@
         background: #fef2f2;
         border: 1px solid #fee2e2;
         border-radius: 9999px;
-        padding: 6px 14px;
-        margin-bottom: 20px;
+        padding: 5px 12px;
+        margin-bottom: 14px;
         overflow: hidden;
       }
       .notice_badge {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 5px;
         background: #ef4444;
         color: #ffffff;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 700;
         letter-spacing: 0.06em;
         text-transform: uppercase;
-        padding: 3px 10px;
+        padding: 2.5px 8px;
         border-radius: 9999px;
         white-space: nowrap;
         box-shadow: 0 2px 6px rgba(239, 68, 68, 0.35);
@@ -152,7 +158,7 @@
       }
       .notice_scroll marquee {
         display: block;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 600;
         color: #dc2626;
         margin: 0;
@@ -162,57 +168,57 @@
       .brand_logo_wrapper {
         display: flex;
         justify-content: center;
-        margin-bottom: 16px;
+        margin-bottom: 12px;
       }
       .brand_logo_card {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         background: #ffffff;
-        padding: 10px 18px;
-        border-radius: 20px;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+        padding: 8px 16px;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
         transition: transform 0.25s ease;
       }
       .brand_logo_card:hover {
         transform: translateY(-2px) scale(1.02);
       }
       .brand_logo_img {
-        max-height: 85px;
-        max-width: 170px;
+        max-height: 62px;
+        max-width: 140px;
         object-fit: contain;
       }
 
       .campaign_main_title {
-        font-size: 1.85rem;
+        font-size: 1.55rem;
         font-weight: 800;
         color: #0f172a;
         text-align: center;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
         line-height: 1.25;
         letter-spacing: -0.01em;
       }
       .campaign_sub_title {
-        font-size: 0.95rem;
+        font-size: 0.88rem;
         color: #64748b;
         text-align: center;
-        margin-bottom: 22px;
-        line-height: 1.5;
+        margin-bottom: 16px;
+        line-height: 1.45;
       }
 
       .meta_cards_grid {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
       }
       .meta_pill {
         display: flex;
         align-items: center;
-        gap: 14px;
-        padding: 12px 18px;
+        gap: 12px;
+        padding: 10px 14px;
         background: #f8fafc;
         border: 1px solid #e2e8f0;
-        border-radius: 18px;
+        border-radius: 14px;
         transition: all 0.25s ease;
       }
       .meta_pill:hover {
@@ -222,13 +228,13 @@
         transform: translateY(-1px);
       }
       .meta_icon_circle {
-        width: 44px;
-        height: 44px;
-        border-radius: 14px;
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
+        font-size: 15px;
         flex-shrink: 0;
       }
       .meta_icon_validity {
@@ -245,15 +251,15 @@
         min-width: 0;
       }
       .meta_pill_label {
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 700;
         letter-spacing: 0.06em;
         text-transform: uppercase;
         color: #94a3b8;
-        margin-bottom: 2px;
+        margin-bottom: 1px;
       }
       .meta_pill_val {
-        font-size: 0.95rem;
+        font-size: 0.88rem;
         font-weight: 700;
         color: #1e293b;
         display: flex;
@@ -262,12 +268,12 @@
         flex-wrap: wrap;
       }
       .meta_badge_number {
-        font-size: 1.15rem;
+        font-size: 1.05rem;
         font-weight: 800;
         color: #2563eb;
       }
 
-      /* Deal Wheel Showcase */
+      /* Deal Wheel Showcase (Enlarged to take more space) */
       .deal_wheel_wrapper {
         display: flex;
         flex-direction: column;
@@ -276,7 +282,7 @@
       }
 
       .deal-wheel {
-        --size: clamp(280px, 76vmin, 500px);
+        --size: clamp(300px, 82vmin, 550px);
         position: relative;
         display: grid;
         align-items: center;
@@ -703,27 +709,38 @@
         box-shadow: 0 14px 30px -4px rgba(37, 99, 235, 0.6) !important;
       }
 
+      @media (min-width: 1200px) {
+        .deal-wheel {
+          --size: clamp(340px, 42vw, 560px);
+        }
+      }
+
       @media (max-width: 991.98px) {
         .main_page_wrapper {
           min-height: 100vh;
           display: block;
-          padding: 12px 0 36px 0;
+          padding: 16px 0 40px 0;
+        }
+        .text_col {
+          margin-bottom: 20px !important;
         }
         .spinner_col {
           margin-bottom: 24px !important;
         }
         .deal-wheel {
-          --size: min(84vw, 360px);
+          --size: min(88vw, 380px);
+          margin: 0 auto 16px auto;
         }
         .campaign_hero_card {
-          padding: 24px 20px;
-          border-radius: 22px;
+          padding: 18px 16px;
+          border-radius: 20px;
+          max-width: 100%;
         }
         .campaign_main_title {
-          font-size: 1.4rem;
+          font-size: 1.35rem;
         }
         .brand_logo_img {
-          max-height: 70px;
+          max-height: 56px;
         }
       }
 
@@ -772,8 +789,8 @@
   <div class="main_page_wrapper">
     <div class="container py-3" id="cn_wheel_main_div">
       <div class="row align-items-center justify-content-center">
-        <!-- Left Column (Desktop) / Second Section (Mobile): Campaign Information Card -->
-        <div class="col-lg-5 col-md-10 col-12 text_col mb-4 mb-lg-0 order-2 order-lg-1">
+        <!-- Left Column (Desktop) / Top Section (Mobile): Campaign Information Card -->
+        <div class="col-xl-4 col-lg-5 col-md-10 col-12 text_col mb-4 mb-lg-0 order-1 order-lg-1">
           <div class="campaign_hero_card">
             @php
                 $notice = DB::table('notices')->where('user_id',$user->id)->where('status','active')->first();
@@ -843,8 +860,8 @@
           </div>
         </div>
 
-        <!-- Right Column (Desktop) / First Section (Mobile): Deal Wheel -->
-        <div class="col-lg-7 col-12 spinner_col text-center order-1 order-lg-2">
+        <!-- Right Column (Desktop) / Second Section (Mobile): Deal Wheel -->
+        <div class="col-xl-8 col-lg-7 col-12 spinner_col text-center order-2 order-lg-2">
           <div class="deal_wheel_wrapper">
             <div class="deal-wheel">
               <ul class="spinner"></ul>

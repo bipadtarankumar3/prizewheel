@@ -75,6 +75,10 @@
         height: 100%;
         z-index: 1;
         pointer-events: none;
+        filter: blur(4.5px);
+        -webkit-filter: blur(4.5px);
+        opacity: 0.78;
+        transform: scale(1.03);
       }
 
       .bg-overlay {
@@ -106,8 +110,10 @@
         -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.8);
         box-shadow: 0 25px 50px -15px rgba(15, 23, 42, 0.15), 0 0 1px 1px rgba(255, 255, 255, 0.8) inset;
-        border-radius: 28px;
-        padding: 32px 26px;
+        border-radius: 24px;
+        padding: 22px 20px;
+        max-width: 410px;
+        margin: 0 auto;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
       }
       .campaign_hero_card:hover {
