@@ -640,8 +640,13 @@
                                                 <i class="ti ti-disc text-warning"></i> {{ $item->spinners_count ?? 0 }} Slices
                                             </span>
                                         </div>
-                                        <div class="small text-muted mt-1">
-                                            Rounds: <strong>{{ $item->spin_whell_round ?? 0 }}</strong>
+                                        <div class="d-flex align-items-center justify-content-between mt-1">
+                                            <span class="small text-muted">Rounds: <strong>{{ $item->spin_whell_round ?? 0 }}</strong></span>
+                                            @if(($item->expired_campings_count ?? 0) > 0)
+                                                <a href="{{ URL::to('admin/expired_camping_list?store_id='.$item->id) }}" class="badge bg-danger-subtle text-danger border border-danger-subtle text-decoration-none" title="View Expired Campaigns for this store">
+                                                    <i class="ti ti-calendar-off"></i> {{ $item->expired_campings_count }} Expired
+                                                </a>
+                                            @endif
                                         </div>
                                     </td>
 
@@ -662,6 +667,10 @@
                                             <!-- Dashboard Visit -->
                                             <a href="{{ URL::to('admin/dashboard_visit/'.$item->id) }}" class="action-pill-btn pill-btn-login w-100 justify-content-center" title="Login directly into this store's panel">
                                                 <i class="ti ti-login"></i> Store Login
+                                            </a>
+                                            <!-- Expired Camps Link -->
+                                            <a href="{{ URL::to('admin/expired_camping_list?store_id='.$item->id) }}" class="action-pill-btn w-100 justify-content-center" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;" title="View all expired campaigns for this store">
+                                                <i class="ti ti-calendar-off"></i> Expired ({{ $item->expired_campings_count ?? 0 }})
                                             </a>
                                             <!-- Live Wheel Site -->
                                             @if(!empty($item->name_url))

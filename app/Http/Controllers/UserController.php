@@ -896,7 +896,7 @@ class UserController extends Controller
 
             $array['user'] = User::where('type','user')
                 ->whereRaw($where)
-                ->withCount(['campings', 'spinners'])
+                ->withCount(['campings', 'spinners', 'expiredCampings'])
                 ->orderBy('id','desc')
                 ->get();
 

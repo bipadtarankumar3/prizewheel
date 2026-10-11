@@ -48,4 +48,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Spinner::class, 'created_by', 'id');
     }
+
+    public function expiredCampings()
+    {
+        return $this->hasMany(Camping::class, 'created_by', 'id')->whereDate('end_date', '<', date('Y-m-d'));
+    }
 }

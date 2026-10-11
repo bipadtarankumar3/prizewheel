@@ -408,7 +408,7 @@
                 @if(Auth::user()->type == 'admin')
                     <!-- Store Selector -->
                     <div class="col-lg-3 col-md-6">
-                        <select name="store_id" class="form-select form-select-sm rounded-pill">
+                        <select name="store_id" class="form-select form-select-sm rounded-pill" onchange="this.form.submit()">
                             <option value="">-- All Client Stores --</option>
                             @foreach($allStores as $s)
                                 <option value="{{ $s->id }}" {{ $store_id == $s->id ? 'selected' : '' }}>
@@ -436,6 +436,21 @@
             </div>
         </form>
     </div>
+
+    @if(!empty($store_id) && $selectedStore = $allStores->firstWhere('id', $store_id))
+        <!-- Active Store Filter Notice Banner -->
+        <div class="alert alert-warning border border-warning d-flex align-items-center justify-content-between p-2.5 px-3 rounded-3 mb-3 shadow-sm">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-warning text-dark fw-bold px-2 py-1"><i class="ti ti-filter"></i> FILTERED BY STORE</span>
+                <span class="text-dark fs-3">
+                    Showing expired campaigns exclusively for: <strong>{{ $selectedStore->name }}</strong> (ID #{{ $selectedStore->id }} &bull; {{ $selectedStore->email }})
+                </span>
+            </div>
+            <a href="{{ URL::to('admin/expired_camping_list') }}" class="btn btn-sm btn-dark fw-bold px-3 py-1 rounded-pill">
+                <i class="ti ti-x me-1"></i> Clear Filter &amp; Show All Stores
+            </a>
+        </div>
+    @endif
 
     <!-- Expired Campaigns Table Card -->
     <div class="user-table-card">
@@ -550,8 +565,11 @@
                                                     <span class="text-muted small">
                                                         {{ $store->email ?? 'No email' }}
                                                     </span>
-                                                    <div class="d-flex align-items-center gap-1 mt-1">
+                                                    <div class="d-flex align-items-center gap-1 mt-1 flex-wrap">
                                                         @if(Auth::user()->type == 'admin')
+                                                            <a href="{{ URL::to('admin/expired_camping_list?store_id='.$store->id) }}" class="badge bg-light text-dark border text-decoration-none" title="Filter to only this store's expired campaigns" style="font-size: 10.5px; padding: 2px 6px;">
+                                                                <i class="ti ti-filter text-primary"></i> Only this Store
+                                                            </a>
                                                             <a href="{{ URL::to('admin/dashboard_visit/'.$store->id) }}" class="action-pill-btn pill-btn-login" title="Login to Store Panel">
                                                                 <i class="ti ti-login"></i> Store Login
                                                             </a>

@@ -30,6 +30,9 @@
         <a href="{{ url('admin/add_camping_page') }}" class="dash-hero-btn dash-hero-btn-primary">
           <i class="ti ti-plus"></i> Create New Campaign
         </a>
+        <a href="{{ url('admin/expired_camping_list') }}" class="dash-hero-btn dash-hero-btn-secondary" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.15); color: #fca5a5;">
+          <i class="ti ti-calendar-off"></i> Expired Campaigns
+        </a>
         <a href="{{ url('admin/spinner_form_camping_list') }}" class="dash-hero-btn dash-hero-btn-secondary">
           <i class="ti ti-id"></i> All Customer Leads
         </a>

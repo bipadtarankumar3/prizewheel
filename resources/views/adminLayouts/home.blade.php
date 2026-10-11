@@ -146,6 +146,14 @@
                     <span class="hide-menu">Campaign</span>
                   </a>
                 </li>
+                <li class="sidebar-item {{ Request::is('admin/expired_camping_list*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/expired_camping_list*') ? 'active' : '' }}" href="{{URL::to('admin/expired_camping_list')}}" aria-expanded="false">
+                    <span>
+                      <i class="ti ti-calendar-off"></i>
+                    </span>
+                    <span class="hide-menu">Expired Campaigns</span>
+                  </a>
+                </li>
                 <li class="sidebar-item {{ Request::is('admin/spinner_list*') ? 'selected' : '' }}">
                   <a class="sidebar-link {{ Request::is('admin/spinner_list*') ? 'active' : '' }}" href="{{URL::to('admin/spinner_list')}}" aria-expanded="false">
                     <span>
