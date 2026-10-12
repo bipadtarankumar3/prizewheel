@@ -36,9 +36,135 @@
   <link rel="stylesheet" href="{{asset('adminAssets/css/style.min.css')}}" />
   
   {{-- <link rel="stylesheet" href="{{asset('adminAssets/libs/datatables.net-bs5/css/dataTables.bootstrap5.min.css')}}"> --}}
-  <link rel="stylesheet" href="{{asset('adminAssets/css/my-style.css')}}">
+  <link rel="stylesheet" href="{{asset('adminAssets/css/my-style.css')}}?v={{ time() }}">
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+
+  <style>
+    /* Mobile Offcanvas Sidebar: Guaranteed Closed on Screens < 992px */
+    @media (max-width: 991.98px) {
+      #main-wrapper .left-sidebar,
+      .left-sidebar,
+      aside.left-sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        left: -300px !important;
+        transform: translateX(-100%) !important;
+        width: 275px !important;
+        max-width: 85vw !important;
+        z-index: 1060 !important;
+        background: #ffffff !important;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), left 0.3s ease !important;
+        box-shadow: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 100vh !important;
+        overflow-y: auto !important;
+      }
+
+      #main-wrapper.show-sidebar .left-sidebar,
+      #main-wrapper.show-sidebar aside.left-sidebar {
+        left: 0 !important;
+        transform: translateX(0) !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        box-shadow: 0 10px 40px rgba(15, 23, 42, 0.45) !important;
+      }
+
+      .sidebar-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(3px);
+        z-index: 1055;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.25s ease, visibility 0.25s ease;
+        pointer-events: none;
+      }
+
+      #main-wrapper.show-sidebar .sidebar-backdrop {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      #main-wrapper .body-wrapper {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+      }
+
+      #main-wrapper .app-header,
+      .app-header {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 64px !important;
+        z-index: 1040 !important;
+        margin: 0 !important;
+        padding: 0 12px !important;
+      }
+
+      #main-wrapper .body-wrapper > .container-fluid,
+      .body-wrapper > .container-fluid {
+        padding-top: 76px !important;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        padding-bottom: 30px !important;
+      }
+    }
+
+    @media (min-width: 992px) {
+      #main-wrapper .left-sidebar,
+      .left-sidebar,
+      aside.left-sidebar {
+        position: fixed !important;
+        left: 0 !important;
+        transform: none !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 260px !important;
+        z-index: 1000 !important;
+      }
+
+      #main-wrapper .body-wrapper {
+        margin-left: 260px !important;
+        width: calc(100% - 260px) !important;
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+      }
+
+      #main-wrapper .app-header,
+      .app-header {
+        position: fixed !important;
+        top: 0 !important;
+        left: 260px !important;
+        width: calc(100% - 260px) !important;
+        height: 70px !important;
+        z-index: 1040 !important;
+        margin: 0 !important;
+      }
+
+      #main-wrapper .body-wrapper > .container-fluid,
+      .body-wrapper > .container-fluid {
+        padding-top: 85px !important;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        padding-bottom: 40px !important;
+      }
+    }
+  </style>
 
 </head>
 
@@ -960,6 +1086,8 @@
     $(function () {
       if ($(window).width() >= 992) {
         $("#main-wrapper").attr("data-sidebartype", "full").removeClass("mini-sidebar");
+      } else {
+        $("#main-wrapper").removeClass("show-sidebar");
       }
 
       // Close mobile sidebar on backdrop or close icon click
