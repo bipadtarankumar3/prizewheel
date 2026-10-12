@@ -1269,13 +1269,6 @@
               <small class="text-muted fs-2">Your public customer link: <strong>{{ url('u/' . (Auth::user()->name_url ?: 'my_business')) }}</strong></small>
             </div>
 
-            <div class="mb-2">
-              <label class="form-label fw-bold text-dark fs-3 mb-1">WhatsApp Cloud API Key <span class="text-muted fw-normal">(Optional)</span></label>
-              <div class="input-group">
-                <span class="input-group-text bg-light border-end-0"><i class="ti ti-key"></i></span>
-                <input type="text" name="wp_key" class="form-control border-start-0" value="{{ Auth::user()->wp_key }}" placeholder="Paste your gateway key (optional)" />
-              </div>
-            </div>
 
           </div>
           <div class="modal-footer bg-light border-0 px-4 py-3 justify-content-between">
