@@ -181,7 +181,7 @@
     }
 
     /* =========================================================
-       FULL-HEIGHT SPLIT LAYOUT: 70% showcase | divider | 30% auth
+       FULL-HEIGHT SPLIT LAYOUT: 60% showcase | divider | 40% auth
        ========================================================= */
     .app-viewport {
       position: relative;
@@ -204,14 +204,14 @@
       align-items: stretch;
     }
 
-    /* LEFT 70% — Showcase with atom bg */
+    /* LEFT 60% — Showcase with atom bg */
     .split-left {
-      flex: 1 1 70%;
-      width: 70%;
+      flex: 0 0 60%;
+      width: 60%;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 40px 48px;
+      padding: 40px 36px;
       position: relative;
       background: transparent;
       z-index: 4;
@@ -235,15 +235,15 @@
       align-self: stretch;
     }
 
-    /* RIGHT 30% — Auth card */
+    /* RIGHT 40% — Auth card */
     .split-right {
-      flex: 0 0 30%;
-      width: 30%;
+      flex: 0 0 40%;
+      width: 40%;
       min-width: 380px;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 40px 28px;
+      padding: 40px 36px;
       background: #ffffff;
       position: relative;
       z-index: 10;
@@ -900,33 +900,35 @@
     }
 
     .carousel-arrow-btn {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       border: 1px solid #e2e8f0;
       background: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 11px;
+      font-size: 13px;
       color: #64748b;
       cursor: pointer;
       transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
     }
 
     .carousel-arrow-btn:hover {
       background: #fff7ed;
       border-color: #fed7aa;
       color: var(--primary);
-      transform: scale(1.05);
+      transform: scale(1.08);
+      box-shadow: 0 4px 12px rgba(255, 107, 0, 0.15);
     }
 
     /* =========================================================
-       RIGHT SIDE: CLEAN WHITE AUTH PANEL (30%)
+       RIGHT SIDE: CLEAN WHITE AUTH PANEL (40%)
        ========================================================= */
     .auth-card-container {
       width: 100%;
-      max-width: 380px;
+      max-width: 440px;
       margin: 0 auto;
       position: relative;
     }
@@ -1480,7 +1482,7 @@
     <div class="split-grid">
 
       <!-- ========================================================
-           LEFT 70%: CAROUSEL SHOWCASE
+           LEFT 60%: CAROUSEL SHOWCASE
            ======================================================== -->
       <div class="split-left">
 
@@ -1868,7 +1870,7 @@
       <div class="split-divider" aria-hidden="true"></div>
 
       <!-- ========================================================
-           RIGHT 30%: LOGIN & REGISTRATION
+           RIGHT 40%: LOGIN & REGISTRATION
            ======================================================== -->
       <div class="split-right">
       <section class="auth-card-container">
@@ -2273,17 +2275,18 @@
       });
     }
 
-    // Carousel Logic
+    // Carousel Logic (Manual Navigation Only - Auto-Play Disabled)
     let currentSlide = 0;
     const totalSlides = 3;
     const track = document.getElementById('carouselTrack');
     const dots = document.querySelectorAll('.indicator-dot');
-    let autoPlayTimer = null;
 
     function goToSlide(index) {
       currentSlide = (index + totalSlides) % totalSlides;
       const offset = -(currentSlide * 33.333333);
-      track.style.transform = `translateX(${offset}%)`;
+      if (track) {
+        track.style.transform = `translateX(${offset}%)`;
+      }
 
       dots.forEach((dot, idx) => {
         if (idx === currentSlide) {
@@ -2301,26 +2304,6 @@
     function prevSlide() {
       goToSlide(currentSlide - 1);
     }
-
-    function startAutoPlay() {
-      stopAutoPlay();
-      autoPlayTimer = setInterval(nextSlide, 5500);
-    }
-
-    function stopAutoPlay() {
-      if (autoPlayTimer) {
-        clearInterval(autoPlayTimer);
-        autoPlayTimer = null;
-      }
-    }
-
-    const showcaseContainer = document.getElementById('showcaseContainer');
-    if (showcaseContainer) {
-      showcaseContainer.addEventListener('mouseenter', stopAutoPlay);
-      showcaseContainer.addEventListener('mouseleave', startAutoPlay);
-    }
-
-    startAutoPlay();
 
     // Wheel Spin Micro-Animation
     let currentWheelRotation = 0;
@@ -2396,8 +2379,8 @@
       class Particle {
         constructor() { this.reset(true); }
         reset(init) {
-          // Concentrate particles mostly in showcase left 70%
-          const maxStartX = window.innerWidth > 1024 ? W * 0.72 : W;
+          // Concentrate particles mostly in showcase left 60%
+          const maxStartX = window.innerWidth > 1024 ? W * 0.60 : W;
           this.x = Math.random() * maxStartX;
           this.y = init ? Math.random() * H : -10;
           this.r = 1.8 + Math.random() * 2.6;
@@ -2432,7 +2415,7 @@
           this.vx *= 0.998;
           this.vy *= 0.998;
 
-          const maxX = window.innerWidth > 1024 ? W * 0.73 : W + 20;
+          const maxX = window.innerWidth > 1024 ? W * 0.60 : W + 20;
           if (this.x < -20) this.x = maxX - 10;
           if (this.x > maxX) this.x = -10;
           if (this.y < -20) this.y = H + 10;
