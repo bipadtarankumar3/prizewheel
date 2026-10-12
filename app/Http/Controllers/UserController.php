@@ -865,26 +865,30 @@ class UserController extends Controller
             $where = '1=1';
             $today = date('Y-m-d');
             $startOfMonth = date('Y-m-01');
+            $oneMonthAgo = date('Y-m-d H:i:s', strtotime('-1 month'));
 
             if(isset($request))
             {
+                $dateField = ($request->date_type == 'expiry_date') ? 'users.expiry_date' : 'users.created_at';
+                $array['date_type'] = $request->date_type ?? 'created_at';
+
                 if(!empty($request->start_date))
                 {
-                    $where .= " and  date(users.created_at) >=  '$request->start_date'" ;
+                    $where .= " and date($dateField) >= '$request->start_date'" ;
                     $array['start_date'] = $request->start_date;
                 }
                 if(!empty($request->end_date))
                 {
-                    $where .= " and  date(users.created_at) <=  '$request->end_date'" ;
+                    $where .= " and date($dateField) <= '$request->end_date'" ;
                     $array['end_date'] = $request->end_date ;
                 }
 
                 if(!empty($request->filter))
                 {
-                    if($request->filter == 'today')
+                    if($request->filter == 'today' || $request->filter == 'new_user')
                     {
                         $where .= " and date(users.created_at) = '$today'";
-                        $array['activeFilter'] = 'today';
+                        $array['activeFilter'] = 'new_user';
                     }
                     elseif($request->filter == 'month')
                     {
@@ -901,6 +905,11 @@ class UserController extends Controller
                         $where .= " and (users.status = 'inactive' or date(users.expiry_date) < '$today')";
                         $array['activeFilter'] = 'expired';
                     }
+                    elseif($request->filter == 'renew_user')
+                    {
+                        $where .= " and users.last_renewed_at is not null and users.last_renewed_at >= '$oneMonthAgo'";
+                        $array['activeFilter'] = 'renew_user';
+                    }
                 }
             }
 
@@ -912,6 +921,8 @@ class UserController extends Controller
             $array['expiredUsersCount'] = User::where('type','user')->where(function($q) use ($today) {
                 $q->where('status','inactive')->orWhereDate('expiry_date','<',$today);
             })->count();
+            $array['newUsersCount'] = $array['todayRegisteredCount'];
+            $array['renewUsersCount'] = User::where('type','user')->where('last_renewed_at', '>=', $oneMonthAgo)->count();
 
             $array['user'] = User::where('type','user')
                 ->whereRaw($where)
@@ -1014,6 +1025,9 @@ class UserController extends Controller
                     $user->status = $request->status;
                 }
                 if ($request->expiry_date != '') {
+                    if ($user->expiry_date != $request->expiry_date) {
+                        $user->last_renewed_at = date('Y-m-d H:i:s');
+                    }
                     $user->expiry_date = $request->expiry_date;
                 }
                 if ($request->spin_whell_round != '') {

@@ -232,6 +232,18 @@
         color: #ffffff !important;
         box-shadow: 0 4px 14px rgba(255, 107, 0, 0.35);
     }
+    .preset-filter-chip.active-chip-new {
+        background: linear-gradient(135deg, #10b981, #059669) !important;
+        border-color: #10b981 !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+    .preset-filter-chip.active-chip-renew {
+        background: linear-gradient(135deg, #4f46e5, #4338ca) !important;
+        border-color: #4f46e5 !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+    }
 
     /* Modern Table Container */
     .user-table-card {
@@ -351,79 +363,105 @@
         </div>
     </div>
 
-    <!-- Summary KPI Counter Strip (5 High-Density Metric Cards) -->
+    <!-- Summary KPI Counter Strip (6 High-Density Metric Cards) -->
     <div class="row g-3 mb-4">
         
         <!-- 1. Total Stores -->
-        <div class="col-xl col-md-4 col-sm-6">
-            <div class="user-stat-card stat-blue">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="stat-bubble-icon bubble-blue">
-                        <i class="ti ti-building-store"></i>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <a href="{{ URL::to('admin/sub_user_list') }}" class="text-decoration-none">
+                <div class="user-stat-card stat-blue">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="stat-bubble-icon bubble-blue">
+                            <i class="ti ti-building-store"></i>
+                        </div>
+                        <span class="badge bg-light-primary text-primary fw-bold rounded-pill px-2">Total</span>
                     </div>
-                    <span class="badge bg-light-primary text-primary fw-bold rounded-pill px-2">Total</span>
+                    <div class="stat-val-num">{{ number_format($totalUsersCount ?? count($user)) }}</div>
+                    <p class="stat-val-label">Total Stores</p>
                 </div>
-                <div class="stat-val-num">{{ number_format($totalUsersCount ?? count($user)) }}</div>
-                <p class="stat-val-label">Total Stores</p>
-            </div>
+            </a>
         </div>
 
-        <!-- 2. Registered Today (Highlighted) -->
-        <div class="col-xl col-md-4 col-sm-6">
-            <div class="user-stat-card stat-orange">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="stat-bubble-icon bubble-orange">
-                        <i class="ti ti-user-plus"></i>
+        <!-- 2. New Users (Added / Signed Up Today) -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <a href="{{ URL::to('admin/sub_user_list?filter=new_user') }}" class="text-decoration-none">
+                <div class="user-stat-card stat-orange">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="stat-bubble-icon bubble-orange">
+                            <i class="ti ti-user-plus"></i>
+                        </div>
+                        <span class="badge bg-light-warning text-danger fw-bold rounded-pill px-2 d-inline-flex align-items-center gap-1">
+                            <span class="pulse-dot-green"></span> Today
+                        </span>
                     </div>
-                    <span class="badge bg-light-warning text-danger fw-bold rounded-pill px-2 d-inline-flex align-items-center gap-1">
-                        <span class="pulse-dot-green"></span> Live Today
-                    </span>
+                    <div class="stat-val-num text-danger">{{ number_format($newUsersCount ?? 0) }}</div>
+                    <p class="stat-val-label">New Users</p>
                 </div>
-                <div class="stat-val-num text-danger">{{ number_format($todayRegisteredCount ?? 0) }}</div>
-                <p class="stat-val-label">Registered Today</p>
-            </div>
+            </a>
         </div>
 
-        <!-- 3. This Month Registrations -->
-        <div class="col-xl col-md-4 col-sm-6">
-            <div class="user-stat-card stat-purple">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="stat-bubble-icon bubble-purple">
-                        <i class="ti ti-calendar-event"></i>
+        <!-- 3. Renew Users (Expiry Changed within 1 Month) -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <a href="{{ URL::to('admin/sub_user_list?filter=renew_user') }}" class="text-decoration-none">
+                <div class="user-stat-card stat-purple">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="stat-bubble-icon bubble-purple">
+                            <i class="ti ti-refresh"></i>
+                        </div>
+                        <span class="badge bg-light-info text-primary fw-bold rounded-pill px-2">1 Month</span>
                     </div>
-                    <span class="badge bg-light text-dark fw-bold rounded-pill px-2">This Month</span>
+                    <div class="stat-val-num text-primary">{{ number_format($renewUsersCount ?? 0) }}</div>
+                    <p class="stat-val-label">Renew Users</p>
                 </div>
-                <div class="stat-val-num">{{ number_format($monthRegisteredCount ?? 0) }}</div>
-                <p class="stat-val-label">New This Month</p>
-            </div>
+            </a>
         </div>
 
-        <!-- 4. Active Subscriptions -->
-        <div class="col-xl col-md-6 col-sm-6">
-            <div class="user-stat-card stat-emerald">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="stat-bubble-icon bubble-emerald">
-                        <i class="ti ti-circle-check"></i>
+        <!-- 4. This Month Registrations -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <a href="{{ URL::to('admin/sub_user_list?filter=month') }}" class="text-decoration-none">
+                <div class="user-stat-card stat-blue">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="stat-bubble-icon bubble-blue">
+                            <i class="ti ti-calendar-event"></i>
+                        </div>
+                        <span class="badge bg-light text-dark fw-bold rounded-pill px-2">This Month</span>
                     </div>
-                    <span class="badge bg-light-success text-success fw-bold rounded-pill px-2">Active</span>
+                    <div class="stat-val-num">{{ number_format($monthRegisteredCount ?? 0) }}</div>
+                    <p class="stat-val-label">New This Month</p>
                 </div>
-                <div class="stat-val-num text-success">{{ number_format($activeUsersCount ?? 0) }}</div>
-                <p class="stat-val-label">Active Subscriptions</p>
-            </div>
+            </a>
         </div>
 
-        <!-- 5. Expired / Inactive -->
-        <div class="col-xl col-md-6 col-sm-12">
-            <div class="user-stat-card stat-danger">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="stat-bubble-icon bubble-danger">
-                        <i class="ti ti-alert-triangle"></i>
+        <!-- 5. Active Subscriptions -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <a href="{{ URL::to('admin/sub_user_list?filter=active') }}" class="text-decoration-none">
+                <div class="user-stat-card stat-emerald">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="stat-bubble-icon bubble-emerald">
+                            <i class="ti ti-circle-check"></i>
+                        </div>
+                        <span class="badge bg-light-success text-success fw-bold rounded-pill px-2">Active</span>
                     </div>
-                    <span class="badge bg-light-danger text-danger fw-bold rounded-pill px-2">Expired</span>
+                    <div class="stat-val-num text-success">{{ number_format($activeUsersCount ?? 0) }}</div>
+                    <p class="stat-val-label">Active Stores</p>
                 </div>
-                <div class="stat-val-num text-muted">{{ number_format($expiredUsersCount ?? 0) }}</div>
-                <p class="stat-val-label">Expired / Trial Ended</p>
-            </div>
+            </a>
+        </div>
+
+        <!-- 6. Expired / Inactive -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <a href="{{ URL::to('admin/sub_user_list?filter=expired') }}" class="text-decoration-none">
+                <div class="user-stat-card stat-danger">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="stat-bubble-icon bubble-danger">
+                            <i class="ti ti-alert-triangle"></i>
+                        </div>
+                        <span class="badge bg-light-danger text-danger fw-bold rounded-pill px-2">Expired</span>
+                    </div>
+                    <div class="stat-val-num text-muted">{{ number_format($expiredUsersCount ?? 0) }}</div>
+                    <p class="stat-val-label">Expired Stores</p>
+                </div>
+            </a>
         </div>
 
     </div>
@@ -432,15 +470,18 @@
     <div class="filter-panel-card">
         <div class="row align-items-center g-3">
             
-            <!-- Quick Chips -->
-            <div class="col-lg-6 col-md-12">
+            <!-- Quick Chips (Includes New User & Renew User) -->
+            <div class="col-xl-7 col-lg-12">
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     <span class="text-muted small fw-bold text-uppercase me-1"><i class="ti ti-filter"></i> Presets:</span>
                     <a href="{{ URL::to('admin/sub_user_list') }}" class="preset-filter-chip @if(empty($activeFilter) && empty($start_date)) active-chip @endif">
                         All ({{ $totalUsersCount ?? 0 }})
                     </a>
-                    <a href="{{ URL::to('admin/sub_user_list?filter=today') }}" class="preset-filter-chip @if(($activeFilter ?? '') == 'today') active-chip-today @endif">
-                        <span class="pulse-dot-green"></span> Today ({{ $todayRegisteredCount ?? 0 }})
+                    <a href="{{ URL::to('admin/sub_user_list?filter=new_user') }}" class="preset-filter-chip @if(($activeFilter ?? '') == 'new_user') active-chip-today @endif">
+                        <span class="pulse-dot-green"></span> New Today ({{ $newUsersCount ?? 0 }})
+                    </a>
+                    <a href="{{ URL::to('admin/sub_user_list?filter=renew_user') }}" class="preset-filter-chip @if(($activeFilter ?? '') == 'renew_user') active-chip-renew @endif">
+                        <i class="ti ti-refresh text-primary"></i> Renew Users ({{ $renewUsersCount ?? 0 }})
                     </a>
                     <a href="{{ URL::to('admin/sub_user_list?filter=month') }}" class="preset-filter-chip @if(($activeFilter ?? '') == 'month') active-chip @endif">
                         This Month ({{ $monthRegisteredCount ?? 0 }})
@@ -454,23 +495,32 @@
                 </div>
             </div>
 
-            <!-- Date Range Form -->
-            <div class="col-lg-6 col-md-12">
-                <form action="{{ URL::to('admin/sub_user_list') }}" method="post" class="d-flex align-items-center justify-content-lg-end gap-2 flex-wrap m-0">
+            <!-- Date Range Filter Form -->
+            <div class="col-xl-5 col-lg-12">
+                <form action="{{ URL::to('admin/sub_user_list') }}" method="post" class="d-flex align-items-center justify-content-xl-end gap-2 flex-wrap m-0">
                     @csrf
+                    <!-- Date Field Selection: Registration Date vs Expiry Date -->
+                    <div class="d-flex align-items-center gap-1">
+                        <span class="text-muted small fw-bold">Date By:</span>
+                        <select name="date_type" class="form-select form-select-sm rounded-pill" style="width: 120px;">
+                            <option value="created_at" @if(($date_type ?? '') == 'created_at') selected @endif>Reg Date</option>
+                            <option value="expiry_date" @if(($date_type ?? '') == 'expiry_date') selected @endif>Expiry Date</option>
+                        </select>
+                    </div>
+
                     <div class="d-flex align-items-center gap-1">
                         <span class="text-muted small fw-bold">From:</span>
-                        <input type="date" class="form-control form-control-sm rounded-pill" name="start_date" style="width: 140px;" value="{{ $start_date ?? date('Y-m-d') }}">
+                        <input type="date" class="form-control form-control-sm rounded-pill" name="start_date" style="width: 130px;" value="{{ $start_date ?? '' }}">
                     </div>
                     <div class="d-flex align-items-center gap-1">
                         <span class="text-muted small fw-bold">To:</span>
-                        <input type="date" class="form-control form-control-sm rounded-pill" name="end_date" style="width: 140px;" value="{{ $end_date ?? date('Y-m-d') }}">
+                        <input type="date" class="form-control form-control-sm rounded-pill" name="end_date" style="width: 130px;" value="{{ $end_date ?? '' }}">
                     </div>
                     <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold">
                         <i class="ti ti-search"></i> Filter
                     </button>
                     @if(!empty($start_date) || !empty($activeFilter))
-                        <a href="{{ URL::to('admin/sub_user_list') }}" class="btn btn-sm btn-light rounded-pill px-2 text-danger" title="Clear filters">
+                        <a href="{{ URL::to('admin/sub_user_list') }}" class="btn btn-sm btn-light rounded-pill px-2 text-danger" title="Clear all filters">
                             <i class="ti ti-x"></i>
                         </a>
                     @endif
@@ -513,7 +563,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th style="width: 30px;">
-                                    <input class="form-check-input" id="select_all" type="checkbox" title="Select all rows">
+                                     <input class="form-check-input" id="select_all" type="checkbox" title="Select all rows">
                                 </th>
                                 <th style="width: 40px;">#</th>
                                 <th>Store &amp; Client</th>
@@ -531,6 +581,7 @@
                             @foreach ($user as $key => $item)
                                 @php
                                     $isRegisteredToday = !empty($item->created_at) && date('Y-m-d', strtotime($item->created_at)) == date('Y-m-d');
+                                    $isRecentlyRenewed = !empty($item->last_renewed_at) && strtotime($item->last_renewed_at) >= strtotime('-1 month');
                                     $isExpired = !empty($item->expiry_date) && strtotime($item->expiry_date) < strtotime(date('Y-m-d'));
                                 @endphp
                                 <tr>
@@ -554,7 +605,18 @@
                                             @endif
                                             <div>
                                                 <div class="fw-bold text-dark fs-3">{{ $item->name }}</div>
-                                                <div class="text-muted small font-monospace">ID: #{{ $item->id }}</div>
+                                                <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
+                                                    <span class="text-muted small font-monospace">ID: #{{ $item->id }}</span>
+                                                    @if($isRegisteredToday)
+                                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2" style="font-size: 10.5px; font-weight: 700;">
+                                                            <span class="pulse-dot-green me-1"></span> New User
+                                                        </span>
+                                                    @elseif($isRecentlyRenewed)
+                                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2" style="font-size: 10.5px; font-weight: 700;">
+                                                            <i class="ti ti-refresh"></i> Renew User
+                                                        </span>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
@@ -620,11 +682,18 @@
                                             @php
                                                 $daysLeft = ceil((strtotime($item->expiry_date) - time()) / 86400);
                                             @endphp
-                                            @if(!$isExpired && $daysLeft >= 0)
-                                                <small class="text-muted">{{ $daysLeft }} days left</small>
-                                            @else
-                                                <small class="text-danger fw-bold">Ended</small>
-                                            @endif
+                                            <div class="d-flex align-items-center gap-1 flex-wrap">
+                                                @if(!$isExpired && $daysLeft >= 0)
+                                                    <small class="text-muted">{{ $daysLeft }} days left</small>
+                                                @else
+                                                    <small class="text-danger fw-bold">Ended</small>
+                                                @endif
+                                                @if($isRecentlyRenewed)
+                                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2 py-0" style="font-size: 9.5px;" title="Renewed on {{ date('d M Y', strtotime($item->last_renewed_at)) }}">
+                                                        <i class="ti ti-refresh"></i> Renewed
+                                                    </span>
+                                                @endif
+                                            </div>
                                         @else
                                             <span class="text-muted">&mdash;</span>
                                         @endif
