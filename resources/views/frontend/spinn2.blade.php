@@ -29,15 +29,15 @@
 
         {{-- <link href="./myStyle.css" rel="stylesheet"> --}}
 
-        <link rel="stylesheet" href="{{asset('frontend/spinner/wheel/main.css')}}" type="text/css" />
-        <script type="text/javascript" src="{{asset('frontend/spinner/wheel/Winwheel.js')}}"></script>
-        <script src="{{asset('frontend/spinner/wheel/TweenMax.min.js')}}"></script>
-        <link rel='stylesheet' type='text/css' href='{{asset('frontend/spinner/wheel/rotation.css')}}' />	
+        <link rel="stylesheet" href="{{asset('frontend/spinner/wheel/main.css')}}?v={{filemtime(public_path('frontend/spinner/wheel/main.css'))}}" type="text/css" />
+        <script type="text/javascript" src="{{asset('frontend/spinner/wheel/Winwheel.js')}}?v={{filemtime(public_path('frontend/spinner/wheel/Winwheel.js'))}}"></script>
+        <script src="{{asset('frontend/spinner/wheel/TweenMax.min.js')}}?v={{filemtime(public_path('frontend/spinner/wheel/TweenMax.min.js'))}}"></script>
+        <link rel='stylesheet' type='text/css' href='{{asset('frontend/spinner/wheel/rotation.css')}}?v={{filemtime(public_path('frontend/spinner/wheel/rotation.css'))}}' />	
 
-        <link rel="stylesheet" href="{{asset('frontend/award/css/style.css')}}">
-        <link rel="stylesheet" href="{{asset('frontend/spinner/style.css')}}">
-    <link rel="stylesheet" href="{{asset('frontend/css/spinn_two/responsive.css')}}">
-    <link rel="stylesheet" href="{{asset('frontend/css/spinn_two/my-style.css')}}">
+        <link rel="stylesheet" href="{{asset('frontend/award/css/style.css')}}?v={{filemtime(public_path('frontend/award/css/style.css'))}}">
+        <link rel="stylesheet" href="{{asset('frontend/spinner/style.css')}}?v={{filemtime(public_path('frontend/spinner/style.css'))}}">
+    <link rel="stylesheet" href="{{asset('frontend/css/spinn_two/responsive.css')}}?v={{filemtime(public_path('frontend/css/spinn_two/responsive.css'))}}"> 
+    <link rel="stylesheet" href="{{asset('frontend/css/spinn_two/my-style.css')}}?v={{filemtime(public_path('frontend/css/spinn_two/my-style.css'))}}">
     
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     
@@ -241,9 +241,27 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        width: 100%;
+        margin: 0 auto;
+        text-align: center;
+      }
+
+      .the_wheel_wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        margin: 0 auto;
+        position: relative;
       }
 
       div.the_wheel {
+        position: relative !important;
+        aspect-ratio: 1 / 1 !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         filter: drop-shadow(0 25px 45px rgba(0, 0, 0, 0.28));
         transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       }
@@ -515,9 +533,16 @@
         }
         .spinner_col {
           margin-bottom: 24px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          justify-content: center !important;
+          width: 100% !important;
         }
         div.the_wheel {
-          width: min(86vw, 360px);
+          width: min(86vw, 360px) !important;
+          aspect-ratio: 1 / 1 !important;
+          margin: 0 auto !important;
         }
         .campaign_hero_card {
           padding: 24px 20px;
@@ -564,7 +589,9 @@
 
       @media (max-width: 480px) {
         div.the_wheel {
-          width: min(84vw, 320px);
+          width: min(86vw, 320px) !important;
+          aspect-ratio: 1 / 1 !important;
+          margin: 0 auto !important;
         }
         .spin_form_btn {
           font-size: 1.05rem !important;
@@ -584,7 +611,9 @@
 
       @media (max-width: 360px) {
         div.the_wheel {
-          width: min(88vw, 290px);
+          width: min(88vw, 290px) !important;
+          aspect-ratio: 1 / 1 !important;
+          margin: 0 auto !important;
         }
         .spin_form_btn {
           font-size: 0.95rem !important;

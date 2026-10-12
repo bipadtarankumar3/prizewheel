@@ -23,10 +23,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     
     <!-- Award & Spinner Styles -->
-    <link rel="stylesheet" href="{{asset('frontend/award/css/style.css')}}">
-    <link rel="stylesheet" href="{{asset('frontend/spinner/style.css')}}">
-    <link rel="stylesheet" href="{{asset('frontend/css/spinn_one/responsive.css')}}">
-    <link rel="stylesheet" href="{{asset('frontend/css/spinn_one/my-style.css')}}">
+    <link rel="stylesheet" href="{{asset('frontend/award/css/style.css')}}?v={{filemtime(public_path('frontend/award/css/style.css'))}}">
+    <link rel="stylesheet" href="{{asset('frontend/spinner/style.css')}}?v={{filemtime(public_path('frontend/spinner/style.css'))}}">
+    <link rel="stylesheet" href="{{asset('frontend/css/spinn_one/responsive.css')}}?v={{filemtime(public_path('frontend/css/spinn_one/responsive.css'))}}">
+    <link rel="stylesheet" href="{{asset('frontend/css/spinn_one/my-style.css')}}?v={{filemtime(public_path('frontend/css/spinn_one/my-style.css'))}}">
 
     <style>
       /* Spinning animation */
@@ -726,10 +726,23 @@
         }
         .spinner_col {
           margin-bottom: 24px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          justify-content: center !important;
+          width: 100% !important;
+        }
+        .deal_wheel_wrapper {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          justify-content: center !important;
+          width: 100% !important;
+          margin: 0 auto !important;
         }
         .deal-wheel {
-          --size: min(88vw, 380px);
-          margin: 0 auto 16px auto;
+          --size: min(84vw, 360px);
+          margin: 0 auto 16px auto !important;
         }
         .campaign_hero_card {
           padding: 18px 16px;
@@ -741,6 +754,20 @@
         }
         .brand_logo_img {
           max-height: 56px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .deal-wheel {
+          --size: min(82vw, 310px);
+          margin: 0 auto 16px auto !important;
+        }
+      }
+
+      @media (max-width: 360px) {
+        .deal-wheel {
+          --size: min(82vw, 275px);
+          margin: 0 auto 16px auto !important;
         }
       }
 
@@ -789,8 +816,8 @@
   <div class="main_page_wrapper">
     <div class="container py-3" id="cn_wheel_main_div">
       <div class="row align-items-center justify-content-center">
-        <!-- Left Column (Desktop) / Top Section (Mobile): Campaign Information Card -->
-        <div class="col-xl-4 col-lg-5 col-md-10 col-12 text_col mb-4 mb-lg-0 order-1 order-lg-1">
+        <!-- Left Column (Desktop) / Second Section (Mobile): Campaign Information Card -->
+        <div class="col-xl-4 col-lg-5 col-md-10 col-12 text_col mb-4 mb-lg-0 order-2 order-lg-1">
           <div class="campaign_hero_card">
             @php
                 $notice = DB::table('notices')->where('user_id',$user->id)->where('status','active')->first();
@@ -860,8 +887,8 @@
           </div>
         </div>
 
-        <!-- Right Column (Desktop) / Second Section (Mobile): Deal Wheel -->
-        <div class="col-xl-8 col-lg-7 col-12 spinner_col text-center order-2 order-lg-2">
+        <!-- Right Column (Desktop) / First Section (Mobile): Deal Wheel -->
+        <div class="col-xl-8 col-lg-7 col-12 spinner_col text-center order-1 order-lg-2">
           <div class="deal_wheel_wrapper">
             <div class="deal-wheel">
               <ul class="spinner"></ul>
@@ -1136,7 +1163,7 @@
   {{-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> --}}
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-  <script  src="{{asset('frontend/award/js/blast.js')}}"></script>
+  <script  src="{{asset('frontend/award/js/blast.js')}}?v={{filemtime(public_path('frontend/award/js/blast.js'))}}"></script>
 
 
   <script src="https://common.olemiss.edu/_js/sweet-alert/sweet-alert.min.js"></script>
