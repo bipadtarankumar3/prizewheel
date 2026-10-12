@@ -244,6 +244,7 @@
         </div>
         <!-- End Sidebar scroll-->
       </aside>
+      <div class="sidebar-backdrop d-lg-none" id="sidebarBackdrop"></div>
 
     <!-- Sidebar End -->
     <!-- Main wrapper -->
@@ -957,7 +958,21 @@
   <script src="{{asset('adminAssets/js/custom.js')}}"></script>
   <script>
     $(function () {
-      $("#main-wrapper").attr("data-sidebartype", "full").removeClass("mini-sidebar");
+      if ($(window).width() >= 992) {
+        $("#main-wrapper").attr("data-sidebartype", "full").removeClass("mini-sidebar");
+      }
+
+      // Close mobile sidebar on backdrop or close icon click
+      $('#sidebarBackdrop, #sidebarCollapse').on('click', function() {
+        $('#main-wrapper').removeClass('show-sidebar');
+      });
+
+      // Close mobile sidebar on navigation link click
+      $('.sidebar-nav .sidebar-link').on('click', function() {
+        if ($(window).width() < 992) {
+          $('#main-wrapper').removeClass('show-sidebar');
+        }
+      });
     });
   </script>
   <!-- current page js files -->

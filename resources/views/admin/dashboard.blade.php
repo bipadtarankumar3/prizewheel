@@ -36,7 +36,7 @@
 
   {{-- Admin KPI Metric Cards --}}
   <div class="row g-3 mb-4">
-    <div class="col-sm-6 col-xl-3">
+    <div class="col-6 col-md-6 col-xl-3">
       <div class="kpi-stat-card">
         <div class="d-flex align-items-center justify-content-between">
           <div class="kpi-icon-bubble bubble-blue">
@@ -50,7 +50,7 @@
         </div>
       </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
+    <div class="col-6 col-md-6 col-xl-3">
       <div class="kpi-stat-card">
         <div class="d-flex align-items-center justify-content-between">
           <div class="kpi-icon-bubble bubble-emerald">
@@ -64,7 +64,7 @@
         </div>
       </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
+    <div class="col-6 col-md-6 col-xl-3">
       <div class="kpi-stat-card">
         <div class="d-flex align-items-center justify-content-between">
           <div class="kpi-icon-bubble bubble-orange">
@@ -78,7 +78,7 @@
         </div>
       </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
+    <div class="col-6 col-md-6 col-xl-3">
       <div class="kpi-stat-card">
         <div class="d-flex align-items-center justify-content-between">
           <div class="kpi-icon-bubble bubble-danger">
@@ -250,7 +250,7 @@
   {{-- PRIMARY 6 HIGH-IMPACT METRIC CARDS --}}
   <div class="row g-3 mb-3">
     {{-- 1. Total Customer Visits --}}
-    <div class="col-sm-6 col-xl-2">
+    <div class="col-6 col-md-4 col-xl-2">
       <div class="kpi-stat-card">
         <div class="d-flex align-items-center justify-content-between">
           <div class="kpi-icon-bubble bubble-blue">
@@ -266,7 +266,7 @@
     </div>
 
     {{-- 2. Total Wheel Spins --}}
-    <div class="col-sm-6 col-xl-2">
+    <div class="col-6 col-md-4 col-xl-2">
       <div class="kpi-stat-card">
         <div class="d-flex align-items-center justify-content-between">
           <div class="kpi-icon-bubble bubble-purple">
@@ -282,7 +282,7 @@
     </div>
 
     {{-- 3. Leads Captured --}}
-    <div class="col-sm-6 col-xl-2">
+    <div class="col-6 col-md-4 col-xl-2">
       <div class="kpi-stat-card">
         <div class="d-flex align-items-center justify-content-between">
           <div class="kpi-icon-bubble bubble-emerald">
@@ -298,7 +298,7 @@
     </div>
 
     {{-- 4. Conversion Rate --}}
-    <div class="col-sm-6 col-xl-2">
+    <div class="col-6 col-md-4 col-xl-2">
       <div class="kpi-stat-card">
         <div class="d-flex align-items-center justify-content-between">
           <div class="kpi-icon-bubble bubble-orange">
@@ -314,7 +314,7 @@
     </div>
 
     {{-- 5. Active Prize Slices --}}
-    <div class="col-sm-6 col-xl-2">
+    <div class="col-6 col-md-4 col-xl-2">
       <div class="kpi-stat-card">
         <div class="d-flex align-items-center justify-content-between">
           <div class="kpi-icon-bubble bubble-cyan">
@@ -330,7 +330,7 @@
     </div>
 
     {{-- 6. WhatsApp Alerts --}}
-    <div class="col-sm-6 col-xl-2">
+    <div class="col-6 col-md-4 col-xl-2">
       <div class="kpi-stat-card">
         <div class="d-flex align-items-center justify-content-between">
           <div class="kpi-icon-bubble bubble-green">
