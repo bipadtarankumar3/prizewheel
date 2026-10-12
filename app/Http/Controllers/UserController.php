@@ -663,8 +663,13 @@ class UserController extends Controller
             $SpinnerForm = SpinnerForm::whereIn('camping_id', $camp_id)->count();
             $activeCampingCount = Camping::where('created_by', $user->id)->where('status', 'active')->count();
 
-            // Recent leads with winner details
-            $recentLeads = SpinnerForm::select(
+            // Campaign & Date Filter parameters for Recent Inquiries
+            $leadCampaignId = request('lead_campaign_id');
+            $leadStartDate = request('lead_start_date');
+            $leadEndDate = request('lead_end_date');
+
+            // Recent leads with winner details & optional filtering
+            $leadsQuery = SpinnerForm::select(
                 'spinner_forms.*',
                 'spinners.name as prize_name',
                 'spinners.color as prize_color',
@@ -672,10 +677,21 @@ class UserController extends Controller
             )
             ->leftJoin('spinners', 'spinners.id', 'spinner_forms.spinner_id')
             ->leftJoin('campings', 'campings.id', 'spinner_forms.camping_id')
-            ->whereIn('spinner_forms.camping_id', $camp_id)
-            ->orderBy('spinner_forms.id', 'desc')
-            ->take(8)
-            ->get();
+            ->whereIn('spinner_forms.camping_id', $camp_id);
+
+            if (!empty($leadCampaignId)) {
+                $leadsQuery->where('spinner_forms.camping_id', $leadCampaignId);
+            }
+            if (!empty($leadStartDate)) {
+                $leadsQuery->whereDate('spinner_forms.created_at', '>=', $leadStartDate);
+            }
+            if (!empty($leadEndDate)) {
+                $leadsQuery->whereDate('spinner_forms.created_at', '<=', $leadEndDate);
+            }
+
+            $recentLeads = $leadsQuery->orderBy('spinner_forms.id', 'desc')
+                ->take(30)
+                ->get();
 
             // Active / Top campaigns
             $campaigns = Camping::where('created_by', $user->id)
@@ -825,7 +841,8 @@ class UserController extends Controller
                 'totalPrizeStock', 'prizesClaimed', 'receiptsUploaded', 'ipSkipsCount',
                 'uniqueDevices', 'allCampaigns', 'topWinningPrizesList',
                 'hourlyCategories', 'hourlyValues',
-                'Users', 'ActiveUsers', 'InactiveUsers', 'ExpiredUser'
+                'Users', 'ActiveUsers', 'InactiveUsers', 'ExpiredUser',
+                'leadCampaignId', 'leadStartDate', 'leadEndDate'
             ));
         }
   

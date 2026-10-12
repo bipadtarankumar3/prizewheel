@@ -496,9 +496,50 @@
             View All Leads ({{ $SpinnerForm }}) <i class="ti ti-arrow-right ms-1"></i>
           </a>
         </div>
+
+        <!-- Campaign & Date Filter Toolbar -->
+        <div class="px-4 py-2 bg-light border-bottom">
+          <form action="{{ url('admin/dashboard') }}" method="GET" id="leadFilterForm" class="d-flex align-items-center gap-2 flex-wrap">
+            <!-- Campaign Select Filter -->
+            <div class="d-flex align-items-center gap-1">
+              <span class="text-muted small fw-bold"><i class="ti ti-filter text-primary"></i> Campaign:</span>
+              <select name="lead_campaign_id" id="lead_campaign_select" class="form-select form-select-sm rounded-pill shadow-none" style="min-width: 175px; font-size: 12.5px;">
+                <option value="">All Campaigns</option>
+                @if(isset($allCampaigns))
+                  @foreach($allCampaigns as $ac)
+                    <option value="{{ $ac->id }}" {{ (isset($leadCampaignId) && $leadCampaignId == $ac->id) ? 'selected' : '' }}>
+                      {{ $ac->campaign_name }}
+                    </option>
+                  @endforeach
+                @endif
+              </select>
+            </div>
+
+            <!-- Date Range Filter -->
+            <div class="d-flex align-items-center gap-1">
+              <span class="text-muted small fw-bold"><i class="ti ti-calendar text-primary"></i> Date:</span>
+              <input type="date" name="lead_start_date" id="lead_start_date" class="form-control form-control-sm rounded-pill shadow-none" style="width: 140px; font-size: 12.5px;" value="{{ $leadStartDate ?? '' }}">
+              <span class="text-muted small">to</span>
+              <input type="date" name="lead_end_date" id="lead_end_date" class="form-control form-control-sm rounded-pill shadow-none" style="width: 140px; font-size: 12.5px;" value="{{ $leadEndDate ?? '' }}">
+            </div>
+
+            <!-- Submit Filter & Reset -->
+            <div class="d-flex align-items-center gap-1 ms-auto">
+              <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold" style="font-size: 12px;">
+                <i class="ti ti-search me-1"></i> Filter
+              </button>
+              @if(!empty($leadCampaignId) || !empty($leadStartDate) || !empty($leadEndDate))
+                <a href="{{ url('admin/dashboard') }}" class="btn btn-sm btn-outline-secondary rounded-pill px-2 fw-semibold" style="font-size: 12px;" title="Reset Filters">
+                  <i class="ti ti-rotate-2"></i> Reset
+                </a>
+              @endif
+            </div>
+          </form>
+        </div>
+
         <div class="dash-card-body p-0">
           <div class="table-responsive">
-            <table class="table modern-table mb-0">
+            <table class="table modern-table mb-0" id="recentLeadsTable">
               <thead>
                 <tr>
                   <th>Customer</th>
@@ -512,7 +553,7 @@
               </thead>
               <tbody>
                 @forelse($recentLeads as $lead)
-                <tr>
+                <tr class="lead-row" data-campaign-id="{{ $lead->camping_id }}" data-date="{{ date('Y-m-d', strtotime($lead->created_at)) }}">
                   <td>
                     <div class="d-flex align-items-center gap-2">
                       <div class="user-avatar-circle">
@@ -584,6 +625,18 @@
                   </td>
                 </tr>
                 @endforelse
+                <tr id="no_leads_filtered_row" style="display: none;">
+                  <td colspan="7" class="text-center py-5 text-muted">
+                    <div class="py-2">
+                      <i class="ti ti-filter-off fs-7 text-muted mb-2 d-block"></i>
+                      <h6 class="text-dark">No inquiries found matching this filter</h6>
+                      <p class="small text-muted mb-3">Try choosing a different campaign or wider date range.</p>
+                      <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="resetLeadFilters()">
+                        <i class="ti ti-rotate-2 me-1"></i> Reset Filters
+                      </button>
+                    </div>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -1067,6 +1120,54 @@
         new ApexCharts(prizeDonutEl, prizeDonutOptions).render();
       }
     @endif
+
+    // Client-side live filter for Recent Inquiries
+    function applyLeadClientFilters() {
+      const selectedCamp = $('#lead_campaign_select').val();
+      const startDate = $('#lead_start_date').val();
+      const endDate = $('#lead_end_date').val();
+
+      let visibleCount = 0;
+      const rows = $('.lead-row');
+
+      if (rows.length === 0) return;
+
+      rows.each(function() {
+        const rowCamp = $(this).attr('data-campaign-id');
+        const rowDate = $(this).attr('data-date');
+
+        let matchCamp = !selectedCamp || rowCamp === selectedCamp;
+        let matchDate = true;
+        if (startDate && rowDate && rowDate < startDate) matchDate = false;
+        if (endDate && rowDate && rowDate > endDate) matchDate = false;
+
+        if (matchCamp && matchDate) {
+          $(this).show();
+          visibleCount++;
+        } else {
+          $(this).hide();
+        }
+      });
+
+      if (visibleCount === 0) {
+        $('#no_leads_filtered_row').show();
+      } else {
+        $('#no_leads_filtered_row').hide();
+      }
+    }
+
+    window.resetLeadFilters = function() {
+      $('#lead_campaign_select').val('');
+      $('#lead_start_date').val('');
+      $('#lead_end_date').val('');
+      $('.lead-row').show();
+      $('#no_leads_filtered_row').hide();
+      window.location.href = "{{ url('admin/dashboard') }}";
+    };
+
+    $('#lead_campaign_select, #lead_start_date, #lead_end_date').on('change', function() {
+      applyLeadClientFilters();
+    });
   });
 </script>
 
