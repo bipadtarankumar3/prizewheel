@@ -1416,14 +1416,23 @@
                     });
                   } else {
                     swal({
-                      title: "Error!",
-                      text: "Here's my error message!",
+                      title: "Notice",
+                      text: (data && data.message) ? data.message : "Submission could not be completed. Please try again.",
                       type: "error",
                       confirmButtonText: "Ok"
                     });
                   }
                   $('#preloader').hide();
-                   
+                },
+                error: function(xhr, status, error) {
+                  $('.form_submit_button').removeAttr('disabled');
+                  $('#preloader').hide();
+                  swal({
+                    title: "Error!",
+                    text: "Something went wrong while submitting your details. Please try again.",
+                    type: "error",
+                    confirmButtonText: "Ok"
+                  });
                 }
         });
       }));

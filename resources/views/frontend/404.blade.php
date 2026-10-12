@@ -668,14 +668,6 @@
 
             @endif
 
-            {{-- Card Footer Watermark --}}
-            @if($status !== 'user_date_expired')
-            <div class="card-micro-footer">
-                <i class="fa-solid fa-atom"></i>
-                <span>Prize Wheel Atomic Platform</span>
-            </div>
-            @endif
-
         </div>
 
     </div>

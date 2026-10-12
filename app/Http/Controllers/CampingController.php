@@ -281,12 +281,22 @@ class CampingController extends Controller
     public function delete_camping($id){
 
         if(Auth::check()){
+            $user_id = Auth::user()->id;
+
+            $spinsCount = Spinner::where('camping_id', $id)->count();
+            if ($spinsCount > 0) {
+                $notification = array(
+                    'messege' => "Cannot delete campaign: It has {$spinsCount} prize spin(s) configured. Please delete the spins first.",
+                    'alert-type' => 'error'
+                );
+                return back()->with($notification);
+            }
             
             $camping = Camping::where('id',$id)->delete();
 
             $notification = array(
                 'messege'=>'Campaign Deleted Successfully',
-                'alert-type'=>'error'
+                'alert-type'=>'success'
             );
             return back()->with($notification);
             

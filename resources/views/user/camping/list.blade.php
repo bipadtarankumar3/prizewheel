@@ -140,9 +140,6 @@
           <button type="submit" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold">
             <i class="ti ti-file-download me-1"></i> Download Selected PDF
           </button>
-          <a href="{{ url('admin/add_camping_page') }}" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold">
-            <i class="ti ti-plus me-1"></i> New Campaign
-          </a>
         </div>
       </div>
 
@@ -318,10 +315,13 @@
                       <i class="ti ti-copy"></i>
                     </button>
 
-                    {{-- Delete Campaign --}}
-                    <a href="{{ url('admin/delete_camping/' . $item->id) }}" class="btn btn-sm btn-light text-danger rounded-circle p-2" onclick="return confirm('Are you sure you want to delete this campaign?');" title="Delete Campaign">
+                    {{-- Delete Campaign (Checked for Spins Safety) --}}
+                    <button type="button" 
+                            class="btn btn-sm btn-light text-danger rounded-circle p-2" 
+                            onclick="handleCampaignDelete('{{ $item->id }}', '{{ addslashes($item->campaign_name) }}', {{ (int)($item->slices_count ?? 0) }})" 
+                            title="Delete Campaign">
                       <i class="ti ti-trash"></i>
-                    </a>
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -354,7 +354,79 @@
   <span>Wheel Link copied to clipboard!</span>
 </div>
 
+<!-- Modal 1: Cannot Delete Campaign (When spins exist) -->
+<div class="modal fade" id="cannotDeleteCampModal" tabindex="-1" aria-labelledby="cannotDeleteCampModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-body p-4 text-center">
+        <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle" style="width: 64px; height: 64px; background: #fee2e2; color: #dc2626;">
+          <i class="ti ti-alert-triangle" style="font-size: 32px;"></i>
+        </div>
+        <h4 class="fw-bolder text-dark mb-2" id="cannotDeleteCampModalLabel">Cannot Delete Campaign</h4>
+        <p class="text-muted small mb-3">
+          The campaign <strong id="blocked_camp_name" class="text-dark"></strong> cannot be deleted because it has <strong id="blocked_spin_count" class="text-danger"></strong> configured.
+        </p>
+        <div class="p-3 bg-light rounded-3 text-start mb-3 border">
+          <div class="d-flex align-items-center gap-2 text-danger small mb-1">
+            <i class="ti ti-shield-x fs-5"></i>
+            <span class="fw-bold">Data Protection Safety Rule</span>
+          </div>
+          <p class="mb-0 text-muted" style="font-size: 12px; line-height: 1.45;">
+            Campaigns with created prize spins cannot be deleted to protect active wheel URLs and prize records. Please delete or reassign its spins first.
+          </p>
+        </div>
+        <div class="d-flex align-items-center justify-content-center gap-2">
+          <a href="{{ url('admin/spinner_list') }}" class="btn btn-primary rounded-pill px-3 fw-bold">
+            <i class="ti ti-settings me-1"></i> Go to Spinner List
+          </a>
+          <button type="button" class="btn btn-outline-secondary rounded-pill px-3 fw-semibold" data-bs-dismiss="modal">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 2: Confirm Delete Campaign (When 0 spins exist) -->
+<div class="modal fade" id="confirmDeleteCampModal" tabindex="-1" aria-labelledby="confirmDeleteCampModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 430px;">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-body p-4 text-center">
+        <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle" style="width: 64px; height: 64px; background: #fee2e2; color: #dc2626;">
+          <i class="ti ti-trash" style="font-size: 30px;"></i>
+        </div>
+        <h4 class="fw-bolder text-dark mb-2" id="confirmDeleteCampModalLabel">Delete Campaign?</h4>
+        <p class="text-muted small mb-4">
+          Are you sure you want to permanently delete <strong id="delete_camp_name" class="text-dark"></strong>? This action cannot be undone.
+        </p>
+        <div class="d-flex align-items-center justify-content-center gap-2">
+          <button type="button" class="btn btn-light rounded-pill px-3 fw-semibold" data-bs-dismiss="modal">
+            Cancel
+          </button>
+          <a href="#" id="delete_camp_confirm_btn" class="btn btn-danger rounded-pill px-4 fw-bold">
+            <i class="ti ti-trash me-1"></i> Yes, Delete
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
+  function handleCampaignDelete(campId, campName, slicesCount) {
+    if (slicesCount > 0) {
+      document.getElementById('blocked_camp_name').innerText = campName;
+      document.getElementById('blocked_spin_count').innerText = slicesCount + ' prize spin' + (slicesCount > 1 ? 's' : '');
+      const modal = new bootstrap.Modal(document.getElementById('cannotDeleteCampModal'));
+      modal.show();
+    } else {
+      document.getElementById('delete_camp_name').innerText = campName;
+      document.getElementById('delete_camp_confirm_btn').setAttribute('href', "{{ url('admin/delete_camping') }}/" + campId);
+      const modal = new bootstrap.Modal(document.getElementById('confirmDeleteCampModal'));
+      modal.show();
+    }
+  }
   function copyStoreUrl(url) {
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(url).then(showToast);

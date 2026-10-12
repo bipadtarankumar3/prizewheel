@@ -1512,33 +1512,11 @@
             <div class="carousel-slide" data-slide="0">
               <div class="feature-pill-badge">
                 <i class="fa-solid fa-dharmachakra"></i>
-                <span>Multi-Platform Prize Wheel</span>
+                <span>Interactive Prize Wheel</span>
               </div>
 
               <!-- Phone Mockup Frame -->
               <div class="phone-mockup-wrapper">
-                
-                <!-- Left Floating Card -->
-                <div class="side-float-badge side-float-left">
-                  <div class="badge-icon-sq badge-icon-orange">
-                    <i class="fa-solid fa-qrcode"></i>
-                  </div>
-                  <div class="badge-content-text">
-                    <span class="badge-title-txt">1 QR Stand</span>
-                    <span class="badge-sub-txt">All Review Links</span>
-                  </div>
-                </div>
-
-                <!-- Right Floating Card -->
-                <div class="side-float-badge side-float-right">
-                  <div class="badge-icon-sq badge-icon-yellow">
-                    <i class="fa-solid fa-bolt"></i>
-                  </div>
-                  <div class="badge-content-text">
-                    <span class="badge-title-txt">Instant Tap</span>
-                    <span class="badge-sub-txt">Google & Rewards</span>
-                  </div>
-                </div>
 
                 <!-- Phone -->
                 <div class="phone-mockup">
@@ -1624,19 +1602,10 @@
               </div>
 
               <!-- Slide description -->
-              <h2 class="slide-headline">Multi-Platform Review & Prize Hub</h2>
+              <h2 class="slide-headline">Interactive Lucky Spin &amp; Prize Wheel</h2>
               <p class="slide-desc">
-                Give customers complete freedom: Google, Facebook, Instagram, YouTube, Video Testimonials, or Spin Wheel in one single tap.
+                Delight customers with gamified spin-the-wheel campaigns. Win exciting discount vouchers, free gifts, cashbacks, and bumper jackpot rewards with customized prize stocks and winning chances.
               </p>
-
-              <!-- Tags / Chips -->
-              <div class="feature-tags-row">
-                <span class="feature-tag-chip"><i class="fa-brands fa-google text-warning"></i> Google</span>
-                <span class="feature-tag-chip"><i class="fa-brands fa-facebook text-primary"></i> Facebook</span>
-                <span class="feature-tag-chip"><i class="fa-brands fa-instagram text-danger"></i> Instagram</span>
-                <span class="feature-tag-chip"><i class="fa-brands fa-youtube text-danger"></i> YouTube</span>
-                <span class="feature-tag-chip"><i class="fa-solid fa-dharmachakra" style="color:var(--primary);"></i> Prize Wheel</span>
-              </div>
             </div>
 
             <!-- SLIDE 2: SUBMIT HIS DETAILS (LEAD CAPTURE BEFORE SPIN) -->

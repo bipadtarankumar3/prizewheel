@@ -337,47 +337,44 @@ class FrontendController extends Controller
 
                     $url='';
                     /*************document upload **********/
-                    // if($request->hasFile('screenshot')) {
-                    //         $screenshot=$request->file('screenshot');
-                    //         $milisecond=round(microtime(true)*1000);
-                    //         $name=$screenshot->getClientOriginalName();
-                    //         $actual_name=str_replace(" ","_",$name);
-                    //         $uploadName=$milisecond."_".$actual_name;
-                    //         $screenshot->move(public_path().'/upload/',$uploadName);
-                    //         $url = asset('upload/'.$uploadName);
-                    // }
-                    /***********document upload ************/
-
-                    /*************document upload **********/
-                    if ($request->has('screenshot-file') && $request->input('screenshot-file') !== null) {
-                        $base64Screenshot = $request->input('screenshot-file');
-                        
-                        // Check if the Base64 string is valid
-                        if (preg_match('/^data:image\/(\w+);base64,/', $base64Screenshot, $type)) {
-                            $base64Screenshot = substr($base64Screenshot, strpos($base64Screenshot, ',') + 1);
-                            $type = strtolower($type[1]); // Get the file extension (e.g., jpg, png, gif)
-
-                            if (!in_array($type, ['jpg', 'jpeg', 'png', 'gif'])) {
-                                throw new \Exception('Invalid image type');
-                            }
-
-                            $base64Screenshot = base64_decode($base64Screenshot);
-
-                            if ($base64Screenshot === false) {
-                                throw new \Exception('Base64 decode failed');
-                            }
-
+                    if ($request->hasFile('screenshot')) {
+                        try {
+                            $screenshot = $request->file('screenshot');
                             $milisecond = round(microtime(true) * 1000);
-                            $filename = $milisecond . "_screenshot." . $type;
-                            $filePath = public_path('upload/') . $filename;
-
-                            // Save the decoded file to the specified directory
-                            file_put_contents($filePath, $base64Screenshot);
-
-                            // Generate a URL for the saved file
-                            $url = asset('upload/' . $filename);
-                        } else {
-                            throw new \Exception('Invalid Base64 string');
+                            $name = $screenshot->getClientOriginalName();
+                            $actual_name = str_replace(" ", "_", $name);
+                            $uploadName = $milisecond . "_" . $actual_name;
+                            $uploadDir = public_path('upload/');
+                            if (!file_exists($uploadDir)) {
+                                @mkdir($uploadDir, 0777, true);
+                            }
+                            $screenshot->move($uploadDir, $uploadName);
+                            $url = asset('upload/' . $uploadName);
+                        } catch (\Throwable $e) {
+                            Log::warning("Screenshot file upload failed: " . $e->getMessage());
+                        }
+                    } elseif ($request->filled('screenshot-file')) {
+                        try {
+                            $base64Screenshot = trim($request->input('screenshot-file'));
+                            if (!empty($base64Screenshot) && preg_match('/^data:image\/(\w+);base64,/', $base64Screenshot, $type)) {
+                                $data = substr($base64Screenshot, strpos($base64Screenshot, ',') + 1);
+                                $ext = strtolower($type[1]);
+                                if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                                    $decoded = base64_decode($data);
+                                    if ($decoded !== false) {
+                                        $uploadDir = public_path('upload/');
+                                        if (!file_exists($uploadDir)) {
+                                            @mkdir($uploadDir, 0777, true);
+                                        }
+                                        $milisecond = round(microtime(true) * 1000);
+                                        $filename = $milisecond . "_screenshot." . $ext;
+                                        file_put_contents($uploadDir . $filename, $decoded);
+                                        $url = asset('upload/' . $filename);
+                                    }
+                                }
+                            }
+                        } catch (\Throwable $e) {
+                            Log::warning("Base64 screenshot decode failed: " . $e->getMessage());
                         }
                     }
                     /***********document upload ************/
@@ -402,32 +399,33 @@ class FrontendController extends Controller
                     Spinner::where('id',$spinner_id)->update(['value'=>$Spinner->value-1]);
 
                     $mail=DB::table('mail_configures')->first();
-                    $config = array(
-                        'driver' => 'smtp',
-                        'host' => $mail->mail_host,
-                        'port' => $mail->mail_port,
-                        'from' => array('address' => $mail->mail_from_address, 'name' => $mail->mail_from_name),
-                        'encryption' => $mail->mail_encryption,
-                        'username' => $mail->mail_username,
-                        'password' => $mail->mail_password,
-                        'sendmail' => '/usr/sbin/sendmail -bs',
-                        'pretend' => false,
-                        'stream' => [
-                            'ssl' => [
-                                'allow_self_signed' => true,
-                                'verify_peer' => false,
-                                'verify_peer_name' => false,
+                    if ($mail) {
+                        $config = array(
+                            'driver' => 'smtp',
+                            'host' => $mail->mail_host,
+                            'port' => $mail->mail_port,
+                            'from' => array('address' => $mail->mail_from_address, 'name' => $mail->mail_from_name),
+                            'encryption' => $mail->mail_encryption,
+                            'username' => $mail->mail_username,
+                            'password' => $mail->mail_password,
+                            'sendmail' => '/usr/sbin/sendmail -bs',
+                            'pretend' => false,
+                            'stream' => [
+                                'ssl' => [
+                                    'allow_self_signed' => true,
+                                    'verify_peer' => false,
+                                    'verify_peer_name' => false,
+                                ],
                             ],
-                        ],
-                    );
-                    Config::set('mail',$config);
+                        );
+                        Config::set('mail',$config);
+                    }
                     $type="ADMIN";
                     $subject="Spinner Form";
                     
                     $userDate = User::where('id',$Camping->created_by)->first();
                     if ($userDate) {
                         
-                       
                         $SpinnerDetails = Spinner::where('id',decrypt($request->spinner_id))->first();
                         $mail_arr = array(
                             'name'=>$request->name,
@@ -443,57 +441,39 @@ class FrontendController extends Controller
                             'ip_address'=>$ip_address
                         );
                         
-                        // $string = ($SpinnerDetails)? $SpinnerDetails->name:'';
-                        // $replaced = str_replace(' ', '%20', $string);
-                        // $message = 'Congratulations,%20'.$request->name.'%20You%20have%20won%20the%20'.$replaced.',%20Our%20team%20will%20contact%20you%20soon.%20If%20have%20you%20any%20Query,%20Please%20reply%20Hello';
-                        
-                        // $curl = curl_init();
+                        if(!empty($request->phone) && !empty($userDate->wp_key)){
+                            try {
+                                $curl = curl_init();
+                                
+                                $string = ($SpinnerDetails)? $SpinnerDetails->name:'';
+                                $replaced = str_replace(' ', '%20', $string);
+                                $message = 'Congratulations,%20'.$request->name.'%20You%20have%20won%20the%20'.$replaced.',%20Our%20team%20will%20contact%20you%20soon.%20If%20have%20you%20any%20Query,%20Please%20reply%20Hello';
                             
-                        // curl_setopt_array($curl, array(
-                        //   CURLOPT_URL => 'http://api.vyyapar.com/wapp/api/send?apikey=717507ca60484e13add12d4364826225&mobile='.$userDate->phone.'&msg=testmsg%20oo',
-                        //   CURLOPT_RETURNTRANSFER => true,
-                        //   CURLOPT_ENCODING => '',
-                        //   CURLOPT_MAXREDIRS => 10,
-                        //   CURLOPT_TIMEOUT => 0,
-                        //   CURLOPT_FOLLOWLOCATION => true,
-                        //   CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                        //   CURLOPT_CUSTOMREQUEST => 'GET',
-                        // ));
-                        
-                        // $response = curl_exec($curl);
-                        
-                        // curl_close($curl);
-                        
-                        if(!empty($request->phone) && $userDate->wp_key !=''){
-                            $curl = curl_init();
-                            
-                            $string = ($SpinnerDetails)? $SpinnerDetails->name:'';
-                            $replaced = str_replace(' ', '%20', $string);
-                            $message = 'Congratulations,%20'.$request->name.'%20You%20have%20won%20the%20'.$replaced.',%20Our%20team%20will%20contact%20you%20soon.%20If%20have%20you%20any%20Query,%20Please%20reply%20Hello';
-                        
-                            curl_setopt_array($curl, array(
-                              CURLOPT_URL => 'http://api.vyyapar.com/wapp/api/send?apikey='.$userDate->wp_key.'&mobile='.$request->phone.'&msg='.$message,
-                              CURLOPT_RETURNTRANSFER => true,
-                              CURLOPT_ENCODING => '',
-                              CURLOPT_MAXREDIRS => 10,
-                              CURLOPT_TIMEOUT => 0,
-                              CURLOPT_FOLLOWLOCATION => true,
-                              CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                              CURLOPT_CUSTOMREQUEST => 'GET',
-                            ));
-                            
-                            $response = curl_exec($curl);
-                            
-                            curl_close($curl);
+                                curl_setopt_array($curl, array(
+                                  CURLOPT_URL => 'http://api.vyyapar.com/wapp/api/send?apikey='.$userDate->wp_key.'&mobile='.$request->phone.'&msg='.$message,
+                                  CURLOPT_RETURNTRANSFER => true,
+                                  CURLOPT_ENCODING => '',
+                                  CURLOPT_MAXREDIRS => 10,
+                                  CURLOPT_TIMEOUT => 5,
+                                  CURLOPT_FOLLOWLOCATION => true,
+                                  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                                  CURLOPT_CUSTOMREQUEST => 'GET',
+                                ));
+                                
+                                $response = curl_exec($curl);
+                                
+                                curl_close($curl);
 
-                            if($userDate->wp_count == ''){
-                                $count =1;
-                            }else{
-                                $count = $userDate->wp_count+1;
+                                if($userDate->wp_count == ''){
+                                    $count = 1;
+                                }else{
+                                    $count = $userDate->wp_count + 1;
+                                }
+
+                                User::where('id',$userDate->id)->update(['wp_count'=>$count]);
+                            } catch (\Throwable $wpEx) {
+                                Log::warning("WhatsApp API error: " . $wpEx->getMessage());
                             }
-
-                            $userDateUp = User::where('id',$userDate->id)->update(['wp_count'=>$count]);
-
                         }
                         
                             
