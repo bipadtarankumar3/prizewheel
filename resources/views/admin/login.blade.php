@@ -422,66 +422,85 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 4px 10px 12px;
-      background: radial-gradient(circle at 50% 30%, #fff7ed 0%, #ffffff 80%);
+      justify-content: space-evenly;
+      padding: 6px 8px 8px;
+      background:
+        radial-gradient(circle at 50% 45%, rgba(255, 107, 0, 0.13) 0%, transparent 65%),
+        radial-gradient(circle at 20% 80%, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 10%, rgba(5, 150, 105, 0.07) 0%, transparent 50%),
+        linear-gradient(160deg, #1a0a2e 0%, #16213e 40%, #0f172a 100%);
       position: relative;
+      overflow: hidden;
     }
 
+    /* Star dot pattern overlay */
+    .wheel-screen-content::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.55) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px);
+      background-size: 28px 28px, 14px 14px;
+      background-position: 0 0, 7px 7px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wheel-screen-content > * { position: relative; z-index: 1; }
+
     .wheel-sub-badge {
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 700;
-      color: var(--primary);
-      background: #ffedd5;
-      padding: 3px 10px;
+      color: #ffffff;
+      background: rgba(255, 107, 0, 0.85);
+      padding: 3px 11px;
       border-radius: 20px;
-      margin-bottom: 6px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
+      border: 1px solid rgba(255,255,255,0.25);
     }
 
     .wheel-title-small {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 800;
-      color: #0f172a;
-      margin-bottom: 6px;
+      color: #ffffff;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.4);
     }
 
     .wheel-canvas-container {
       position: relative;
-      width: 236px;
-      height: 236px;
+      width: 210px;
+      height: 210px;
       margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    /* Wheel Pointer Arrow Pin */
+    /* Gold Teardrop Pointer Pin */
     .wheel-pointer-pin {
       position: absolute;
-      top: -12px;
+      top: -16px;
       left: 50%;
       transform: translateX(-50%);
-      width: 28px;
-      height: 30px;
+      width: 22px;
+      height: 32px;
       z-index: 15;
-      filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25));
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.45));
     }
 
     .wheel-pointer-pin svg {
       width: 100%;
       height: 100%;
-      fill: var(--primary);
     }
 
     /* Rotating Wheel Disc */
     .wheel-disc {
-      width: 226px;
-      height: 226px;
+      width: 200px;
+      height: 200px;
       border-radius: 50%;
       position: relative;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16), 0 0 0 6px #ffffff, 0 0 0 8px #fed7aa;
       transition: transform 4s cubic-bezier(0.17, 0.97, 0.38, 1);
       cursor: pointer;
     }
@@ -498,12 +517,12 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 60px;
-      height: 60px;
-      background: radial-gradient(circle, #ffffff 40%, #fff7ed 100%);
+      width: 52px;
+      height: 52px;
+      background: radial-gradient(circle at 40% 35%, #ffffff 0%, #f0f0f0 100%);
       border-radius: 50%;
-      border: 3px solid var(--primary);
-      box-shadow: 0 4px 15px var(--primary-glow);
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 3px rgba(255,107,0,0.7), 0 6px 18px rgba(0,0,0,0.35);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -518,26 +537,25 @@
     }
 
     .wheel-center-knob span {
-      font-size: 11px;
-      font-weight: 800;
+      font-size: 10px;
+      font-weight: 900;
       color: var(--primary);
       letter-spacing: 0.5px;
       line-height: 1;
     }
 
     .wheel-center-knob i {
-      font-size: 9px;
+      font-size: 8px;
       color: var(--primary);
       margin-top: 2px;
     }
 
     .wheel-result-banner {
-      margin-top: 8px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
-      color: #059669;
-      background: #ecfdf5;
-      border: 1px dashed #10b981;
+      color: #fff;
+      background: rgba(5, 150, 105, 0.85);
+      border: 1px dashed rgba(255,255,255,0.5);
       padding: 4px 12px;
       border-radius: 20px;
       display: inline-flex;
@@ -1492,16 +1510,7 @@
           <span>1-Day Free Trial</span>
         </div>
 
-        <!-- Bottom Floating Badge in Showcase -->
-        <div class="bottom-float-badge">
-          <div class="icon-wrap">
-            <i class="fa-solid fa-bolt"></i>
-          </div>
-          <div class="badge-text-group">
-            <span>Smart NFC & QR</span>
-            <span class="badge-sub">Instant Feedback</span>
-          </div>
-        </div>
+
 
       <section class="showcase-card" id="showcaseContainer">
         
@@ -1512,7 +1521,7 @@
             <div class="carousel-slide" data-slide="0">
               <div class="feature-pill-badge">
                 <i class="fa-solid fa-dharmachakra"></i>
-                <span>Interactive Prize Wheel</span>
+                <span>Magic Spin Wheel</span>
               </div>
 
               <!-- Phone Mockup Frame -->
@@ -1542,47 +1551,90 @@
                       <div class="wheel-title-small">Lucky Prize Wheel</div>
 
                       <div class="wheel-canvas-container">
+                        <!-- Gold Teardrop Pointer -->
                         <div class="wheel-pointer-pin">
-                          <svg viewBox="0 0 24 24">
-                            <polygon points="12,24 0,0 24,0" />
+                          <svg viewBox="0 0 22 32" fill="none">
+                            <defs>
+                              <linearGradient id="goldPin" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#fbbf24"/>
+                                <stop offset="50%" stop-color="#f59e0b"/>
+                                <stop offset="100%" stop-color="#b45309"/>
+                              </linearGradient>
+                            </defs>
+                            <ellipse cx="11" cy="10" rx="9" ry="9" fill="url(#goldPin)" stroke="#92400e" stroke-width="1"/>
+                            <polygon points="11,30 4,14 18,14" fill="url(#goldPin)" stroke="#92400e" stroke-width="1"/>
+                            <ellipse cx="8" cy="8" rx="3" ry="3" fill="rgba(255,255,255,0.45)"/>
                           </svg>
                         </div>
 
-                        <!-- SVG Wheel Disc with Orange & Colorful Slices -->
+                        <!-- SVG Wheel Disc — 6 coloured slices with radius text -->
                         <div class="wheel-disc" id="interactiveWheel" onclick="spinDemoWheel()">
                           <svg viewBox="0 0 300 300">
-                            <!-- Slice 1: Vibrant Orange -->
-                            <path d="M150,150 L150,10 A140,140 0 0,1 271.24,80 Z" fill="#ff6b00" />
-                            <text x="195" y="75" fill="#ffffff" font-size="12" font-weight="bold" transform="rotate(30, 195, 75)">20% OFF</text>
-                            
-                            <!-- Slice 2: Royal Blue -->
-                            <path d="M150,150 L271.24,80 A140,140 0 0,1 271.24,220 Z" fill="#2563eb" />
-                            <text x="215" y="155" fill="#ffffff" font-size="12" font-weight="bold" transform="rotate(90, 215, 155)">FREE GIFT</text>
-                            
-                            <!-- Slice 3: Emerald Green -->
-                            <path d="M150,150 L271.24,220 A140,140 0 0,1 150,290 Z" fill="#059669" />
-                            <text x="195" y="235" fill="#ffffff" font-size="12" font-weight="bold" transform="rotate(150, 195, 235)">10% OFF</text>
-                            
-                            <!-- Slice 4: Amber Gold -->
-                            <path d="M150,150 L150,290 A140,140 0 0,1 28.76,220 Z" fill="#f59e0b" />
-                            <text x="105" y="235" fill="#ffffff" font-size="12" font-weight="bold" transform="rotate(210, 105, 235)">JACKPOT!</text>
-                            
-                            <!-- Slice 5: Purple -->
-                            <path d="M150,150 L28.76,220 A140,140 0 0,1 28.76,80 Z" fill="#7c3aed" />
-                            <text x="85" y="155" fill="#ffffff" font-size="12" font-weight="bold" transform="rotate(270, 85, 155)">COFFEE</text>
-                            
-                            <!-- Slice 6: Deep Coral -->
-                            <path d="M150,150 L28.76,80 A140,140 0 0,1 150,10 Z" fill="#ea580c" />
-                            <text x="105" y="75" fill="#ffffff" font-size="12" font-weight="bold" transform="rotate(330, 105, 75)">50% OFF</text>
+                            <defs>
+                              <!-- Thick red outer rim gradient -->
+                              <linearGradient id="rimGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#ef4444"/>
+                                <stop offset="100%" stop-color="#b91c1c"/>
+                              </linearGradient>
+                            </defs>
 
-                            <!-- Outer gold accent rim -->
-                            <circle cx="150" cy="150" r="140" fill="none" stroke="#fed7aa" stroke-width="4" />
-                            <circle cx="150" cy="16" r="3" fill="#ffffff" />
-                            <circle cx="266" cy="83" r="3" fill="#ffffff" />
-                            <circle cx="266" cy="217" r="3" fill="#ffffff" />
-                            <circle cx="150" cy="284" r="3" fill="#ffffff" />
-                            <circle cx="34" cy="217" r="3" fill="#ffffff" />
-                            <circle cx="34" cy="83" r="3" fill="#ffffff" />
+                            <!-- Red outer rim ring -->
+                            <circle cx="150" cy="150" r="148" fill="url(#rimGrad)" />
+                            <circle cx="150" cy="150" r="135" fill="#fff" />
+
+                            <!-- Slice 1: Orange — top-right (0°→60°) -->
+                            <path d="M150,150 L150,16 A134,134 0 0,1 266,83 Z" fill="#f97316" />
+                            <!-- Slice 2: Purple -->
+                            <path d="M150,150 L266,83 A134,134 0 0,1 266,217 Z" fill="#7c3aed" />
+                            <!-- Slice 3: Red-Orange -->
+                            <path d="M150,150 L266,217 A134,134 0 0,1 150,284 Z" fill="#ef4444" />
+                            <!-- Slice 4: Blue -->
+                            <path d="M150,150 L150,284 A134,134 0 0,1 34,217 Z" fill="#2563eb" />
+                            <!-- Slice 5: Green -->
+                            <path d="M150,150 L34,217 A134,134 0 0,1 34,83 Z" fill="#10b981" />
+                            <!-- Slice 6: Amber/Gold -->
+                            <path d="M150,150 L34,83 A134,134 0 0,1 150,16 Z" fill="#f59e0b" />
+
+                            <!-- White divider lines -->
+                            <line x1="150" y1="150" x2="150" y2="16" stroke="#fff" stroke-width="2.5"/>
+                            <line x1="150" y1="150" x2="266" y2="83" stroke="#fff" stroke-width="2.5"/>
+                            <line x1="150" y1="150" x2="266" y2="217" stroke="#fff" stroke-width="2.5"/>
+                            <line x1="150" y1="150" x2="150" y2="284" stroke="#fff" stroke-width="2.5"/>
+                            <line x1="150" y1="150" x2="34" y2="217" stroke="#fff" stroke-width="2.5"/>
+                            <line x1="150" y1="150" x2="34" y2="83" stroke="#fff" stroke-width="2.5"/>
+
+                            <!-- Slice labels: simple rotated text per slice, anchored at midpoint radius -->
+                            <!-- Slice 1 midpoint = 30° (Orange) -->
+                            <text x="150" y="88" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" font-family="sans-serif" transform="rotate(30,150,150)">JACKPOT!</text>
+                            <!-- Slice 2 midpoint = 90° (Purple) -->
+                            <text x="150" y="88" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" font-family="sans-serif" transform="rotate(90,150,150)">COFFEE</text>
+                            <!-- Slice 3 midpoint = 150° (Red) -->
+                            <text x="150" y="88" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" font-family="sans-serif" transform="rotate(150,150,150)">50% OFF</text>
+                            <!-- Slice 4 midpoint = 210° (Blue) -->
+                            <text x="150" y="88" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" font-family="sans-serif" transform="rotate(210,150,150)">20% OFF</text>
+                            <!-- Slice 5 midpoint = 270° (Green) -->
+                            <text x="150" y="88" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" font-family="sans-serif" transform="rotate(270,150,150)">FREE GIFT</text>
+                            <!-- Slice 6 midpoint = 330° (Gold) -->
+                            <text x="150" y="88" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" font-family="sans-serif" transform="rotate(330,150,150)">10% OFF</text>
+
+                            <!-- Inner white hub ring -->
+                            <circle cx="150" cy="150" r="34" fill="#fff" stroke="rgba(255,107,0,0.6)" stroke-width="3"/>
+
+                            <!-- Gold studs on red rim at slice boundaries -->
+                            <circle cx="150" cy="7" r="6" fill="#fbbf24" stroke="#92400e" stroke-width="1"/>
+                            <circle cx="266" cy="78" r="6" fill="#fbbf24" stroke="#92400e" stroke-width="1"/>
+                            <circle cx="266" cy="222" r="6" fill="#fbbf24" stroke="#92400e" stroke-width="1"/>
+                            <circle cx="150" cy="293" r="6" fill="#fbbf24" stroke="#92400e" stroke-width="1"/>
+                            <circle cx="34" cy="222" r="6" fill="#fbbf24" stroke="#92400e" stroke-width="1"/>
+                            <circle cx="34" cy="78" r="6" fill="#fbbf24" stroke="#92400e" stroke-width="1"/>
+
+                            <!-- Diamond arrow markers at slice midpoints on outer rim -->
+                            <polygon points="150,138 142,150 150,162 158,150" fill="#fff" opacity="0.9" transform="rotate(-90, 150, 150) translate(0,-116)"/>
+                            <polygon points="150,138 142,150 150,162 158,150" fill="#fff" opacity="0.9" transform="rotate(-30, 150, 150) translate(0,-116)"/>
+                            <polygon points="150,138 142,150 150,162 158,150" fill="#fff" opacity="0.9" transform="rotate(30, 150, 150) translate(0,-116)"/>
+                            <polygon points="150,138 142,150 150,162 158,150" fill="#fff" opacity="0.9" transform="rotate(90, 150, 150) translate(0,-116)"/>
+                            <polygon points="150,138 142,150 150,162 158,150" fill="#fff" opacity="0.9" transform="rotate(150, 150, 150) translate(0,-116)"/>
+                            <polygon points="150,138 142,150 150,162 158,150" fill="#fff" opacity="0.9" transform="rotate(210, 150, 150) translate(0,-116)"/>
                           </svg>
                         </div>
 
@@ -1594,7 +1646,7 @@
                       </div>
 
                       <div class="wheel-result-banner" id="wheelPrizeText">
-                        <i class="fa-solid fa-sparkles"></i> Click SPIN to win!
+                        <i class="fa-solid fa-trophy"></i> Click SPIN to win!
                       </div>
                     </div>
                   </div>
