@@ -416,7 +416,7 @@
       font-size: 10px;
     }
 
-    /* SLIDE 1: INTERACTIVE WHEEL SCREEN */
+    /* SLIDE 1: INTERACTIVE WHEEL SCREEN - LIGHT LUXURY THEME */
     .wheel-screen-content {
       flex: 1;
       display: flex;
@@ -425,24 +425,25 @@
       justify-content: space-evenly;
       padding: 6px 8px 8px;
       background:
-        radial-gradient(circle at 50% 45%, rgba(255, 107, 0, 0.13) 0%, transparent 65%),
-        radial-gradient(circle at 20% 80%, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 80% 10%, rgba(5, 150, 105, 0.07) 0%, transparent 50%),
-        linear-gradient(160deg, #1a0a2e 0%, #16213e 40%, #0f172a 100%);
+        radial-gradient(circle at 50% 48%, rgba(254, 215, 170, 0.45) 0%, transparent 58%),
+        radial-gradient(circle at 85% 15%, rgba(254, 240, 138, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 15% 80%, rgba(253, 230, 138, 0.35) 0%, transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(254, 202, 202, 0.3) 0%, transparent 40%),
+        linear-gradient(175deg, #ffffff 0%, #fffdfa 25%, #fff7ed 60%, #fef3c7 100%);
       position: relative;
       overflow: hidden;
     }
 
-    /* Star dot pattern overlay */
+    /* Festive warm ambient confetti sparkle dot pattern */
     .wheel-screen-content::before {
       content: '';
       position: absolute;
       inset: 0;
       background-image:
-        radial-gradient(circle, rgba(255,255,255,0.55) 1px, transparent 1px),
-        radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px);
-      background-size: 28px 28px, 14px 14px;
-      background-position: 0 0, 7px 7px;
+        radial-gradient(circle, rgba(234, 88, 12, 0.14) 1.5px, transparent 1.5px),
+        radial-gradient(circle, rgba(245, 158, 11, 0.12) 1px, transparent 1px);
+      background-size: 26px 26px, 13px 13px;
+      background-position: 0 0, 6.5px 6.5px;
       pointer-events: none;
       z-index: 0;
     }
@@ -451,21 +452,25 @@
 
     .wheel-sub-badge {
       font-size: 9.5px;
-      font-weight: 700;
+      font-weight: 800;
       color: #ffffff;
-      background: rgba(255, 107, 0, 0.85);
-      padding: 3px 11px;
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      padding: 3.5px 12px;
       border-radius: 20px;
       text-transform: uppercase;
-      letter-spacing: 0.6px;
-      border: 1px solid rgba(255,255,255,0.25);
+      letter-spacing: 0.7px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 3px 8px rgba(234, 88, 12, 0.28);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
 
     .wheel-title-small {
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 800;
-      color: #ffffff;
-      text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+      color: #0f172a;
+      letter-spacing: -0.2px;
     }
 
     .wheel-canvas-container {
@@ -478,6 +483,19 @@
       justify-content: center;
     }
 
+    /* Soft ambient golden halo glow ring behind the wheel */
+    .wheel-canvas-container::before {
+      content: '';
+      position: absolute;
+      width: 216px;
+      height: 216px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(251, 191, 36, 0.38) 0%, rgba(249, 115, 22, 0.15) 55%, transparent 72%);
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(8px);
+    }
+
     /* Gold Teardrop Pointer Pin */
     .wheel-pointer-pin {
       position: absolute;
@@ -487,7 +505,7 @@
       width: 22px;
       height: 32px;
       z-index: 15;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.45));
+      filter: drop-shadow(0 4px 6px rgba(180, 83, 9, 0.45));
     }
 
     .wheel-pointer-pin svg {
@@ -495,7 +513,7 @@
       height: 100%;
     }
 
-    /* Rotating Wheel Disc */
+    /* Rotating Wheel Disc with vibrant 3D depth */
     .wheel-disc {
       width: 200px;
       height: 200px;
@@ -503,6 +521,7 @@
       position: relative;
       transition: transform 4s cubic-bezier(0.17, 0.97, 0.38, 1);
       cursor: pointer;
+      filter: drop-shadow(0 10px 22px rgba(234, 88, 12, 0.22)) drop-shadow(0 4px 10px rgba(15, 23, 42, 0.08));
     }
 
     .wheel-disc svg {
@@ -519,17 +538,17 @@
       transform: translate(-50%, -50%);
       width: 52px;
       height: 52px;
-      background: radial-gradient(circle at 40% 35%, #ffffff 0%, #f0f0f0 100%);
+      background: radial-gradient(circle at 40% 35%, #ffffff 0%, #fff7ed 60%, #fed7aa 100%);
       border-radius: 50%;
-      border: 3px solid #fff;
-      box-shadow: 0 0 0 3px rgba(255,107,0,0.7), 0 6px 18px rgba(0,0,0,0.35);
+      border: 3px solid #ffffff;
+      box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.9), 0 8px 18px rgba(234, 88, 12, 0.32);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       z-index: 12;
-      transition: transform 0.15s ease;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
     }
 
     .wheel-center-knob:active {
@@ -539,28 +558,34 @@
     .wheel-center-knob span {
       font-size: 10px;
       font-weight: 900;
-      color: var(--primary);
+      color: #ea580c;
       letter-spacing: 0.5px;
       line-height: 1;
     }
 
     .wheel-center-knob i {
       font-size: 8px;
-      color: var(--primary);
+      color: #ea580c;
       margin-top: 2px;
     }
 
     .wheel-result-banner {
-      font-size: 10px;
+      font-size: 10.5px;
       font-weight: 700;
-      color: #fff;
-      background: rgba(5, 150, 105, 0.85);
-      border: 1px dashed rgba(255,255,255,0.5);
-      padding: 4px 12px;
+      color: #047857;
+      background: #ecfdf5;
+      border: 1.5px dashed #10b981;
+      padding: 4px 14px;
       border-radius: 20px;
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      box-shadow: 0 3px 8px rgba(16, 185, 129, 0.12);
+      transition: all 0.2s ease;
+    }
+
+    .wheel-result-banner i {
+      color: #10b981;
     }
 
     /* =========================================================
