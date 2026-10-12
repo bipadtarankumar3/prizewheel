@@ -52,7 +52,7 @@
         <div class="form-group row align-items-center mb-0">
           <label for="chances" class="col-3 text-end control-label col-form-label">
             Chances
-            <br><small style="color: red;font-size:10px"> (0 for skip and 1 for spin)</small>
+            <br><small style="color: red;font-size:10px"> (0 for skip and 1 for prize)</small>
           </label>
           <div class="col-9 border-start pb-2 pt-2">
             {{-- <input type="text" name="chances"  @if (isset($Spinner)) value="{{$Spinner->chances}}"  @endif class="form-control" id="chances" placeholder="Chances Here"> --}}

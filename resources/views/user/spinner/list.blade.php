@@ -737,10 +737,6 @@
                         <i class="fa fa-search"></i>
                     </button>
                 </form>
-
-                <button type="button" onclick="add_spinner_btn()" class="btn btn-camp-add btn-sm">
-                    <i class="fas fa-plus"></i> Add Spinner
-                </button>
             </div>
         </div>
 

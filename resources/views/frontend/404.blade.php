@@ -577,31 +577,10 @@
                         <i class="fa-solid fa-headset"></i>
                         <span>Support Helpline: <strong>{{ $user->phone }}</strong></span>
                     </div>
-
-                    <div class="actions-group">
-                        <a href="tel:{{ $user->phone }}" class="btn-action btn-primary-action">
-                            <i class="fa-solid fa-phone-volume"></i>
-                            <span>Call Store Admin</span>
-                        </a>
-
-                        @if(!empty($cleanPhone))
-                            <a href="https://wa.me/{{ $cleanPhone }}?text=Hello%2C%20regarding%20the%20Prize%20Wheel%20subscription%20renewal" target="_blank" class="btn-action btn-secondary-action">
-                                <i class="fa-brands fa-whatsapp"></i>
-                                <span>Chat on WhatsApp</span>
-                            </a>
-                        @endif
-                    </div>
                 @else
                     <div class="info-pill-box">
                         <i class="fa-solid fa-circle-info"></i>
                         <span>Contact your campaign administrator for account renewal</span>
-                    </div>
-
-                    <div class="actions-group">
-                        <a href="{{ url('/') }}" class="btn-action btn-outline-action">
-                            <i class="fa-solid fa-arrow-left"></i>
-                            <span>Back to Home</span>
-                        </a>
                     </div>
                 @endif
 
@@ -690,10 +669,12 @@
             @endif
 
             {{-- Card Footer Watermark --}}
+            @if($status !== 'user_date_expired')
             <div class="card-micro-footer">
                 <i class="fa-solid fa-atom"></i>
                 <span>Prize Wheel Atomic Platform</span>
             </div>
+            @endif
 
         </div>
 
