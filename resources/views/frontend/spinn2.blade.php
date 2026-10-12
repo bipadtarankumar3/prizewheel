@@ -713,9 +713,8 @@
 <div class="blast" id="blast" style="display: none">
     <div class="content">
         <div class="trophy">
-            <img src="{{asset('frontend/spinner/wheel/trophy.png')}}" class="trophy_img" alt="trophy">
-            <br>
-            <img src="" alt="" srcset="" class="spinner_image_show" width="40%">
+            <img src="{{asset('frontend/spinner/wheel/trophy.png')}}" class="trophy_img" alt="trophy" style="max-height: 110px; object-fit: contain;">
+            <img src="" alt="" class="spinner_image_show" style="max-height: 110px; object-fit: contain; display: none;">
         </div>
         <div class="text text-center">
             <h2 class="my-3">Congratulations, you won!</h2>
@@ -1123,6 +1122,7 @@
                                     },
                                     success: function(response) {
                                         if (response.success && response.data) {
+                                            window.currentServerPrize = response.data;
                                             // Call calculatePrize with the received segment number
                                             calculatePrize(response.data.segment_number, response.data.degree, response.data.after_angle);
                                             show_code_msg('Your code is <b>' + response.data.code + '</b>');
@@ -1232,32 +1232,10 @@
           // -------------------------------------------------------
           function startSpin()
           {
-              // Ensure that spinning can't be clicked again while already running.
+              // Route to submit_from so server always selects and authorizes winning prize
               if (wheelSpinning == false)
               {
-                  // Based on the power level selected adjust the number of spins for the wheel, the more times is has
-                  // to rotate with the duration of the animation the quicker the wheel spins.
-                  if (wheelPower == 1)
-                  {
-                      theWheel.animation.spins = 3;
-                  }
-                  else if (wheelPower == 2)
-                  {
-                      theWheel.animation.spins = 8;
-                  }
-                  else if (wheelPower == 3)
-                  {
-                      theWheel.animation.spins = 15;
-                  }
-
-                  document.getElementById('spin_button').className = "";
-
-                  // Begin the spin animation by calling startAnimation on the wheel object.
-                  theWheel.startAnimation();
-
-                  // Set to true so that power can't be changed and spin button re-enabled during
-                  // the current animation. The user will have to reset before spinning again.
-                  wheelSpinning = true;
+                  submit_from();
               }
           }
 
@@ -1278,8 +1256,7 @@
           }
 
           // -------------------------------------------------------
-          // Called when the spin animation has finished by the callback feature of the wheel because I specified callback in the parameters
-          // note the indicated segment is passed in as a parmeter as 99% of the time you will want to know this to inform the user of their prize.
+          // Called when the spin animation has finished by the callback feature of the wheel
           // -------------------------------------------------------
           function alertPrize(indicatedSegment)
           {
@@ -1290,7 +1267,42 @@
                     playing = false;
                 }
 
-                if (!indicatedSegment) {
+                function isDisqualifiedPrize(seg) {
+                    if (!seg) return true;
+                    if (seg.skip && (seg.skip.toString().trim().toLowerCase() === 'yes' || seg.skip.toString().trim() === '1')) return true;
+                    if (seg.price !== undefined && seg.price !== null && Number(seg.price) <= 0) return true;
+                    if (seg.chances !== undefined && seg.chances !== null && Number(seg.chances) <= 0) return true;
+                    return false;
+                }
+
+                let finalPrize = null;
+
+                // 1. Authoritative server chosen prize (strictly validated)
+                if (window.currentServerPrize && window.currentServerPrize.segment_number && theWheel.segments && theWheel.segments[window.currentServerPrize.segment_number]) {
+                    let sp = theWheel.segments[window.currentServerPrize.segment_number];
+                    if (!isDisqualifiedPrize(sp)) {
+                        finalPrize = sp;
+                    }
+                }
+
+                // 2. Check indicated segment from Winwheel
+                if (!finalPrize && indicatedSegment && !isDisqualifiedPrize(indicatedSegment)) {
+                    finalPrize = indicatedSegment;
+                }
+
+                // 3. Absolute safety fallback: find first eligible slice
+                if (!finalPrize && theWheel.segments) {
+                    for (let i = 1; i < theWheel.segments.length; i++) {
+                        let seg = theWheel.segments[i];
+                        if (seg && !isDisqualifiedPrize(seg)) {
+                            finalPrize = seg;
+                            break;
+                        }
+                    }
+                }
+
+                if (!finalPrize) {
+                    swal("Notice", "No winning prizes currently available.", "info");
                     $(".spin_form_btn").removeAttr('disabled');
                     wheelSpinning = false;
                     return;
@@ -1302,21 +1314,31 @@
                 } catch(e){}
 
                 blast_fun();
-                $('.award_text').html(indicatedSegment.text);
+                $('.award_text').html(finalPrize.text);
                 $('#blast').addClass('show-blast').fadeIn(300);
 
-                if (indicatedSegment.image && indicatedSegment.image != '') {
-                    $('.spinner_image_show').attr('src', indicatedSegment.image);
-                    $('.spinner_image').attr('src', indicatedSegment.image);
-                } else {
-                    $('.trophy_img').attr('src', "{{asset('frontend/spinner/wheel/trophy.png')}}");
-                    $('.spinner_image').attr('src', "{{asset('frontend/spinner/wheel/trophy.png')}}");
-                }
+                let hasCustomImg = (finalPrize.image && finalPrize.image !== '');
+                let pImg = hasCustomImg 
+                    ? finalPrize.image 
+                    : (window.currentServerPrize && window.currentServerPrize.image ? window.currentServerPrize.image : "{{asset('frontend/spinner/wheel/trophy.png')}}");
 
-                $('#spinner_id').val(indicatedSegment.id);
-                $('#spinner_name').val(indicatedSegment.text);
-                $('.spinner_name_text').html(indicatedSegment.text);
-                $('#spinner_value').val(indicatedSegment.price);
+                if (hasCustomImg) {
+                    $('.spinner_image_show').attr('src', pImg).show();
+                    $('.trophy_img').hide();
+                } else {
+                    $('.trophy_img').attr('src', "{{asset('frontend/spinner/wheel/trophy.png')}}").show();
+                    $('.spinner_image_show').hide();
+                }
+                $('.spinner_image').attr('src', pImg);
+
+                let prizeId = finalPrize.id || (window.currentServerPrize ? window.currentServerPrize.id : '');
+                let prizeName = finalPrize.text || (window.currentServerPrize ? window.currentServerPrize.name : '');
+                let prizeVal = finalPrize.price !== undefined ? finalPrize.price : (window.currentServerPrize ? window.currentServerPrize.price : 0);
+
+                $('#spinner_id').val(prizeId);
+                $('#spinner_name').val(prizeName);
+                $('.spinner_name_text').html(prizeName);
+                $('#spinner_value').val(prizeVal);
 
                 setTimeout(() => {
                     $('#confetti-canvas').hide();
@@ -1330,13 +1352,25 @@
               $(".spin_form_btn").attr('disabled', 'disabled');
               wheelSpinning = true;
               let stopAt = 0;
-              if (segmentNumber && typeof theWheel.getRandomForSegment === 'function') {
+
+              // Center-targeted stop calculation:
+              // Guarantees stopping in the middle of the segment safely away from all borders
+              if (segmentNumber && theWheel.segments && theWheel.segments[segmentNumber]) {
+                  let seg = theWheel.segments[segmentNumber];
+                  let startAngle = seg.startAngle;
+                  let endAngle = seg.endAngle;
+                  let segSpan = endAngle - startAngle;
+                  let centerAngle = startAngle + (segSpan / 2);
+                  // Bounded jitter strictly in middle 30% of segment
+                  let jitter = (Math.random() - 0.5) * (segSpan * 0.3);
+                  stopAt = Math.round(centerAngle + jitter);
+              } else if (segmentNumber && typeof theWheel.getRandomForSegment === 'function') {
                   stopAt = theWheel.getRandomForSegment(segmentNumber);
-              }
-              if (!stopAt && after_angle) {
+              } else if (after_angle) {
                   let lessBound = (after_angle - degree) + 5;
                   stopAt = Math.floor(Math.random() * (after_angle - lessBound - 4)) + lessBound + 2;
               }
+
               if (stopAt) {
                   theWheel.animation.stopAngle = stopAt;
               }

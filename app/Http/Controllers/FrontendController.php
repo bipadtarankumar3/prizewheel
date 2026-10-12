@@ -75,7 +75,10 @@ class FrontendController extends Controller
                                     'skip'=>$value->skip,
                                 );
                                 $spinner_data[] =  $arr ;
-                                if ($value->skip == 'Yes' || (float)$value->value <= 0 || ($value->chances !== null && (float)$value->chances <= 0)) {
+                                $isSkipped = (!empty($value->skip) && in_array(strtolower(trim($value->skip)), ['yes', '1', 'true']));
+                                $isZeroStock = ((float)$value->value <= 0);
+                                $isZeroChance = ($value->chances !== null && (float)$value->chances <= 0);
+                                if ($isSkipped || $isZeroStock || $isZeroChance) {
                                     $spinner_skip_data[] = $value->name;
                                 }
                             }
@@ -139,7 +142,10 @@ class FrontendController extends Controller
                                     'skip'=>$value->skip,
                                 );
                                 $spinner_data[] =  $arr ;
-                                if ($value->skip == 'Yes' || (float)$value->value <= 0 || ($value->chances !== null && (float)$value->chances <= 0)) {
+                                $isSkipped = (!empty($value->skip) && in_array(strtolower(trim($value->skip)), ['yes', '1', 'true']));
+                                $isZeroStock = ((float)$value->value <= 0);
+                                $isZeroChance = ($value->chances !== null && (float)$value->chances <= 0);
+                                if ($isSkipped || $isZeroStock || $isZeroChance) {
                                     $spinner_skip_data[] = $value->name;
                                 }
                             }
@@ -232,40 +238,50 @@ class FrontendController extends Controller
         $i = 1;
         foreach ($Spinner as $key => $value) {
             $prizes[] = [
+                'id' => $value['id'],
                 'segment_number' => $i,
                 'fillStyle' => $value['color'],
                 'text' => $value['name'],
-                'weight' => $value['chances'] !== null ? (float)$value['chances'] : null,
-                'max_qty' => (int)$value['value'],
+                'image' => $value['image'] ?? '',
+                'weight' => (isset($value['chances']) && $value['chances'] !== null && trim((string)$value['chances']) !== '') ? (float)$value['chances'] : null,
+                'max_qty' => isset($value['value']) ? (float)$value['value'] : 0,
                 'skip' => $value['skip'] ?? 'No',
                 'degree' => $degreeIncrement * $i,
             ];
             $i++;
         }
 
-        // STRICT FILTER: Eligible prizes ONLY!
-        // 1. skip must NOT be 'Yes'
-        // 2. max_qty must be > 0 (in stock)
-        // 3. chances/weight if configured must be > 0 (chances <= 0 are NEVER selected!)
+        // ABSOLUTE STRICT FILTER: Eligible prizes ONLY!
+        // A prize is DISQUALIFIED if:
+        // 1. skip is 'Yes' (or 'yes', '1', 'true')
+        // 2. max_qty/value <= 0 (out of stock / zero quantity)
+        // 3. chances <= 0 (e.g. 0, 0.0, 0.00 — strictly never winnable)
         $eligiblePrizes = [];
         $totalWeight = 0;
         foreach ($prizes as $prize) {
-            $isSkipped = ($prize['skip'] === 'Yes');
+            $isSkipped = (!empty($prize['skip']) && in_array(strtolower(trim($prize['skip'])), ['yes', '1', 'true']));
             $noStock = ($prize['max_qty'] <= 0);
             $hasChancesConfigured = ($prize['weight'] !== null);
-            $chancesVal = $hasChancesConfigured ? (float)$prize['weight'] : 1.0;
+            $zeroChance = ($hasChancesConfigured && $prize['weight'] <= 0);
 
-            // Never select if skipped, zero stock, or chances <= 0
-            if (!$isSkipped && !$noStock && $chancesVal > 0) {
-                $eligiblePrizes[] = array_merge($prize, ['calc_weight' => $chancesVal]);
-                $totalWeight += $chancesVal;
+            // If skipped, zero stock, or zero chance: NEVER SELECT!
+            if ($isSkipped || $noStock || $zeroChance) {
+                continue;
+            }
+
+            $chancesVal = $hasChancesConfigured ? (float)$prize['weight'] : 1.0;
+            if ($chancesVal > 0) {
+                // Higher quantity items are selected proportionally more often:
+                $qtyWeight = max(1, (float)$prize['max_qty']) * $chancesVal;
+                $eligiblePrizes[] = array_merge($prize, ['calc_weight' => $qtyWeight]);
+                $totalWeight += $qtyWeight;
             }
         }
 
         if (empty($eligiblePrizes) || $totalWeight <= 0) {
             return response()->json([
                 'success' => false,
-                'message' => 'No prize available for selection at this time.',
+                'message' => 'Currently no winning prizes are available. Please try again later.',
             ]);
         }
 
@@ -290,11 +306,14 @@ class FrontendController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
+                'id' => encrypt($selectedPrize['id']),
                 'code' => 'WIN' . strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6)),
                 'segment_number' => $selectedPrize['segment_number'],
                 'after_angle' => $after_angle,
                 'seg_angle' => $selectedPrize['degree'],
                 'name' => $selectedPrize['text'],
+                'price' => $selectedPrize['max_qty'],
+                'image' => $selectedPrize['image'] ?? '',
                 'degree' => $degreeIncrement,
             ]
         ]);
@@ -318,7 +337,11 @@ class FrontendController extends Controller
             $spinner_id = decrypt($request->spinner_id);
             $Spinner = Spinner::where('id',decrypt($request->spinner_id))->first();
 
-            if ($Spinner) {
+            $isSkipped = (!empty($Spinner->skip) && in_array(strtolower(trim($Spinner->skip)), ['yes', '1', 'true']));
+            $isZeroStock = ($Spinner && (float)$Spinner->value <= 0);
+            $isZeroChance = ($Spinner && $Spinner->chances !== null && (float)$Spinner->chances <= 0);
+
+            if ($Spinner && !$isSkipped && !$isZeroStock && !$isZeroChance) {
 
                 $Camping = Camping::where('id',$Spinner->camping_id)->first();
                 // dd($Spinner);
@@ -555,7 +578,11 @@ class FrontendController extends Controller
         try {
             $spinner_id = decrypt($request->spinner_id);
             $Spinner = Spinner::where('id',$spinner_id)->first();
-            if ($Spinner && $Spinner->value >= 1 && $Spinner->skip !== 'Yes' && ($Spinner->chances === null || (float)$Spinner->chances > 0)) {
+            $isSkipped = (!empty($Spinner->skip) && in_array(strtolower(trim($Spinner->skip)), ['yes', '1', 'true']));
+            $hasStock = ($Spinner && (float)$Spinner->value > 0);
+            $hasChances = ($Spinner && ($Spinner->chances === null || trim((string)$Spinner->chances) === '' || (float)$Spinner->chances > 0));
+
+            if ($Spinner && $hasStock && !$isSkipped && $hasChances) {
 
                 // $SpinnerUpdate = Spinner::where('id',$spinner_id)->update(['value'=>$Spinner->value-1]);
                 $Camping = Camping::where('id',$Spinner->camping_id)->first();

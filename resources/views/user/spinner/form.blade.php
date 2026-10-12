@@ -52,30 +52,28 @@
         <div class="form-group row align-items-center mb-0">
           <label for="chances" class="col-3 text-end control-label col-form-label">
             Chances
-            <br><small style="color: red;font-size:10px"> (0 for skip and 1 for prize)</small>
+            <br><small style="color: red;font-size:10px"> (0 for skip and 1 for win)</small>
           </label>
           <div class="col-9 border-start pb-2 pt-2">
-            {{-- <input type="text" name="chances"  @if (isset($Spinner)) value="{{$Spinner->chances}}"  @endif class="form-control" id="chances" placeholder="Chances Here"> --}}
-          
-            <select name="chances" id="chances"  class="col-3  control-label col-form-label form-control" required>
-              <option value="1" style="background-color: green;color:white" @if (isset($Spinner)) @if($Spinner->chances ==1 ) selected @endif  @endif>1</option>
-              <option value="0" style="background-color: red;color:white" @if (isset($Spinner)) @if($Spinner->chances ==0 ) selected @endif  @endif>0</option>
-              
+            <select name="chances" id="chances" class="col-3 control-label col-form-label form-control" required>
+              <option value="1" style="background-color: green;color:white" @if (isset($Spinner)) @if((float)$Spinner->chances > 0 && $Spinner->skip != 'Yes') selected @endif @else selected @endif>1 (Win)</option>
+              <option value="0" style="background-color: red;color:white" @if (isset($Spinner)) @if((float)$Spinner->chances <= 0 || $Spinner->skip == 'Yes') selected @endif @endif>0 (Skip)</option>
             </select>
           </div>
         </div>
-
     @else
-    <div class="form-group row align-items-center mb-0">
-      <label for="note" class="col-3 text-end control-label col-form-label">Skip <br><small style="color: red;font-size:10px"> (If you want to skip this spin please select yes)</small></label>
-      <div class="col-9 border-start pb-2 pt-2">
-        <select name="skip" id=""  class="col-3  control-label col-form-label form-control" required>
-            <option value="No" style="background-color: green;color:white" @if (isset($Spinner)) @if($Spinner->skip =='No' ) selected @endif  @endif>No</option>
-            <option value="Yes" style="background-color: red;color:white" @if (isset($Spinner)) @if($Spinner->skip =='Yes' ) selected @endif  @endif>Yes</option>
-            
-          </select>
-      </div>
-    </div>
+        <div class="form-group row align-items-center mb-0">
+          <label for="skip" class="col-3 text-end control-label col-form-label">
+            Skip 
+            <br><small style="color: red;font-size:10px"> (If you want to skip this spin select Yes)</small>
+          </label>
+          <div class="col-9 border-start pb-2 pt-2">
+            <select name="skip" id="skip" class="col-3 control-label col-form-label form-control" required>
+                <option value="No" style="background-color: green;color:white" @if (isset($Spinner)) @if($Spinner->skip =='No' || empty($Spinner->skip)) selected @endif @else selected @endif>No</option>
+                <option value="Yes" style="background-color: red;color:white" @if (isset($Spinner)) @if($Spinner->skip =='Yes') selected @endif @endif>Yes (Skip / Never Win)</option>
+            </select>
+          </div>
+        </div>
     @endif
 
     

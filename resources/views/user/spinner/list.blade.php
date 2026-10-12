@@ -797,8 +797,8 @@
 
                                     @if (Auth::user()->default_spinn == 2)
                                         <td>
-                                            @if($item->chances == 1)
-                                                <span class="badge bg-success text-white">1 (Win)</span>
+                                            @if((float)$item->chances > 0 && $item->skip != 'Yes')
+                                                <span class="badge bg-success text-white">{{ $item->chances == 1 ? '1 (Win)' : $item->chances . ' (Win)' }}</span>
                                             @else
                                                 <span class="badge bg-danger text-white">0 (Skip)</span>
                                             @endif

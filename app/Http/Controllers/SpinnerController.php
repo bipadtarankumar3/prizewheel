@@ -170,14 +170,27 @@ class SpinnerController extends Controller
                     if (isset($request->value) && $request->value !== '') { // Accepts 0 but skips empty values
                         $spinner->value = $request->value;
                     }
-                    if (isset($request->chances) && $request->chances !== '') { // Accepts 0 but skips empty values
-                        $spinner->chances = $request->chances;
-                    }
                     if ($request->color !== null && $request->color !== '') {
                         $spinner->color = $request->color;
                     }
-                    if (isset($request->skip) && $request->skip !== '') { // Accepts 0 but skips empty values
-                        $spinner->skip = $request->skip;
+                    if (isset($request->chances) && $request->chances !== '') {
+                        if ((float)$request->chances <= 0) {
+                            $spinner->chances = 0;
+                            $spinner->skip = 'Yes';
+                        } else {
+                            $spinner->chances = $request->chances;
+                            $spinner->skip = 'No';
+                        }
+                    } elseif (isset($request->skip) && $request->skip !== '') {
+                        if ($request->skip === 'Yes') {
+                            $spinner->skip = 'Yes';
+                            $spinner->chances = 0;
+                        } else {
+                            $spinner->skip = 'No';
+                            if ($spinner->chances === null || (float)$spinner->chances <= 0) {
+                                $spinner->chances = 1;
+                            }
+                        }
                     }
                     if ($request->camping_id !== null && $request->camping_id !== '') {
                         $spinner->camping_id = $request->camping_id;
@@ -225,13 +238,20 @@ class SpinnerController extends Controller
                     }
                 }
 
+                $skipVal = $request->skip ?? 'No';
+                $chancesVal = $request->chances ?? ($skipVal === 'Yes' ? 0 : 1);
+                if ($skipVal === 'Yes' || (float)$chancesVal <= 0) {
+                    $skipVal = 'Yes';
+                    $chancesVal = 0;
+                }
+
                 Spinner::create([
                     'name' => $request->name,
                     'image' => $document_link,
                     'value' => $request->value,
-                    'chances' => $request->chances,
+                    'chances' => $chancesVal,
                     'color' => $request->color,
-                    'skip' => $request->skip,
+                    'skip' => $skipVal,
                     'camping_id' => $request->camping_id,
                     'created_by' => Auth::user()->id,
                     'status' => $request->status

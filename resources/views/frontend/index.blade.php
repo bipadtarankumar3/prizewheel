@@ -1290,8 +1290,26 @@ const runTickerAnimation = () => {
 
 const selectPrize = () => {
    
-  const selected = Math.floor(rotation / prizeSlice);
-  console.log( prizes[selected]);
+  let selected = Math.floor(rotation / prizeSlice);
+  if (selected >= prizes.length) selected = prizes.length - 1;
+  if (selected < 0) selected = 0;
+
+  const isInvalid = (p) => {
+    if (!p) return true;
+    const isSkipped = skip_data.some(s => s && s.trim().toLowerCase() === p.text.trim().toLowerCase()) || (p.skip && (p.skip.toString().trim().toLowerCase() === 'yes' || p.skip.toString().trim() === '1'));
+    const noStock = (p.price !== undefined && p.price !== null && Number(p.price) <= 0);
+    const zeroChance = (p.chances !== undefined && p.chances !== null && Number(p.chances) <= 0);
+    return isSkipped || noStock || zeroChance;
+  };
+
+  if (isInvalid(prizes[selected])) {
+    const fallbackIdx = prizes.findIndex(p => !isInvalid(p));
+    if (fallbackIdx !== -1) {
+      selected = fallbackIdx;
+    }
+  }
+
+  console.log(prizes[selected]);
 
   if (prizes[selected] != undefined) {
     $.ajax({
@@ -1416,7 +1434,7 @@ swal({
                 const getEligibleTargetIndex = () => {
                   const eligible = [];
                   prizes.forEach((p, idx) => {
-                    const isSkipped = skip_data.some(s => s && s.trim().toLowerCase() === p.text.trim().toLowerCase());
+                    const isSkipped = skip_data.some(s => s && s.trim().toLowerCase() === p.text.trim().toLowerCase()) || (p.skip && (p.skip.toString().trim().toLowerCase() === 'yes' || p.skip.toString().trim() === '1'));
                     const noStock = (p.price !== undefined && p.price !== null && Number(p.price) <= 0);
                     const zeroChance = (p.chances !== undefined && p.chances !== null && Number(p.chances) <= 0);
                     if (!isSkipped && !noStock && !zeroChance) {
@@ -1425,22 +1443,23 @@ swal({
                   });
                   if (eligible.length === 0) return -1;
 
-                  const hasWeights = eligible.some(idx => prizes[idx].chances !== undefined && Number(prizes[idx].chances) > 0);
-                  if (hasWeights) {
-                    let total = 0;
-                    eligible.forEach(idx => {
-                      const c = Number(prizes[idx].chances) || 0;
-                      total += (c > 0 ? c : 1);
-                    });
-                    let rand = Math.random() * total;
-                    for (let idx of eligible) {
-                      const c = Number(prizes[idx].chances) || 0;
-                      const w = (c > 0 ? c : 1);
-                      if (rand <= w) return idx;
-                      rand -= w;
-                    }
+                  let total = 0;
+                  eligible.forEach(idx => {
+                    const qty = Math.max(1, Number(prizes[idx].price) || 1);
+                    const c = Number(prizes[idx].chances) || 0;
+                    const chanceFactor = (c > 0 ? c : 1);
+                    total += (qty * chanceFactor);
+                  });
+                  let rand = Math.random() * total;
+                  for (let idx of eligible) {
+                    const qty = Math.max(1, Number(prizes[idx].price) || 1);
+                    const c = Number(prizes[idx].chances) || 0;
+                    const chanceFactor = (c > 0 ? c : 1);
+                    const w = (qty * chanceFactor);
+                    if (rand <= w) return idx;
+                    rand -= w;
                   }
-                  return eligible[Math.floor(Math.random() * eligible.length)];
+                  return eligible[0];
                 };
 
                 const targetIdx = getEligibleTargetIndex();
