@@ -747,13 +747,11 @@ class UserController extends Controller
             }
 
             $sliceCount = max(1, count($chartDates));
-            $visitBase = max(1, round($totalVisits / ($sliceCount + 2)));
-            $spinBase = max(1, round($totalSpins / ($sliceCount + 2)));
-            
+
             for ($k = 0; $k < $sliceCount; $k++) {
-                $factor = 0.7 + (sin($k * 1.5) * 0.3) + (($k == $sliceCount - 1) ? 0.4 : 0);
-                $chartVisits[] = max($chartLeads[$k] ?? 0, round($visitBase * $factor));
-                $chartSpins[] = max($chartLeads[$k] ?? 0, round($spinBase * $factor));
+                // Only use real data — show 0 if no actual visits/spins recorded
+                $chartVisits[] = 0;
+                $chartSpins[]  = 0;
             }
 
             // Advanced Store Analytics
@@ -815,12 +813,13 @@ class UserController extends Controller
             }
 
             if (array_sum($hourlyBuckets) == 0) {
+                // No real data — keep all buckets at 0, don't fabricate values
                 $hourlyBuckets = [
-                    'Morning (9 AM - 12 PM)' => max(1, round(max(1, $totalSpins) * 0.2)),
-                    'Lunch (12 PM - 3 PM)' => max(2, round(max(1, $totalSpins) * 0.35)),
-                    'Afternoon (3 PM - 6 PM)' => max(1, round(max(1, $totalSpins) * 0.15)),
-                    'Evening (6 PM - 9 PM)' => max(2, round(max(1, $totalSpins) * 0.25)),
-                    'Night (9 PM - 12 AM)' => max(1, round(max(1, $totalSpins) * 0.05)),
+                    'Morning (9 AM - 12 PM)'  => 0,
+                    'Lunch (12 PM - 3 PM)'    => 0,
+                    'Afternoon (3 PM - 6 PM)' => 0,
+                    'Evening (6 PM - 9 PM)'   => 0,
+                    'Night (9 PM - 12 AM)'    => 0,
                 ];
             }
 
