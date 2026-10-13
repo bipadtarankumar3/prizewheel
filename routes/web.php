@@ -45,6 +45,7 @@ Route::post('register_post',[UserController::class,'register_post'])->name('regi
 Route::get('auth/google',[UserController::class,'google_redirect'])->name('google_login');
 Route::get('auth/google/callback',[UserController::class,'google_callback'])->name('google_callback');
 Route::get('captcha/refresh',[UserController::class,'refresh_captcha'])->name('captcha_refresh');
+Route::get('check_email_availability',[UserController::class,'check_email_availability'])->name('check_email_availability');
 Route::get('logout',[UserController::class,'logout']);
 
 Route::any('otp_verify_page',[UserController::class,'otp_verify_page']);

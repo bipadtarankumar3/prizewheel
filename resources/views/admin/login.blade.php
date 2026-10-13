@@ -2083,6 +2083,7 @@
                     type="text" 
                     id="regName" 
                     name="name" 
+                    value="{{ old('name') }}"
                     class="form-control-input" 
                     placeholder="e.g. Apex Dental Clinic, Royal TVS" 
                     required 
@@ -2100,6 +2101,7 @@
                     type="email" 
                     id="regEmail" 
                     name="email" 
+                    value="{{ old('email') }}"
                     class="form-control-input" 
                     placeholder="contact@business.com" 
                     required 
@@ -2107,6 +2109,7 @@
                   />
                   <i class="fa-regular fa-envelope input-icon-left"></i>
                 </div>
+                <div id="emailAvailabilityNotice" style="font-size: 11.5px; margin-top: 5px; font-weight: 600; display: none;"></div>
               </div>
 
               <!-- WhatsApp Number -->
@@ -2117,6 +2120,7 @@
                     type="tel" 
                     id="regPhone" 
                     name="phone" 
+                    value="{{ old('phone') }}"
                     class="form-control-input" 
                     placeholder="+91 98765 43210" 
                     autocomplete="tel"
@@ -2245,6 +2249,12 @@
       }
     @endif
 
+    @if($errors->any())
+      @foreach($errors->all() as $err)
+        toastr.error("{{ $err }}");
+      @endforeach
+    @endif
+
     function togglePasswordVisibility(inputId, eyeIcon) {
       const input = document.getElementById(inputId);
       if (!input) return;
@@ -2282,10 +2292,58 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       const hash = window.location.hash.toLowerCase();
-      if (hash === '#signup' || window.location.search.includes('mode=signup')) {
+      const shouldSignup = hash === '#signup' || 
+                           window.location.search.includes('mode=signup') || 
+                           "{{ old('name') || old('phone') || (($initialMode ?? '') === 'signup') ? '1' : '0' }}" === "1";
+      if (shouldSignup) {
         switchToMode('signup');
       } else if (hash === '#login' || window.location.search.includes('mode=login')) {
         switchToMode('login');
+      }
+
+      // Real-time email validation for signup
+      const regEmailInput = document.getElementById('regEmail');
+      const emailNotice = document.getElementById('emailAvailabilityNotice');
+      let emailTimer = null;
+
+      if (regEmailInput && emailNotice) {
+        regEmailInput.addEventListener('input', function() {
+          clearTimeout(emailTimer);
+          const emailVal = this.value.trim();
+
+          if (!emailVal || !emailVal.includes('@') || emailVal.length < 5) {
+            emailNotice.style.display = 'none';
+            return;
+          }
+
+          emailNotice.style.display = 'block';
+          emailNotice.style.color = '#64748b';
+          emailNotice.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking email...';
+
+          emailTimer = setTimeout(() => {
+            fetch("{{ route('check_email_availability') }}?email=" + encodeURIComponent(emailVal))
+              .then(res => res.json())
+              .then(data => {
+                if (data.status === 'exists') {
+                  emailNotice.style.display = 'block';
+                  emailNotice.style.color = '#ef4444';
+                  emailNotice.dataset.exists = '1';
+                  emailNotice.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> ' + data.message + ' <a href="javascript:void(0)" onclick="switchToMode(\'login\')" style="color:#ff6b00; text-decoration:underline; font-weight:700;">Sign in here</a>';
+                } else if (data.status === 'available') {
+                  emailNotice.style.display = 'block';
+                  emailNotice.style.color = '#10b981';
+                  emailNotice.dataset.exists = '0';
+                  emailNotice.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + data.message;
+                } else {
+                  emailNotice.style.display = 'none';
+                  emailNotice.dataset.exists = '0';
+                }
+              })
+              .catch(() => {
+                emailNotice.style.display = 'none';
+              });
+          }, 400);
+        });
       }
     });
 
@@ -2316,6 +2374,13 @@
         if (p1 !== p2) {
           e.preventDefault();
           toastr.error("Passwords do not match. Please re-enter.");
+          return false;
+        }
+
+        const emailNotice = document.getElementById('emailAvailabilityNotice');
+        if (emailNotice && emailNotice.dataset.exists === '1') {
+          e.preventDefault();
+          toastr.error("This email is already registered. Please sign in or use Google Login.");
           return false;
         }
       });

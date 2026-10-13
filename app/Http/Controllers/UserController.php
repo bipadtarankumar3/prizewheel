@@ -74,7 +74,12 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
-            'password' => 'required|min:6',
+            'password' => 'required|min:6|confirmed',
+        ], [
+            'email.required' => 'Please enter a valid email address.',
+            'email.email' => 'Please provide a valid email format (e.g. name@example.com).',
+            'password.confirmed' => 'The password confirmation does not match.',
+            'password.min' => 'Password must be at least 6 characters long.',
         ]);
 
         if ($request->has('captcha') && !empty($request->captcha)) {
@@ -88,13 +93,16 @@ class UserController extends Controller
             }
         }
 
-        $existing = User::where('email', $request->email)->first();
+        $cleanEmail = strtolower(trim($request->email));
+
+        // Strict Email validation for normal registration:
+        $existing = User::where('email', $cleanEmail)->first();
         if ($existing) {
             $notification = array(
-                'messege' => 'This email is already registered. Please sign in.',
+                'messege' => 'This email is already registered. Please sign in or use Google Login.',
                 'alert-type' => 'error'
             );
-            return redirect('login')->with($notification)->withInput();
+            return redirect('login?mode=signup')->with($notification)->withInput();
         }
 
         $baseSlug = Str::slug($request->name, '_');
@@ -112,7 +120,7 @@ class UserController extends Controller
             'user_unique_id' => Str::random(10),
             'name' => $request->name,
             'name_url' => $uniqueSlug,
-            'email' => $request->email,
+            'email' => $cleanEmail,
             'password' => Hash::make($request->password),
             'phone' => $request->phone ?? '',
             'type' => 'user',
@@ -135,10 +143,34 @@ class UserController extends Controller
         session()->put('adminName', $user->name);
 
         $notification = array(
-            'messege' => 'Welcome! Your account has been created successfully.',
+            'messege' => 'Welcome! Your account has been created successfully with 1-Day Free Trial.',
             'alert-type' => 'success'
         );
         return redirect('admin/dashboard')->with($notification);
+    }
+
+    public function check_email_availability(Request $request)
+    {
+        $email = strtolower(trim($request->get('email', '')));
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return response()->json([
+                'status' => 'invalid',
+                'message' => 'Please enter a valid email address.'
+            ]);
+        }
+
+        $exists = User::where('email', $email)->exists();
+        if ($exists) {
+            return response()->json([
+                'status' => 'exists',
+                'message' => 'This email is already registered. Please sign in or use Google Login.'
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'available',
+            'message' => 'Email is available for registration.'
+        ]);
     }
 
     public function google_redirect(Request $request)
@@ -236,7 +268,9 @@ class UserController extends Controller
 
                     if ($email) {
                         $user = User::where('email', $email)->first();
+                        $isNewUser = false;
                         if (!$user) {
+                            $isNewUser = true;
                             $baseSlug = Str::slug($name, '_') ?: 'user';
                             $uniqueSlug = $baseSlug;
                             $count = 1;
@@ -261,17 +295,26 @@ class UserController extends Controller
                                 'otp' => '123456',
                                 'otp_link_status' => 'yes',
                             ]);
+                            $this->sendRegistrationEmails($user);
                         }
+
+                        // Seamless login: Just log them in directly! Never show 'already registered' errors!
                         Auth::login($user);
                         session()->put('adminUserId', $user->id);
                         session()->put('type', $user->type);
                         session()->put('adminName', $user->name);
                         if (empty($user->phone)) {
                             session()->put('google_first_login_modal', true);
+                        } else {
+                            session()->forget('google_first_login_modal');
                         }
 
+                        $welcomeMsg = $isNewUser 
+                            ? 'Welcome! Account created successfully with 1-Day Free Trial.'
+                            : 'Welcome back, ' . $user->name . '!';
+
                         return redirect('admin/dashboard')->with([
-                            'messege' => 'Signed in with Google successfully!',
+                            'messege' => $welcomeMsg,
                             'alert-type' => 'success'
                         ]);
                     }
@@ -334,56 +377,9 @@ class UserController extends Controller
     public function login_post(Request $request)
     {
         $request->validate([
-            'email' => 'required',
+            'email' => 'required|email',
             'password' => 'required',
         ]);
-
-        // When any user logs in, create account 1 time with same email if not existing yet
-        $existingUser = User::where('email', $request->email)->first();
-        if (!$existingUser) {
-            $baseSlug = Str::slug(explode('@', $request->email)[0], '_');
-            if (empty($baseSlug)) {
-                $baseSlug = 'user';
-            }
-            $uniqueSlug = $baseSlug;
-            $count = 1;
-            while (User::where('name_url', $uniqueSlug)->exists()) {
-                $uniqueSlug = $baseSlug . '_' . $count;
-                $count++;
-            }
-
-            $newUser = User::create([
-                'user_unique_id' => Str::random(10),
-                'name' => ucfirst(explode('@', $request->email)[0]),
-                'name_url' => $uniqueSlug,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'phone' => '',
-                'type' => 'user',
-                'status' => 'active',
-                'expiry_date' => date('Y-m-d', strtotime('+1 day')),
-                'spin_whell_round' => 100,
-                'default_background' => 'on',
-                'default_spinn' => '1',
-                'note' => 'Auto-created on first login (1-Day Trial)',
-                'otp' => '123456',
-                'otp_link_status' => 'yes',
-            ]);
-
-            // Send emails to new user and admin
-            $this->sendRegistrationEmails($newUser);
-
-            Auth::login($newUser);
-            session()->put('adminUserId', $newUser->id);
-            session()->put('type', $newUser->type);
-            session()->put('adminName', $newUser->name);
-
-            $notification = array(
-                'messege' => 'Welcome! Account created successfully with 1-Day Free Trial.',
-                'alert-type' => 'success'
-            );
-            return redirect('admin/dashboard')->with($notification);
-        }
 
         $credentials = $request->only('email', 'password');
         if (Auth::attempt($credentials)) {
@@ -432,10 +428,10 @@ class UserController extends Controller
         }
 
         $notification = array(
-            'messege' => 'Login details are Invalid',
+            'messege' => 'Invalid email or password. Please try again.',
             'alert-type' => 'error'
         );
-        return back()->with($notification);
+        return back()->with($notification)->withInput();
     }
 
     public function otp_verify_page()
