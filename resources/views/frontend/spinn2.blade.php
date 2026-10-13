@@ -839,39 +839,36 @@
                   </div>
                 </div>
 
+                @php
+                  $hasWhatsapp = (!isset($FormFields) || $FormFields->whatsapp_no != 'off');
+                  $hasEmail = (!empty($FormFields) && $FormFields->email == 'on');
+                @endphp
+
                 <div class="form-row">
                   <div class="form-group col-md-6 col-12">
                     <label for="name">Name</label>
                     <input type="text" name="name" class="form-control" id="name" placeholder="Enter your full name" required>
                   </div>
                   <div class="form-group col-md-6 col-12">
-                    <label for="phone">Mobile Number</label>
-                    <input type="text" name="phone" class="form-control" id="phone" min="10" onkeyup="numOnly(this)" onblur="numOnly(this)" maxlength="10" placeholder="10 Digit Mobile Number" required>
+                    <label for="phone">
+                      @if($hasWhatsapp)
+                        <i class="fab fa-whatsapp text-success mr-1"></i> Mobile / WhatsApp Number
+                      @else
+                        Mobile Number
+                      @endif
+                    </label>
+                    <input type="text" name="phone" class="form-control" id="phone" min="10" onkeyup="numOnly(this)" onblur="numOnly(this)" maxlength="10" placeholder="{{ $hasWhatsapp ? '10 Digit Mobile / WhatsApp Number' : '10 Digit Mobile Number' }}" required>
+                    <input type="hidden" name="whatsapp_number" id="whatsapp_number">
                     <span id="phone_error" style="color: #ef4444; font-size: 0.8rem; font-weight: 600;"></span>
                   </div>
                 </div>
 
-                @php
-                  $hasWhatsapp = (!empty($FormFields) && $FormFields->whatsapp_no == 'on');
-                  $hasEmail = (!empty($FormFields) && $FormFields->email == 'on');
-                @endphp
-
-                @if ($hasWhatsapp || $hasEmail)
+                @if ($hasEmail)
                 <div class="form-row">
-                  @if ($hasWhatsapp)
-                  <div class="form-group {{ $hasEmail ? 'col-md-6 col-12' : 'col-12' }}">
-                    <label for="whatsapp_number">WhatsApp Number</label>
-                    <input type="text" name="whatsapp_number" class="form-control" min="10" onkeyup="wpNumOnly(this)" onblur="numOnly(this)" maxlength="10" id="whatsapp_number" placeholder="10 Digit WhatsApp Number" required>
-                    <span id="wp_phone_error" style="color: #ef4444; font-size: 0.8rem; font-weight: 600;"></span>
-                  </div>
-                  @endif
-
-                  @if ($hasEmail)
-                  <div class="form-group {{ $hasWhatsapp ? 'col-md-6 col-12' : 'col-12' }}">
+                  <div class="form-group col-12">
                     <label for="email">Email Address</label>
                     <input type="email" name="email" class="form-control" id="email" placeholder="example@gmail.com">
                   </div>
-                  @endif
                 </div>
                 @endif
 
@@ -997,13 +994,17 @@
         $('.form_submit_button').attr('disabled','disabled');
         if (numericValue.length !== 10) {
             const errorMessageSpan = document.getElementById("phone_error");
-            errorMessageSpan.textContent = 'Enter Valid 10 Digit Number';
+            if (errorMessageSpan) errorMessageSpan.textContent = 'Enter Valid 10 Digit Number';
             selector.value = numericValue;
         } else {
             const errorMessageSpan = document.getElementById("phone_error");
-            errorMessageSpan.textContent = '';
+            if (errorMessageSpan) errorMessageSpan.textContent = '';
             selector.value = numericValue;
             $('.form_submit_button').removeAttr('disabled');
+        }
+        var wpInput = document.getElementById('whatsapp_number');
+        if (wpInput) {
+            wpInput.value = numericValue;
         }
     }
       	
@@ -1427,10 +1428,13 @@
 
       $("#spinner_form").on('submit',(function(e) {
         e.preventDefault();
+        var phone  = $('#phone').val();
+        if (!$('#whatsapp_number').val()) {
+          $('#whatsapp_number').val(phone);
+        }
         var name  = $('#name').val();
         var email  = $('#email').val();
         var whatsapp_number  = $('#whatsapp_number').val();
-        var phone  = $('#phone').val();
         var address  = $('#address').val();
         var bike_model_id  = $('#bike_model_id').val();
  

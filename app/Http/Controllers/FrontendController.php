@@ -403,11 +403,16 @@ class FrontendController extends Controller
                     /***********document upload ************/
 
                     date_default_timezone_set("Asia/Calcutta"); 
+                    $userDate = User::where('id', $Spinner->created_by)->first();
+                    $FormFields = FormFields::where('user_id', $userDate->id ?? $Spinner->created_by)->first();
+                    $hasWhatsapp = (!isset($FormFields) || $FormFields->whatsapp_no != 'off');
+                    $whatsapp_number = $hasWhatsapp ? (!empty($request->whatsapp_number) ? $request->whatsapp_number : $request->phone) : null;
+
                     $arr = array(
                         'name'=>$request->name,
                         'email'=>$request->email,
                         'phone'=>$request->phone,
-                        'whatsapp_number'=>$request->whatsapp_number,
+                        'whatsapp_number'=>$whatsapp_number,
                         'schreenshot'=>$url,
                         'spinner_id'=>$Spinner->id,
                         'camping_id'=>$Spinner->camping_id,

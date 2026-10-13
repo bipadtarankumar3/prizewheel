@@ -481,46 +481,51 @@ class SpinnerController extends Controller
 
             
     public function downloadSpinnerFormListPdf(Request $request){
-
         if(Auth::check()){
-                //dd($request->all());
-                $id = $request->checkbox;
-                $campaign_id = $request->campaign_id;
-            if ($id != null) {
-                $array['SpinnerForm'] = SpinnerForm::
-                    select(
-                        'spinner_forms.id',
-                        'spinner_forms.name',
-                        'spinner_forms.email',
-                        'spinner_forms.whatsapp_number',
-                        'spinner_forms.phone',
-                        'spinner_forms.address',
-                        'spinner_forms.schreenshot',
-                        'spinner_forms.spinner_id',
-                        'spinner_forms.camping_id',
-                        'spinner_forms.bike_model_id',
-                        'spinner_forms.mac_address',
-                        'spinner_forms.status',
-                        'spinner_forms.created_at',
-                        'bike_models.name as bike_name',
-                        'spinners.name as spinner_name',
-                        )
-                    ->leftJoin('bike_models','bike_models.id','spinner_forms.bike_model_id')
-                    ->leftJoin('spinners','spinners.id','spinner_forms.spinner_id')
-                    ->where('spinner_forms.camping_id',$campaign_id)
-                    ->whereIn('spinner_forms.id',$id)
-                    ->get();
+            $id = $request->checkbox;
+            $campaign_id = $request->campaign_id;
+            $selectAll = $request->select_all_leads == '1' || $request->has('select_all');
 
-                    $customPaper = array(0,0,720,1440);
+            $query = SpinnerForm::
+                select(
+                    'spinner_forms.id',
+                    'spinner_forms.name',
+                    'spinner_forms.email',
+                    'spinner_forms.whatsapp_number',
+                    'spinner_forms.phone',
+                    'spinner_forms.address',
+                    'spinner_forms.schreenshot',
+                    'spinner_forms.spinner_id',
+                    'spinner_forms.camping_id',
+                    'spinner_forms.bike_model_id',
+                    'spinner_forms.mac_address',
+                    'spinner_forms.status',
+                    'spinner_forms.created_at',
+                    'bike_models.name as bike_name',
+                    'spinners.name as spinner_name',
+                )
+                ->leftJoin('bike_models','bike_models.id','spinner_forms.bike_model_id')
+                ->leftJoin('spinners','spinners.id','spinner_forms.spinner_id')
+                ->where('spinner_forms.camping_id', $campaign_id);
 
-                    $array['camping'] = Camping::where('id',$campaign_id)->first();
-            $pdf = PDF::loadView('user.spinner_form.spinnerFormListPdf', $array)->setPaper($customPaper,'portrait');
-        
-            return $pdf->download('spinnerFormList.pdf');
-            } else {
-                return back();
+            // If specific leads selected and NOT select all, filter by those IDs
+            if (!empty($id) && !$selectAll) {
+                $query->whereIn('spinner_forms.id', (array)$id);
             }
-                  
+            // Otherwise, download ALL leads of that campaign
+
+            $array['SpinnerForm'] = $query->orderBy('spinner_forms.id', 'asc')->get();
+
+            if ($array['SpinnerForm']->isEmpty()) {
+                return back()->with('error', 'No leads found to download for this campaign.');
+            }
+
+            $customPaper = array(0, 0, 720, 1440);
+            $array['camping'] = Camping::where('id', $campaign_id)->first();
+            $pdf = PDF::loadView('user.spinner_form.spinnerFormListPdf', $array)->setPaper($customPaper, 'portrait');
+
+            $fileName = !empty($array['camping']->title) ? \Illuminate\Support\Str::slug($array['camping']->title) . '_leads.pdf' : 'campaign_leads.pdf';
+            return $pdf->download($fileName);
         }
     }
 
@@ -539,10 +544,7 @@ class SpinnerController extends Controller
     }
 
     public function spinner_form_details($id){
-
         if(Auth::check()){
-
-            $where = "spinner_forms.id='$id'";
             $array['SpinnerForm'] = SpinnerForm::
             select(
                 'spinner_forms.id',
@@ -560,13 +562,15 @@ class SpinnerController extends Controller
                 'spinner_forms.created_at',
                 'bike_models.name as bike_name',
                 'spinners.name as spinner_name',
-                )
+                'campings.title as campaign_name'
+            )
             ->leftJoin('bike_models','bike_models.id','spinner_forms.bike_model_id')
             ->leftJoin('spinners','spinners.id','spinner_forms.spinner_id')
-            ->whereRaw($where)
+            ->leftJoin('campings','campings.id','spinner_forms.camping_id')
+            ->where('spinner_forms.id', $id)
             ->first();
             
-            return view('user.spinner_form.spinner_form_details',$array);
+            return view('user.spinner_form.spinner_form_details', $array);
         }
     }
 

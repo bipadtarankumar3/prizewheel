@@ -137,12 +137,11 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth']], function () {
 
 
     // ----------------- Review Links ------------------------
-    Route::any('review_links', [ReviewController::class,'review_links']);
-    Route::any('review_links_form', [ReviewController::class,'review_links_form']);
-    Route::post('add_review_links', [ReviewController::class,'add_review_links']);
-    Route::get('edit_review_links/{id}', [ReviewController::class,'edit_review_links']);
-    Route::get('delete_review_links/{id}', [ReviewController::class,'delete_review_links']);
-
+    // Route::any('review_links', [ReviewController::class,'review_links']);
+    // Route::any('review_links_form', [ReviewController::class,'review_links_form']);
+    // Route::post('add_review_links', [ReviewController::class,'add_review_links']);
+    // Route::get('edit_review_links/{id}', [ReviewController::class,'edit_review_links']);
+    // Route::get('delete_review_links/{id}', [ReviewController::class,'delete_review_links']);
     // ----------------- Review Links End------------------------
 
 
@@ -158,17 +157,18 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth']], function () {
     Route::post('downloadFormCampingPdf', [SpinnerController::class,'downloadFormCampingPdf']);
     Route::post('downloadSpinnerFormListPdf', [SpinnerController::class,'downloadSpinnerFormListPdf']);
     Route::any('spinner_form_list/{id}', [SpinnerController::class,'spinner_form_list']);
+    Route::any('spinner_form_details/{id}', [SpinnerController::class,'spinner_form_details']);
     Route::any('delete_spinner_form_list/{id}', [SpinnerController::class,'delete_spinner_form_list']);
     // ----------------- Spinner End------------------------
 
 
     // ----------------- Private Review ------------------------
-    Route::any('private_review_list', [PrivateReviewController::class,'private_review_list']);
-    Route::get('add_private_review_page', [PrivateReviewController::class,'add_private_review_page']);
-    Route::post('add_private_review', [PrivateReviewController::class,'add_private_review']);
-    Route::post('download_private_review_Pdf', [PrivateReviewController::class,'download_private_review_Pdf']);
-    Route::get('edit_private_review/{id}', [PrivateReviewController::class,'edit_private_review']);
-    Route::get('delete_private_review/{id}', [PrivateReviewController::class,'delete_private_review']);
+    // Route::any('private_review_list', [PrivateReviewController::class,'private_review_list']);
+    // Route::get('add_private_review_page', [PrivateReviewController::class,'add_private_review_page']);
+    // Route::post('add_private_review', [PrivateReviewController::class,'add_private_review']);
+    // Route::post('download_private_review_Pdf', [PrivateReviewController::class,'download_private_review_Pdf']);
+    // Route::get('edit_private_review/{id}', [PrivateReviewController::class,'edit_private_review']);
+    // Route::get('delete_private_review/{id}', [PrivateReviewController::class,'delete_private_review']);
     // ----------------- Private Review End------------------------
 
 

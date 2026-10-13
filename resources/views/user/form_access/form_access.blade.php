@@ -248,19 +248,19 @@
                                     </div>
                                     <label class="switch-ios mb-0">
                                         <input type="checkbox" name="whatsapp_no" id="toggle_whatsapp"
-                                               @if(isset($FormFields) && $FormFields->whatsapp_no == 'on') checked @endif>
+                                               {{ (!isset($FormFields) || $FormFields->whatsapp_no != 'off') ? 'checked' : '' }}>
                                         <span class="slider-ios"></span>
                                     </label>
                                 </div>
                                 <div class="field-title-text">WhatsApp Number</div>
                                 <div class="field-desc-text">
-                                    Capture client's WhatsApp contact number to send instant prize codes and promo updates.
+                                    Capture client's WhatsApp contact number (unified as 1 "Mobile / WhatsApp Number" field in the form).
                                 </div>
                             </div>
                             <div class="pt-2 border-top d-flex align-items-center justify-content-between">
                                 <span class="badge badge-light border text-muted">Input Type: Tel</span>
-                                <span class="font-weight-bold text-success" id="badge_whatsapp_status">
-                                    {{ (isset($FormFields) && $FormFields->whatsapp_no == 'on') ? 'Active' : 'Disabled' }}
+                                <span class="font-weight-bold {{ (!isset($FormFields) || $FormFields->whatsapp_no != 'off') ? 'text-success' : 'text-muted' }}" id="badge_whatsapp_status">
+                                    {{ (!isset($FormFields) || $FormFields->whatsapp_no != 'off') ? 'Active' : 'Disabled' }}
                                 </span>
                             </div>
                         </div>
@@ -449,14 +449,14 @@
                                 <input type="text" class="form-control form-control-sm bg-white" placeholder="e.g. John Doe" disabled>
                             </div>
                             <div class="mb-2">
-                                <label class="text-muted font-weight-bold mb-1" style="font-size: 11px;">Mobile Number *</label>
-                                <input type="text" class="form-control form-control-sm bg-white" placeholder="+91 98765 43210" disabled>
-                            </div>
-
-                            <!-- Dynamic fields based on toggles -->
-                            <div class="mb-2 preview-field" id="sim_whatsapp" style="display: {{ (isset($FormFields) && $FormFields->whatsapp_no == 'on') ? 'block' : 'none' }};">
-                                <label class="text-success font-weight-bold mb-1" style="font-size: 11px;">WhatsApp Number</label>
-                                <input type="text" class="form-control form-control-sm bg-white border-success" placeholder="+91 WhatsApp Contact" disabled>
+                                <label class="font-weight-bold mb-1" id="sim_phone_label" style="font-size: 11px; color: {{ (!isset($FormFields) || $FormFields->whatsapp_no != 'off') ? '#10b981' : '#64748b' }};">
+                                    @if(!isset($FormFields) || $FormFields->whatsapp_no != 'off')
+                                        <i class="ti ti-brand-whatsapp text-success me-1"></i> Mobile / WhatsApp Number *
+                                    @else
+                                        Mobile Number *
+                                    @endif
+                                </label>
+                                <input type="text" class="form-control form-control-sm bg-white" id="sim_phone_input" placeholder="+91 98765 43210" disabled>
                             </div>
 
                             <div class="mb-2 preview-field" id="sim_email" style="display: {{ (isset($FormFields) && $FormFields->email == 'on') ? 'block' : 'none' }};">
@@ -530,8 +530,13 @@
 
         // Real-time phone simulator listeners
         $('#toggle_whatsapp').on('change', function() {
-            $('#sim_whatsapp').toggle(this.checked);
-            $('#badge_whatsapp_status').text(this.checked ? 'Active' : 'Disabled');
+            if (this.checked) {
+                $('#sim_phone_label').html('<i class="ti ti-brand-whatsapp text-success me-1"></i> Mobile / WhatsApp Number *').css('color', '#10b981');
+                $('#badge_whatsapp_status').text('Active').removeClass('text-muted').addClass('text-success');
+            } else {
+                $('#sim_phone_label').text('Mobile Number *').css('color', '#64748b');
+                $('#badge_whatsapp_status').text('Disabled').removeClass('text-success').addClass('text-muted');
+            }
         });
 
         $('#toggle_email').on('change', function() {

@@ -20,22 +20,32 @@ class FormFieldsController extends Controller
     public function form_access(Request $request){
 
         if(Auth::check()){
-            $array['FormFields'] = FormFields::where('user_id',Auth::user()->id)->first();
-            // dd($user);
-            return view('user.form_access.form_access',$array);
+            $formFields = FormFields::where('user_id', Auth::user()->id)->first();
+            if (!$formFields) {
+                $formFields = FormFields::create([
+                    'whatsapp_no' => 'on',
+                    'user_id' => Auth::user()->id,
+                ]);
+            } elseif (is_null($formFields->whatsapp_no) || $formFields->whatsapp_no === '') {
+                $formFields->whatsapp_no = 'on';
+                $formFields->save();
+            }
+            $array['FormFields'] = $formFields;
+            return view('user.form_access.form_access', $array);
         }
     }
 
     public function form_access_post(Request $request){
 
         if(Auth::check()){
+            $whatsapp_no = $request->has('whatsapp_no') ? 'on' : 'off';
             
             if ($request->id !='') {
 
                 FormFields::where('id',$request->id)->update([
                     // 'name' => $request->name,
                     // 'number' => $request->number,
-                    'whatsapp_no' => $request->whatsapp_no,
+                    'whatsapp_no' => $whatsapp_no,
                     'email' => $request->email,
                     'address' => $request->address,
                     'choose_option' => $request->choose_option,
@@ -55,7 +65,7 @@ class FormFieldsController extends Controller
                 FormFields::create([
                     // 'name' => $request->name,
                     // 'number' => $request->number,
-                    'whatsapp_no' => $request->whatsapp_no,
+                    'whatsapp_no' => $whatsapp_no,
                     'email' => $request->email,
                     'address' => $request->address,
                     'choose_option' => $request->choose_option,

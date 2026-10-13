@@ -218,13 +218,14 @@
         color: #ffffff !important;
     }
 
-    /* Modal Styling */
+    /* Modal Styling - Light & Attractive */
     .atom-modal-header {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-        color: #ffffff;
+        background: #ffffff;
+        color: #0f172a;
+        border-bottom: 1px solid #e2e8f0;
         border-top-left-radius: 18px;
         border-top-right-radius: 18px;
-        padding: 18px 24px;
+        padding: 16px 22px;
     }
 </style>
 
@@ -377,6 +378,7 @@
     <form action="{{ URL::to('admin/downloadSpinnerFormListPdf') }}" method="POST" id="leadsPdfForm">
         @csrf
         <input type="hidden" name="campaign_id" value="{{ $id }}">
+        <input type="hidden" name="select_all_leads" id="selectAllHidden" value="0">
 
         <div class="user-table-card">
             <div class="table-toolbar-strip">
@@ -388,19 +390,15 @@
                         </label>
                     </div>
                 </div>
-
-                <div>
-                    <button type="submit" class="btn btn-info btn-sm font-weight-bold rounded-pill px-3">
-                        <i class="ti ti-file-text me-1"></i> Download Selected PDF
-                    </button>
-                </div>
             </div>
 
             <div class="table-responsive">
                 <table id="zero_config" class="table table-hover mb-0 text-nowrap">
                     <thead>
                         <tr>
-                            <th width="40" class="text-center">#</th>
+                            <th width="40" class="text-center">
+                                <input type="checkbox" id="header_select_all" title="Select All Leads" style="cursor: pointer;">
+                            </th>
                             <th>Sl.</th>
                             <th>Customer Profile</th>
                             <th>WhatsApp</th>
@@ -516,21 +514,24 @@
      ============================================================================ -->
 <div class="modal fade" id="add_spinner_modal" tabindex="-1" role="dialog" aria-labelledby="modalLeadDetails" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 18px; overflow: hidden;">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 18px; overflow: hidden; background: #ffffff;">
             <div class="atom-modal-header d-flex align-items-center justify-content-between">
-                <div>
-                    <span class="badge badge-warning text-dark font-weight-bold mr-2">LEAD DOSSIER</span>
-                    <span class="font-weight-bold" style="font-size: 1.05rem;">Customer Lead Details</span>
+                <div class="d-flex align-items-center gap-2">
+                    <div style="width: 36px; height: 36px; border-radius: 10px; background: #fff7ed; color: #ea580c; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                        <i class="ti ti-id"></i>
+                    </div>
+                    <div>
+                        <h5 class="font-weight-bold text-dark mb-0" style="font-size: 1.05rem;">Customer Lead Details</h5>
+                        <small class="text-muted" style="font-size: 0.75rem;">Full dossier of customer spin and prize enquiry</small>
+                    </div>
                 </div>
-                <button type="button" class="close text-white opacity-75" data-dismiss="modal" aria-label="Close" onclick="hide_modal()">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close" onclick="hide_modal()"></button>
             </div>
             <div class="modal-body p-0 spinner_body">
                 <!-- Loaded dynamically via AJAX -->
             </div>
             <div class="modal-footer bg-light border-top-0 d-flex justify-content-end p-3">
-                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-4" data-dismiss="modal" onclick="hide_modal()">
+                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-4 font-weight-bold" data-bs-dismiss="modal" data-dismiss="modal" onclick="hide_modal()">
                     Close
                 </button>
             </div>
@@ -543,42 +544,164 @@
 @section('js')
 <script>
     function spinner_form_details(id) {
+        var modalEl = document.getElementById('add_spinner_modal');
+        $('.spinner_body').html('<div class="text-center py-5"><div class="spinner-border text-warning" role="status"></div><div class="mt-2 text-muted small font-weight-bold">Loading full customer details...</div></div>');
+
+        // Open modal via Bootstrap 5 or jQuery
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        } else if ($.fn.modal) {
+            $('#add_spinner_modal').modal('show');
+        }
+
         $.ajax({
             type: "GET",
-            url: "{{ URL::to('admin/spinner_form_details/') }}/" + id,
+            url: "{{ URL::to('admin/spinner_form_details') }}/" + id,
             success: function(data) {
                 $('.spinner_body').html(data);
-                $('#add_spinner_modal').modal('show');
             },
             error: function(err) {
-                console.error(err);
+                console.error('Failed to load lead details:', err);
+                $('.spinner_body').html('<div class="alert alert-danger m-3 font-weight-bold">Failed to load customer details. Please try again.</div>');
             }
         });
     }
 
     function hide_modal() {
-        $('#add_spinner_modal').modal('hide');
+        var modalEl = document.getElementById('add_spinner_modal');
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            var instance = bootstrap.Modal.getInstance(modalEl);
+            if (instance) instance.hide();
+        }
+        if ($.fn.modal) {
+            $('#add_spinner_modal').modal('hide');
+        }
     }
 
-    $('#select_all').on('click', function() {
-        var isChecked = this.checked;
-        $('.lead-chk').prop('checked', isChecked);
-    });
-
     if ($('#zero_config').length) {
-        $('#zero_config').DataTable({
+        var table = $('#zero_config').DataTable({
             dom: 'Bfrtip',
             pageLength: 25,
             order: [[ 1, 'asc' ]],
             buttons: [
                 {
                     extend: 'pdfHtml5',
+                    text: '<i class="ti ti-file-text me-1"></i> PDF',
                     orientation: 'landscape',
                     pageSize: 'LEGAL',
-                    title: 'Campaign Captured Leads Registry'
+                    title: '{{ $camping->title ?? "Campaign" }} - Leads Registry',
+                    exportOptions: {
+                        columns: [1, 2, 3, 4, 5, 6, 7, 8],
+                        modifier: {
+                            page: 'all'
+                        }
+                    }
                 },
-                'copy', 'excel', 'print'
+                {
+                    extend: 'copy',
+                    text: '<i class="ti ti-copy me-1"></i> Copy',
+                    exportOptions: {
+                        columns: [1, 2, 3, 4, 5, 6, 7, 8],
+                        modifier: {
+                            page: 'all'
+                        }
+                    }
+                },
+                {
+                    extend: 'excel',
+                    text: '<i class="ti ti-file-spreadsheet me-1"></i> Excel',
+                    title: '{{ $camping->title ?? "Campaign" }} - Leads Registry',
+                    exportOptions: {
+                        columns: [1, 2, 3, 4, 5, 6, 7, 8],
+                        modifier: {
+                            page: 'all'
+                        }
+                    }
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="ti ti-printer me-1"></i> Print',
+                    exportOptions: {
+                        columns: [1, 2, 3, 4, 5, 6, 7, 8],
+                        modifier: {
+                            page: 'all'
+                        }
+                    }
+                }
             ]
+        });
+
+        function updateSelectionStatus() {
+            var total = table.$('input.lead-chk').length;
+            var checked = table.$('input.lead-chk:checked').length;
+            var allChecked = total > 0 && checked === total;
+            var someChecked = checked > 0 && checked < total;
+
+            $('#select_all, #header_select_all').prop('checked', allChecked);
+            $('#select_all, #header_select_all').prop('indeterminate', someChecked);
+
+            if (allChecked) {
+                $('#selectAllHidden').val('1');
+                $('#downloadBtnText').text('Download All Leads (PDF)');
+            } else if (checked > 0) {
+                $('#selectAllHidden').val('0');
+                $('#downloadBtnText').text('Download Selected PDF (' + checked + ')');
+            } else {
+                $('#selectAllHidden').val('0');
+                $('#downloadBtnText').text('Download All Leads (PDF)');
+            }
+        }
+
+        // Click on top "Select All Leads" or table header checkbox
+        $('#select_all, #header_select_all').on('change', function() {
+            var isChecked = this.checked;
+            $('#select_all, #header_select_all').prop('checked', isChecked);
+            $('#select_all, #header_select_all').prop('indeterminate', false);
+
+            // Check / uncheck across ALL DataTables pages
+            table.$('input.lead-chk').prop('checked', isChecked);
+            $('#selectAllHidden').val(isChecked ? '1' : '0');
+
+            if (isChecked) {
+                $('#downloadBtnText').text('Download All Leads (PDF)');
+            } else {
+                $('#downloadBtnText').text('Download All Leads (PDF)');
+            }
+        });
+
+        // Individual checkbox change (delegated to support all pages)
+        $('#zero_config').on('change', 'input.lead-chk', function() {
+            updateSelectionStatus();
+        });
+
+        // Sync state on pagination / sorting / filtering
+        table.on('draw', function() {
+            updateSelectionStatus();
+        });
+
+        // Initial sync
+        updateSelectionStatus();
+
+        // Form submit handler - inject checked items from non-active pages if not select all
+        $('#leadsPdfForm').on('submit', function() {
+            if ($('#select_all').is(':checked') || $('#header_select_all').is(':checked')) {
+                $('#selectAllHidden').val('1');
+            }
+
+            $('#leadsPdfForm input[data-dynamic-chk="1"]').remove();
+
+            if ($('#selectAllHidden').val() !== '1') {
+                table.$('input.lead-chk:checked').each(function() {
+                    if (!$.contains(document, this)) {
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: 'checkbox[]',
+                            value: this.value,
+                            'data-dynamic-chk': '1'
+                        }).appendTo('#leadsPdfForm');
+                    }
+                });
+            }
         });
     }
 </script>
