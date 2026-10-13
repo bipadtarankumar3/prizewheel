@@ -3,6 +3,10 @@
 
 <div class="container-fluid">
 
+@php
+  $storeUrl = url('u/' . (Auth::user()->name_url ?: Auth::user()->id));
+@endphp
+
 @if (Auth::user()->type == 'admin')
   {{-- ==========================================
        SUPER ADMIN DASHBOARD
@@ -870,7 +874,7 @@
       btn.style.pointerEvents = 'none';
     }
 
-    const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&margin=20&data={{ urlencode($storeUrl) }}";
+    const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&margin=20&data={{ urlencode($storeUrl ?? '') }}";
     const filename = "{{ Str::slug(Auth::user()->name ?? 'spin-wheel') }}-qr-code.png";
 
     fetch(qrUrl)

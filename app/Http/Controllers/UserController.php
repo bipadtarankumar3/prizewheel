@@ -639,10 +639,13 @@ class UserController extends Controller
                     $adminChartStoreNames[] = $storesOnDay->pluck('name')->toArray();
                 }
 
+                $storeUrl = url('u/' . ($user->name_url ?: $user->id));
+
                 return view('admin.dashboard', compact(
                     'Users', 'ActiveUsers', 'InactiveUsers', 'ExpiredUser',
                     'TotalCampings', 'TotalSpinners', 'TotalLeads', 'TotalSpins', 'TotalVisits',
-                    'RecentUsers', 'adminChartDates', 'adminChartRegistrations', 'adminChartStoreNames'
+                    'RecentUsers', 'adminChartDates', 'adminChartRegistrations', 'adminChartStoreNames',
+                    'storeUrl'
                 ));
             }
 
@@ -828,6 +831,8 @@ class UserController extends Controller
             $ExpiredUser = 0;
             $Users = 0;
 
+            $storeUrl = url('u/' . ($user->name_url ?: $user->id));
+
             return view('admin.dashboard', compact(
                 'Camping', 'SpinnerForm', 'Spinner',
                 'activeCampingCount', 'recentLeads', 'campaigns', 'spinnerSlices',
@@ -837,7 +842,8 @@ class UserController extends Controller
                 'uniqueDevices', 'allCampaigns', 'topWinningPrizesList',
                 'hourlyCategories', 'hourlyValues',
                 'Users', 'ActiveUsers', 'InactiveUsers', 'ExpiredUser',
-                'leadCampaignId', 'leadStartDate', 'leadEndDate'
+                'leadCampaignId', 'leadStartDate', 'leadEndDate',
+                'storeUrl'
             ));
         }
   
