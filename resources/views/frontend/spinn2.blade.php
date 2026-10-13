@@ -742,8 +742,8 @@
 <div class="blast" id="blast" style="display: none">
     <div class="content">
         <div class="trophy">
-            <img src="{{asset('frontend/spinner/wheel/trophy.png')}}" class="trophy_img" alt="trophy" style="max-height: 110px; object-fit: contain;">
-            <img src="" alt="" class="spinner_image_show" style="max-height: 110px; object-fit: contain; display: none;">
+            <img src="{{asset('frontend/spinner/wheel/trophy.png')}}" class="trophy_img" alt="trophy" crossorigin="anonymous" style="max-height: 110px; object-fit: contain;">
+            <img src="" alt="" class="spinner_image_show" crossorigin="anonymous" style="max-height: 110px; object-fit: contain; display: none;">
         </div>
         <div class="text text-center">
             <h2 class="my-3">Congratulations, you won!</h2>
@@ -895,9 +895,18 @@
                 </div>
                 @endif
 
+                @if (!empty($FormFields) && $FormFields->screenshot == 'on')
+                <div id="screenshot-preview-card" style="display: none; max-width: 340px; margin: 14px auto 0;" class="p-2 bg-light rounded text-center border">
+                  <div class="d-flex align-items-center justify-content-center mb-1 text-success font-weight-bold" style="font-size: 0.8rem;">
+                    <i class="fas fa-check-circle mr-1"></i> Winning Proof Screenshot Attached
+                  </div>
+                  <img id="screenshot-preview-img" src="" alt="Proof Screenshot" style="max-height: 95px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.06); object-fit: contain;">
+                </div>
+                @endif
+
                 <div class="text-center mt-4">
                   @if (!empty($FormFields) && $FormFields->screenshot == 'on')
-                    <button type="button" class="btn btn-secondary take_screen_button mr-2" onclick="captureScreenshot('blast','screenshot-input')">
+                    <button type="button" class="btn btn-secondary take_screen_button mr-2" onclick="captureScreenshot('blast','screenshot-input', null, true)">
                       <i class="fas fa-camera mr-1"></i> Take Screenshot
                     </button>
                     <button type="submit" class="btn btn-primary form_submit_button" style="display: none">
@@ -1370,6 +1379,11 @@
                 $('.spinner_name_text').html(prizeName);
                 $('#spinner_value').val(prizeVal);
 
+                // Auto capture winning celebration card quietly while active on screen
+                setTimeout(function() {
+                    captureScreenshot('blast', 'screenshot-input', null, false);
+                }, 600);
+
                 setTimeout(() => {
                     $('#confetti-canvas').hide();
                 }, 2000);
@@ -1423,6 +1437,12 @@
       $('#ReedemModal').one('hidden.bs.modal', function(){
         $('#FormModal').modal('show');
         setTimeout(function(){ proceedingToForm = false; }, 400);
+
+        if (window.cachedWinningScreenshot) {
+          applyScreenshot(window.cachedWinningScreenshot, 'screenshot-input', null, false);
+        } else {
+          captureScreenshot('blast', 'screenshot-input', null, false);
+        }
       }).modal('hide');
     }
 
@@ -1432,6 +1452,11 @@
         if (!$('#whatsapp_number').val()) {
           $('#whatsapp_number').val(phone);
         }
+
+        if (!$('#screenshot-input').val() && window.cachedWinningScreenshot) {
+          $('#screenshot-input').val(window.cachedWinningScreenshot);
+        }
+
         var name  = $('#name').val();
         var email  = $('#email').val();
         var whatsapp_number  = $('#whatsapp_number').val();
@@ -1555,37 +1580,125 @@
       });
 
 
-      function captureScreenshot(elementId, inputId, callback) {
-        const targetElement = document.getElementById(elementId);
+      window.cachedWinningScreenshot = null;
 
-        if (!targetElement) {
-            console.error(`Element with ID "${elementId}" not found.`);
-            return;
+      function captureScreenshot(elementId, inputId, callback, isManual) {
+        var isUserClick = (isManual === true);
+        var blastEl = document.getElementById('blast');
+        var wasHidden = false;
+        var savedStyles = {};
+
+        if (elementId === 'blast' || !elementId) {
+            if (blastEl && ($(blastEl).is(':hidden') || window.getComputedStyle(blastEl).display === 'none' || blastEl.offsetHeight === 0)) {
+                wasHidden = true;
+                savedStyles = {
+                    display: blastEl.style.display,
+                    visibility: blastEl.style.visibility,
+                    position: blastEl.style.position,
+                    left: blastEl.style.left,
+                    top: blastEl.style.top,
+                    zIndex: blastEl.style.zIndex,
+                    opacity: blastEl.style.opacity
+                };
+                blastEl.style.setProperty('display', 'flex', 'important');
+                blastEl.style.setProperty('visibility', 'visible', 'important');
+                blastEl.style.setProperty('position', 'fixed', 'important');
+                blastEl.style.setProperty('left', '0px', 'important');
+                blastEl.style.setProperty('top', '0px', 'important');
+                blastEl.style.setProperty('z-index', '-9999', 'important');
+                blastEl.style.setProperty('opacity', '1', 'important');
+            }
         }
 
-        html2canvas(targetElement)
-            .then(canvas => {
-                const imageData = canvas.toDataURL("image/png");
-                const inputElement = document.getElementById(inputId);
+        var targetElement = (blastEl && blastEl.querySelector('.content')) ? blastEl.querySelector('.content') : document.getElementById(elementId);
+        if (!targetElement) {
+            targetElement = document.querySelector('#FormModal .modal-content') || document.body;
+        }
 
-                if (inputElement) {
-                    inputElement.value = imageData;
-                } else {
-                    console.warn(`Input field with ID "${inputId}" not found.`);
-                }
+        function restoreStyles() {
+            if (wasHidden && blastEl) {
+                blastEl.style.display = savedStyles.display || 'none';
+                blastEl.style.visibility = savedStyles.visibility || '';
+                blastEl.style.position = savedStyles.position || '';
+                blastEl.style.left = savedStyles.left || '';
+                blastEl.style.top = savedStyles.top || '';
+                blastEl.style.zIndex = savedStyles.zIndex || '';
+                blastEl.style.opacity = savedStyles.opacity || '';
+            }
+        }
 
-                if (callback && typeof callback === "function") {
-                    callback(imageData);
-                } else {
-                    alert("Screenshot captured successfully! Please click the 'Submit' button.");
-                    $('.take_screen_button').hide();
-                    $('.form_submit_button').show();
+        html2canvas(targetElement, {
+            useCORS: true,
+            allowTaint: true,
+            scale: 2,
+            backgroundColor: '#ffffff',
+            logging: false
+        }).then(function(canvas) {
+            restoreStyles();
+            var imageData = canvas.toDataURL("image/png");
+
+            if (!imageData || imageData === "data:," || imageData.length < 200 || !imageData.startsWith('data:image/')) {
+                var fallbackTarget = document.querySelector('#FormModal .modal-content');
+                if (fallbackTarget) {
+                    html2canvas(fallbackTarget, { scale: 1.5, useCORS: true, allowTaint: true }).then(function(fbCanvas) {
+                        var fbData = fbCanvas.toDataURL("image/png");
+                        applyScreenshot(fbData, inputId, callback, isUserClick);
+                    }).catch(function(err) {
+                        console.error("Fallback screenshot error:", err);
+                    });
+                    return;
                 }
-            })
-            .catch(error => {
-                console.error("Error capturing the screenshot:", error);
-            });
-    }
+            }
+
+            applyScreenshot(imageData, inputId, callback, isUserClick);
+        }).catch(function(error) {
+            restoreStyles();
+            console.error("Error capturing the screenshot:", error);
+            var fallbackTarget = document.querySelector('#FormModal .modal-content');
+            if (fallbackTarget) {
+                html2canvas(fallbackTarget, { scale: 1.5, useCORS: true, allowTaint: true }).then(function(fbCanvas) {
+                    var fbData = fbCanvas.toDataURL("image/png");
+                    applyScreenshot(fbData, inputId, callback, isUserClick);
+                }).catch(function(err) {
+                    console.error("Fallback screenshot error:", err);
+                });
+            }
+        });
+      }
+
+      function applyScreenshot(imageData, inputId, callback, isUserClick) {
+        if (!imageData || !imageData.startsWith('data:image/')) return;
+
+        window.cachedWinningScreenshot = imageData;
+        var inputElement = document.getElementById(inputId || 'screenshot-input');
+        if (inputElement) {
+            inputElement.value = imageData;
+        }
+
+        // Show thumbnail preview in FormModal
+        $('#screenshot-preview-img').attr('src', imageData);
+        $('#screenshot-preview-card').fadeIn(200);
+
+        // Update buttons: enable Submit, offer Retake Screenshot option
+        $('.take_screen_button').html('<i class="fas fa-camera mr-1"></i> Retake Screenshot');
+        $('.form_submit_button').show();
+
+        if (callback && typeof callback === "function") {
+            callback(imageData);
+        } else if (isUserClick) {
+            if (typeof swal === 'function') {
+                swal({
+                    title: "Screenshot Captured!",
+                    text: "Your winning proof has been attached. Please click Submit to claim your prize.",
+                    type: "success",
+                    confirmButtonText: "Ok",
+                    confirmButtonColor: "#10b981"
+                });
+            } else {
+                alert("Screenshot captured successfully! Please click the 'Submit' button.");
+            }
+        }
+      }
 
 
                 //

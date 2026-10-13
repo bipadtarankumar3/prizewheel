@@ -15,6 +15,7 @@ use App\Models\sitesetting;
 use DB;
 use Config;
 use Mail;
+use Illuminate\Support\Facades\Log;
 use App\Mail\SpinnerFormMail;
 use App\Models\ip_skip;
 
@@ -376,25 +377,35 @@ class FrontendController extends Controller
                         } catch (\Throwable $e) {
                             Log::warning("Screenshot file upload failed: " . $e->getMessage());
                         }
-                    } elseif ($request->filled('screenshot-file')) {
+                    } elseif ($request->filled('screenshot-file') || $request->filled('screenshot_file')) {
                         try {
-                            $base64Screenshot = trim($request->input('screenshot-file'));
-                            if (!empty($base64Screenshot) && preg_match('/^data:image\/(\w+);base64,/', $base64Screenshot, $type)) {
+                            $base64Screenshot = trim($request->input('screenshot-file') ?? $request->input('screenshot_file') ?? '');
+                            if (!empty($base64Screenshot) && preg_match('/^data:image\/([a-zA-Z0-9\+\-\.]+);base64,/', $base64Screenshot, $type)) {
                                 $data = substr($base64Screenshot, strpos($base64Screenshot, ',') + 1);
                                 $ext = strtolower($type[1]);
-                                if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-                                    $decoded = base64_decode($data);
-                                    if ($decoded !== false) {
-                                        $uploadDir = public_path('upload/');
-                                        if (!file_exists($uploadDir)) {
-                                            @mkdir($uploadDir, 0777, true);
-                                        }
-                                        $milisecond = round(microtime(true) * 1000);
-                                        $filename = $milisecond . "_screenshot." . $ext;
-                                        file_put_contents($uploadDir . $filename, $decoded);
-                                        $url = asset('upload/' . $filename);
-                                    }
+                                if ($ext === 'jpeg') {
+                                    $ext = 'jpg';
                                 }
+                                if (!in_array($ext, ['jpg', 'png', 'gif', 'webp'])) {
+                                    $ext = 'png';
+                                }
+                                $data = str_replace(' ', '+', $data);
+                                $decoded = base64_decode($data);
+                                if ($decoded !== false && strlen($decoded) > 50) {
+                                    $uploadDir = public_path('upload/');
+                                    if (!file_exists($uploadDir)) {
+                                        @mkdir($uploadDir, 0777, true);
+                                    }
+                                    $milisecond = round(microtime(true) * 1000);
+                                    $filename = $milisecond . "_screenshot." . $ext;
+                                    file_put_contents($uploadDir . $filename, $decoded);
+                                    $url = asset('upload/' . $filename);
+                                    Log::info("Screenshot saved successfully: " . $filename . " URL: " . $url);
+                                } else {
+                                    Log::warning("Base64 screenshot decode produced empty/invalid data.");
+                                }
+                            } else {
+                                Log::warning("Screenshot base64 format invalid. Length: " . strlen($base64Screenshot));
                             }
                         } catch (\Throwable $e) {
                             Log::warning("Base64 screenshot decode failed: " . $e->getMessage());
