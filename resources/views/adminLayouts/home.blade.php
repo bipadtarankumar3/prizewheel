@@ -957,8 +957,9 @@
 
   @php
     $popup = DB::table('popupalerts')->where('user_type','admin')->where('status','active')->orderBy('id','desc')->first();
+    $needsFirstLoginProfile = (Auth::check() && Auth::user()->type == 'user' && (session('google_first_login_modal') || empty(Auth::user()->phone)));
   @endphp
-  @if (!empty($popup))
+  @if (!empty($popup) && !$needsFirstLoginProfile)
   <!-- Modern Styled Popup Alert Modal -->
   <div class="modal fade newsShowPopupModal" id="newsShowPopupModal" tabindex="-1" aria-labelledby="newsShowPopupModalLabel" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
@@ -988,40 +989,12 @@
         </div>
 
         <!-- Modal Body -->
-        <div class="popup-modal-body">
+        <div class="popup-modal-body pb-4">
           @if (!empty($popup->popup_img))
-            <div class="popup-image-showcase-frame">
+            <div class="popup-image-showcase-frame mb-0">
               <img src="{{ $popup->popup_img }}" alt="{{ $popup->title ?? 'Announcement' }}" class="popup-main-image" loading="lazy">
             </div>
           @endif
-
-          <!-- Quick Action Contact & Info Strip -->
-          <div class="popup-quick-info-strip">
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-              <div class="d-flex align-items-center gap-2 text-muted small">
-                <i class="ti ti-shield-check text-success fs-5"></i>
-                <span class="fw-semibold text-dark">Verified Partner Support</span>
-              </div>
-              <div class="d-flex align-items-center gap-2 flex-wrap">
-                <a href="tel:+919087868584" class="popup-chip-link" title="Call Support">
-                  <i class="ti ti-phone-call text-primary"></i> +91 9087868584
-                </a>
-                <a href="https://digitalvyapari.online" target="_blank" class="popup-chip-link" title="Visit Website">
-                  <i class="ti ti-world text-primary"></i> Visit Website
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Modal Footer -->
-        <div class="popup-modal-footer">
-          <button type="button" class="btn popup-btn-dismiss" onclick="popupModalClose()" data-bs-dismiss="modal">
-            Close
-          </button>
-          <a href="https://digitalvyapari.online" target="_blank" class="btn popup-btn-action">
-            <i class="ti ti-external-link me-1"></i> Visit Website
-          </a>
         </div>
 
       </div>
@@ -1183,7 +1156,9 @@
     @if (!empty($popup) && $popup->status == 'active')
       if (!sessionStorage.getItem('popupDismissed')) {
         setTimeout(function(){ 
-          $('.newsShowPopupModal').modal('show');
+          if ($('#firstLoginModal').length === 0) {
+            $('.newsShowPopupModal').modal('show');
+          }
         }, 600);
       }
     @endif
@@ -1211,11 +1186,19 @@
     @if(Auth::check() && Auth::user()->type == 'user' && (session('google_first_login_modal') || empty(Auth::user()->phone)))
       $(document).ready(function() {
         if ($('#firstLoginModal').length) {
+          $('.newsShowPopupModal').modal('hide');
           $('#firstLoginModal').modal({
             backdrop: 'static',
             keyboard: false
           });
           $('#firstLoginModal').modal('show');
+
+          $('#firstLoginModal').on('shown.bs.modal', function () {
+            var $phoneInput = $(this).find('input[name="phone"]');
+            if ($phoneInput.length) {
+              $phoneInput.focus();
+            }
+          });
         }
       });
     @endif
@@ -1256,7 +1239,7 @@
               <label class="form-label fw-bold text-dark fs-3 mb-1">WhatsApp / Contact Number <span class="text-danger">*</span></label>
               <div class="input-group">
                 <span class="input-group-text bg-light border-end-0"><i class="ti ti-brand-whatsapp text-success"></i></span>
-                <input type="tel" name="phone" class="form-control border-start-0" value="{{ Auth::user()->phone }}" required placeholder="+91 98765 43210" />
+                <input type="tel" name="phone" id="firstLoginPhone" class="form-control border-start-0" value="{{ Auth::user()->phone }}" required placeholder="10 Digit Mobile / WhatsApp Number" autocomplete="tel" />
               </div>
               <small class="text-muted fs-2">We send spin notifications and customer leads to this WhatsApp number.</small>
             </div>

@@ -667,40 +667,12 @@
         </div>
 
         <!-- Modal Body -->
-        <div class="popup-modal-body">
+        <div class="popup-modal-body pb-4">
           @if (!empty($popup->popup_img))
-            <div class="popup-image-showcase-frame">
+            <div class="popup-image-showcase-frame mb-0">
               <img src="{{ $popup->popup_img }}" alt="{{ $popup->title ?? 'Announcement' }}" class="popup-main-image" loading="lazy">
             </div>
           @endif
-
-          <!-- Quick Action Contact & Info Strip -->
-          <div class="popup-quick-info-strip">
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-              <div class="d-flex align-items-center gap-2 text-muted small">
-                <i class="ti ti-shield-check text-success fs-5"></i>
-                <span class="fw-semibold text-dark">Verified Partner Support</span>
-              </div>
-              <div class="d-flex align-items-center gap-2 flex-wrap">
-                <a href="tel:+919087868584" class="popup-chip-link" title="Call Support">
-                  <i class="ti ti-phone-call text-primary"></i> +91 9087868584
-                </a>
-                <a href="https://digitalvyapari.online" target="_blank" class="popup-chip-link" title="Visit Website">
-                  <i class="ti ti-world text-primary"></i> Visit Website
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Modal Footer -->
-        <div class="popup-modal-footer">
-          <button type="button" class="btn popup-btn-dismiss" onclick="popupModalClose()" data-bs-dismiss="modal">
-            Close
-          </button>
-          <a href="https://digitalvyapari.online" target="_blank" class="btn popup-btn-action">
-            <i class="ti ti-external-link me-1"></i> Visit Website
-          </a>
         </div>
 
       </div>
