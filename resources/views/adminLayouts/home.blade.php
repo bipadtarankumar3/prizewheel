@@ -479,7 +479,7 @@
                           <span class="qr-flow-badge-landing">Wheel Mode</span>
                         </div>
                         <p class="mb-0 text-white-50 fs-2 mt-2">
-                          Choose how winning slices are calculated for customer spins:
+                          Choose how prizes are given to customers when they spin:
                         </p>
                       </div>
 
@@ -508,13 +508,13 @@
                               @endif
                             </div>
                           </div>
-                          <div class="d-flex align-items-center gap-2 fs-2 text-dark mb-1">
-                            <i class="ti ti-circle-check text-success fs-3"></i>
-                            <span><strong>Probability control:</strong> Wins calculated by set % chances</span>
+                          <div class="d-flex align-items-start gap-2 fs-2 text-dark mb-2">
+                            <i class="ti ti-check text-success fs-4 mt-1 flex-shrink-0"></i>
+                            <span><strong>More Quantity = More Wins:</strong> Set higher chances for prizes you have more stock of so they win more often.</span>
                           </div>
-                          <div class="d-flex align-items-center gap-2 fs-2 text-dark">
-                            <i class="ti ti-shield-check text-warning fs-3"></i>
-                            <span><strong>Balanced gifts:</strong> Ideal for tiered inventory & budget control</span>
+                          <div class="d-flex align-items-start gap-2 fs-2 text-dark">
+                            <i class="ti ti-ban text-danger fs-4 mt-1 flex-shrink-0"></i>
+                            <span><strong>Chance 0 = Never Won:</strong> Any prize set with <strong>0 chances</strong> will <strong>never</strong> be won.</span>
                           </div>
                         </div>
 
@@ -540,13 +540,13 @@
                               @endif
                             </div>
                           </div>
-                          <div class="d-flex align-items-center gap-2 fs-2 text-primary mb-1">
-                            <i class="ti ti-bolt text-primary fs-3"></i>
-                            <span><strong>Skip logic:</strong> Skips 0-value & flagged skip slices</span>
+                          <div class="d-flex align-items-start gap-2 fs-2 text-dark mb-2">
+                            <i class="ti ti-player-skip-forward text-primary fs-4 mt-1 flex-shrink-0"></i>
+                            <span><strong>Skip = Never Ever Won:</strong> Slices marked with <strong>"Skip"</strong> will <strong>never ever</strong> be won as a prize.</span>
                           </div>
-                          <div class="d-flex align-items-center gap-2 fs-2 text-primary">
-                            <i class="ti ti-external-link text-primary fs-3"></i>
-                            <span>Guarantees customer lands on available valid prizes</span>
+                          <div class="d-flex align-items-start gap-2 fs-2 text-dark">
+                            <i class="ti ti-gift text-primary fs-4 mt-1 flex-shrink-0"></i>
+                            <span><strong>Active Prizes Only:</strong> Customers only win from available prizes that have quantity and are not skipped.</span>
                           </div>
                         </div>
 
