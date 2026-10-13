@@ -332,7 +332,7 @@
                           </a>
                         @endif
                         @if (Auth::user()->type  == 'user')
-                        <a href="{{URL::to('admin/view_qr')}}" class="btn btn-outline-warning my-2">Download QR</a>
+                        <a href="{{URL::to('admin/print_qr_code')}}" target="_blank" class="btn btn-outline-warning my-2">Download QR Stand</a>
                           <a href="{{URL::to('u/'.Auth::user()->name_url)}}" target="_blank" class="btn btn-outline-success my-2">Visit My Site</a>
                            <a href="#" onclick="clearAllSpain()" class="btn btn-outline-danger my-2" >Clear All Spin </a>
                         

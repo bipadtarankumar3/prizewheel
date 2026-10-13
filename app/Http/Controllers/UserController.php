@@ -1513,12 +1513,8 @@ class UserController extends Controller
 
     
     public function view_qr(Request $request){
-
         if(Auth::check()){
-            
- 
-            return view('admin/view_qr');
-            
+            return redirect('admin/print_qr_code');
         }
     }
 

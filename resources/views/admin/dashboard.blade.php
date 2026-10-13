@@ -694,9 +694,9 @@
         <p class="text-muted small mb-3">Place this QR code at your store counter or checkout table for instant customer spins!</p>
         
         <div class="d-grid gap-2">
-          <a href="{{ url('admin/view_qr') }}" class="btn btn-dark rounded-3 fw-bold py-2">
-            <i class="ti ti-qrcode me-1"></i> View Full QR Stand
-          </a>
+          <button type="button" onclick="downloadNormalQr(this)" class="btn btn-dark rounded-3 fw-bold py-2">
+            <i class="ti ti-download me-1"></i> Download QR
+          </button>
           <a href="{{ url('admin/print_qr_code') }}" target="_blank" class="btn btn-outline-dark rounded-3 fw-bold py-2">
             <i class="ti ti-printer me-1"></i> Print Standee Material
           </a>
@@ -861,6 +861,49 @@
         toast.classList.remove('show');
       }, 2500);
     }
+  }
+
+  function downloadNormalQr(btn) {
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.innerHTML = '<i class="ti ti-loader fa-spin me-1"></i> Downloading...';
+      btn.style.pointerEvents = 'none';
+    }
+
+    const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&margin=20&data={{ urlencode($storeUrl) }}";
+    const filename = "{{ Str::slug(Auth::user()->name ?? 'spin-wheel') }}-qr-code.png";
+
+    fetch(qrUrl)
+      .then(res => {
+        if (!res.ok) throw new Error('Network error');
+        return res.blob();
+      })
+      .then(blob => {
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+      })
+      .catch(err => {
+        console.warn('Direct fetch failed, falling back to direct link:', err);
+        const fallbackLink = document.createElement('a');
+        fallbackLink.href = qrUrl;
+        fallbackLink.target = '_blank';
+        fallbackLink.download = filename;
+        document.body.appendChild(fallbackLink);
+        fallbackLink.click();
+        document.body.removeChild(fallbackLink);
+      })
+      .finally(() => {
+        if (btn) {
+          btn.innerHTML = originalText;
+          btn.style.pointerEvents = 'auto';
+        }
+      });
   }
 
   document.addEventListener("DOMContentLoaded", function () {
