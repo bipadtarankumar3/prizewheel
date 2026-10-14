@@ -422,19 +422,23 @@
       white-space: nowrap;
     }
 
-    /* Print Specific Optimization */
+    /* Print Specific Optimization - Guaranteed 1-Page Fit across A4, Letter, and Mobile */
     @page {
       size: portrait;
-      margin: 6mm;
+      margin: 0;
     }
 
     @media print {
-      body {
-        background: #ffffff !important;
-        background-image: none !important;
-        color: #000000 !important;
-        padding: 0 !important;
+      html, body {
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 100% !important;
         margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        background: #ffffff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
 
       .no-print,
@@ -442,74 +446,132 @@
       .studio-panel,
       .standee-acrylic-base,
       .standee-glass-shine,
-      .standee-glow {
+      .standee-glow,
+      .standee-quick-actions,
+      header,
+      footer {
         display: none !important;
       }
 
       .studio-canvas {
         padding: 0 !important;
         margin: 0 !important;
-        max-width: 100% !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+      }
+
+      .studio-canvas > .row {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+
+      .studio-canvas .col-12 {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
       }
 
       .standee-mockup-wrapper {
         max-width: 100% !important;
         width: 100% !important;
+        height: 100% !important;
         margin: 0 auto !important;
+        padding: 10mm 15mm !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
 
       .standee-card {
         box-shadow: none !important;
         border: none !important;
-        border-radius: 0 !important;
-        width: 135mm !important; /* Standard A4 print scale */
-        margin: 0 auto !important;
+        border-radius: 4px !important;
+        overflow: hidden !important;
+        margin: auto !important;
+        width: min(118mm, 80vw) !important;
+        max-height: min(244mm, 90vh) !important;
+        aspect-ratio: 600 / 1243 !important;
         page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
       }
 
-      * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+      .standee-qr-slot {
+        max-width: none !important;
+        width: 56% !important;
       }
     }
 
     /* Responsive Mobile Queries */
     @media (max-width: 991.98px) {
       .studio-topbar {
-        padding: 12px 14px;
+        padding: 10px 14px;
       }
 
       .studio-canvas {
-        padding: 24px 12px 40px;
+        padding: 20px 12px 40px;
       }
 
       .standee-mockup-wrapper {
-        max-width: 330px;
+        max-width: 320px;
       }
 
       .btn-studio {
-        padding: 9px 14px;
+        padding: 8px 14px;
         font-size: 13px;
       }
     }
 
     @media (max-width: 575.98px) {
-      .studio-topbar-actions {
-        width: 100%;
-        display: flex;
-        justify-content: stretch;
-        gap: 8px;
-        margin-top: 10px;
+      .studio-topbar {
+        padding: 10px 12px;
       }
 
-      .studio-topbar-actions .btn-studio {
-        flex: 1;
-        padding: 10px 8px;
-        font-size: 12.5px;
+      .studio-topbar-actions {
+        width: auto;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .studio-canvas {
+        padding: 16px 10px 40px;
       }
 
       .standee-mockup-wrapper {
-        max-width: 300px;
+        max-width: min(300px, 86vw);
+      }
+
+      .btn-studio {
+        padding: 8px 12px;
+        font-size: 12.5px;
+      }
+
+      .studio-panel {
+        padding: 20px 16px;
       }
     }
   </style>
@@ -526,10 +588,10 @@
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
       
       <!-- Left: Back & Breadcrumb -->
-      <div class="d-flex align-items-center gap-3">
+      <div class="d-flex align-items-center gap-2">
         <a href="{{ URL::to('admin/dashboard') }}" class="btn-studio btn-studio-back">
           <i class="fa-solid fa-arrow-left"></i>
-          <span>Dashboard</span>
+          <span class="d-none d-sm-inline">Dashboard</span>
         </a>
 
         <div class="studio-brand-badge d-none d-md-inline-flex">
@@ -540,10 +602,13 @@
 
       <!-- Right: Action Bar -->
       <div class="d-flex align-items-center gap-2 studio-topbar-actions">
+        <!-- Quick Print Action in Topbar -->
+        
+
         <!-- Direct Customer Wheel Test -->
-        <a href="{{ $wheelUrl }}" target="_blank" class="btn-studio btn-studio-ghost" title="Test your live prize wheel in customer view">
+        <a href="{{ $wheelUrl }}" target="_blank" class="btn-studio btn-studio-ghost py-2 px-3" style="font-size: 13px;" title="Test your live prize wheel in customer view">
           <i class="fa-solid fa-arrow-up-right-from-square"></i>
-          <span>Test Wheel</span>
+          <span class="d-none d-md-inline">Test Wheel</span>
         </a>
       </div>
 
@@ -592,9 +657,25 @@
           <div class="standee-acrylic-base no-print"></div>
         </div>
 
-        <p class="text-muted text-center mt-3 mb-0 no-print" style="font-size: 12.5px;">
+        <!-- Quick Primary Action Buttons (Immediately accessible under standee on mobile & desktop) -->
+        <div class="standee-quick-actions no-print mt-3 w-100" style="max-width: 380px;">
+          <div class="row g-2 justify-content-center">
+            <div class="col-6">
+              <button type="button" onclick="window.print()" class="btn-studio btn-studio-print w-100 py-2.5" style="font-size: 13.5px;" title="Print this standee on A4 or Letter paper">
+                <i class="fa-solid fa-print"></i> <span>Print Standee</span>
+              </button>
+            </div>
+            <div class="col-6">
+              <button type="button" onclick="downloadStandeeImage()" class="btn-studio btn-studio-download w-100 py-2.5" style="font-size: 13.5px;" title="Download high resolution poster as PNG image">
+                <i class="fa-solid fa-cloud-arrow-down"></i> <span>Download PNG</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-muted text-center mt-2 mb-0 no-print" style="font-size: 12.5px;">
           <i class="fa-solid fa-circle-check me-1 text-success"></i> 
-          Proportionally locked for A4, A5, and Acrylic table standees.
+          Proportionally locked for single-page A4, Letter, and Acrylic table standees.
         </p>
 
       </div>
@@ -651,19 +732,19 @@
             </div>
           </div>
 
-          <!-- Main Action Buttons -->
-          <div class="row g-2 mt-4">
+          <!-- Secondary Action Buttons -->
+          <!-- <div class="row g-2 mt-4">
             <div class="col-6">
               <button type="button" onclick="window.print()" class="btn-studio btn-studio-print w-100 py-2.5" style="font-size: 13.5px;" title="Print this standee on A4 or Letter paper">
                 <i class="fa-solid fa-print"></i> <span>Print Standee</span>
               </button>
             </div>
             <div class="col-6">
-              <button type="button" id="downloadBtn" onclick="downloadStandeeImage()" class="btn-studio btn-studio-download w-100 py-2.5" style="font-size: 13.5px;" title="Download high resolution poster as PNG image">
+              <button type="button" onclick="downloadStandeeImage()" class="btn-studio btn-studio-download w-100 py-2.5" style="font-size: 13.5px;" title="Download high resolution poster as PNG image">
                 <i class="fa-solid fa-cloud-arrow-down"></i> <span>Download PNG</span>
               </button>
             </div>
-          </div>
+          </div> -->
 
         </div>
       </div>
@@ -693,11 +774,14 @@
     // High Resolution PNG Downloader using HTML2Canvas
     function downloadStandeeImage() {
       var element = document.getElementById("qr_box");
-      var btn = document.getElementById("downloadBtn");
-      var originalHtml = btn.innerHTML;
+      var btns = document.querySelectorAll(".btn-studio-download");
+      var originalHtmls = [];
 
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Exporting...</span>';
-      btn.style.pointerEvents = 'none';
+      btns.forEach(function(btn) {
+        originalHtmls.push(btn.innerHTML);
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Exporting...</span>';
+        btn.style.pointerEvents = 'none';
+      });
 
       // Temporarily hide shine overlay during high-res canvas render
       var shine = element.querySelector('.standee-glass-shine');
@@ -718,14 +802,18 @@
         link.href = canvas.toDataURL("image/png");
         link.click();
 
-        btn.innerHTML = originalHtml;
-        btn.style.pointerEvents = 'auto';
+        btns.forEach(function(btn, idx) {
+          btn.innerHTML = originalHtmls[idx];
+          btn.style.pointerEvents = 'auto';
+        });
         toastr.success("High-resolution PNG downloaded!");
       }).catch(function(err) {
         if (shine) shine.style.display = 'block';
         console.error(err);
-        btn.innerHTML = originalHtml;
-        btn.style.pointerEvents = 'auto';
+        btns.forEach(function(btn, idx) {
+          btn.innerHTML = originalHtmls[idx];
+          btn.style.pointerEvents = 'auto';
+        });
         toastr.error("Export failed. Please use the Print button instead.");
       });
     }
