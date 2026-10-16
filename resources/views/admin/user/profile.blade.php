@@ -61,8 +61,12 @@
                   
                   <div class="col-sm-12 col-md-4">
                     <div class="mb-3">
-                      <label for="inputcontact" class="control-label col-form-label">Phone</label>
-                      <input type="text" name="phone"  @if (isset($user)) value="{{$user->phone}}"  @endif class="form-control" id="phone" placeholder="Phone Here">
+                      <label for="phone" class="control-label col-form-label">Mobile / WhatsApp Number (10 Digits)</label>
+                      <div class="input-group">
+                        <span class="input-group-text bg-light text-muted fw-bold">+91</span>
+                        <input type="tel" name="phone" @if (isset($user)) value="{{ preg_replace('/^(\+91|91|0)/', '', $user->phone ?? '') }}" @endif class="form-control" id="phone" placeholder="9876543210" maxlength="10" pattern="^[6-9][0-9]{9}$" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                      </div>
+                      <small class="text-muted fs-2">Enter 10-digit Indian number starting with 6, 7, 8, or 9</small>
                     </div>
                   </div>
                

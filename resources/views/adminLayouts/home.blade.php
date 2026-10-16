@@ -1247,7 +1247,7 @@
             Welcome to PrizeWheel! Please fill in your contact & business details to activate your 1-day free trial dashboard.
           </p>
         </div>
-        <form action="{{ route('complete_first_login_profile') }}" method="POST">
+        <form action="{{ route('complete_first_login_profile') }}" method="POST" id="firstLoginForm">
           @csrf
           <div class="modal-body first-login-modal-body p-4">
             
@@ -1262,10 +1262,29 @@
             <div class="mb-3">
               <label class="form-label fw-bold text-dark fs-3 mb-1">WhatsApp / Contact Number <span class="text-danger">*</span></label>
               <div class="input-group">
-                <span class="input-group-text bg-light border-end-0"><i class="ti ti-brand-whatsapp text-success"></i></span>
-                <input type="tel" name="phone" id="firstLoginPhone" class="form-control border-start-0" value="{{ Auth::user()->phone }}" required placeholder="10 Digit Mobile / WhatsApp Number" autocomplete="tel" />
+                <span class="input-group-text bg-light border-end-0 fw-bold text-dark fs-3" style="letter-spacing: 0.5px;">
+                  <i class="ti ti-brand-whatsapp text-success me-1"></i> +91
+                </span>
+                @php
+                  $cleanUserPhone = preg_replace('/[^0-9]/', '', (string)(Auth::user()->phone ?? ''));
+                  if (strlen($cleanUserPhone) === 12 && str_starts_with($cleanUserPhone, '91')) {
+                      $cleanUserPhone = substr($cleanUserPhone, 2);
+                  } elseif (strlen($cleanUserPhone) === 11 && str_starts_with($cleanUserPhone, '0')) {
+                      $cleanUserPhone = substr($cleanUserPhone, 1);
+                  }
+                @endphp
+                <input type="tel" 
+                       name="phone" 
+                       id="firstLoginPhone" 
+                       class="form-control border-start-0 fs-3" 
+                       value="{{ $cleanUserPhone }}" 
+                       required 
+                       maxlength="10" 
+                       placeholder="10-digit mobile number (e.g. 9876543210)" 
+                       autocomplete="tel" />
               </div>
-              <small class="text-muted fs-2">We send spin notifications and customer leads to this WhatsApp number.</small>
+              <div class="text-danger fs-2 mt-1 fw-semibold" id="firstLoginPhoneError" style="display: none;"></div>
+              <small class="text-muted fs-2" id="firstLoginPhoneHelper">We send spin notifications and customer leads to this WhatsApp number.</small>
             </div>
 
             <div class="mb-3">
@@ -1274,14 +1293,14 @@
                 <span class="input-group-text bg-light border-end-0 fs-2 text-muted">/u/</span>
                 <input type="text" name="name_url" class="form-control border-start-0" value="{{ Auth::user()->name_url }}" required placeholder="my_business" />
               </div>
-              <small class="text-muted fs-2">Your public customer link: <strong>{{ url('u/' . (Auth::user()->name_url ?: 'my_business')) }}</strong></small>
+              <small class="text-muted fs-2">Your public customer link: <strong id="modalPublicUrlPreview">{{ str_replace('/public', '', url('u/' . (Auth::user()->name_url ?: 'my_business'))) }}</strong></small>
             </div>
 
 
           </div>
           <div class="modal-footer bg-light border-0 px-4 py-3 justify-content-between">
             <span class="text-muted fs-2"><i class="ti ti-shield-check text-success"></i> Secure & encrypted</span>
-            <button type="submit" class="btn btn-primary px-4 py-2 fw-bold" style="background: linear-gradient(135deg, #ff6b00 0%, #ea580c 100%); border: none;">
+            <button type="submit" class="btn btn-primary px-4 py-2 fw-bold" id="firstLoginSubmitBtn" style="background: linear-gradient(135deg, #ff6b00 0%, #ea580c 100%); border: none;">
               <span>Activate & Launch Dashboard</span> <i class="ti ti-arrow-right ms-1"></i>
             </button>
           </div>
@@ -1289,6 +1308,109 @@
       </div>
     </div>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 1. URL slug live preview
+      const slugInput = document.querySelector('input[name="name_url"]');
+      const previewEl = document.getElementById('modalPublicUrlPreview');
+      const baseCleanUrl = "{{ str_replace('/public', '', url('u')) }}";
+      if (slugInput && previewEl) {
+        slugInput.addEventListener('input', function() {
+          const val = this.value.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+          previewEl.textContent = baseCleanUrl + '/' + (val || 'my_business');
+        });
+      }
+
+      // 2. Indian Phone Number Live Validation
+      const phoneInput = document.getElementById('firstLoginPhone');
+      const phoneError = document.getElementById('firstLoginPhoneError');
+      const phoneHelper = document.getElementById('firstLoginPhoneHelper');
+      const submitBtn = document.getElementById('firstLoginSubmitBtn');
+      const formEl = document.getElementById('firstLoginForm');
+
+      function validateIndianPhone() {
+        if (!phoneInput) return true;
+        let val = phoneInput.value.replace(/[^0-9]/g, '');
+
+        // If user pasted with 91 prefix (12 digits) or leading 0 (11 digits)
+        if (val.length === 12 && val.startsWith('91')) {
+          val = val.substring(2);
+        } else if (val.length === 11 && val.startsWith('0')) {
+          val = val.substring(1);
+        }
+
+        // Limit strictly to 10 digits
+        if (val.length > 10) {
+          val = val.substring(0, 10);
+        }
+        phoneInput.value = val;
+
+        if (val.length === 0) {
+          phoneInput.classList.remove('is-valid', 'is-invalid');
+          if (phoneError) phoneError.style.display = 'none';
+          if (phoneHelper) phoneHelper.style.display = 'block';
+          if (submitBtn) submitBtn.disabled = false;
+          return false;
+        }
+
+        // Indian mobile numbers must start with 6, 7, 8, or 9
+        const firstDigit = val.charAt(0);
+        if (!['6', '7', '8', '9'].includes(firstDigit)) {
+          phoneInput.classList.add('is-invalid');
+          phoneInput.classList.remove('is-valid');
+          if (phoneError) {
+            phoneError.textContent = 'Invalid Indian mobile number. Must start with 6, 7, 8, or 9.';
+            phoneError.style.display = 'block';
+          }
+          if (phoneHelper) phoneHelper.style.display = 'none';
+          if (submitBtn) submitBtn.disabled = true;
+          return false;
+        }
+
+        // Must be exactly 10 digits
+        if (val.length < 10) {
+          phoneInput.classList.add('is-invalid');
+          phoneInput.classList.remove('is-valid');
+          if (phoneError) {
+            phoneError.textContent = 'Please enter all 10 digits (' + val.length + '/10 digits entered).';
+            phoneError.style.display = 'block';
+          }
+          if (phoneHelper) phoneHelper.style.display = 'none';
+          if (submitBtn) submitBtn.disabled = true;
+          return false;
+        }
+
+        // Exactly 10 digits starting with 6-9 -> Valid!
+        phoneInput.classList.remove('is-invalid');
+        phoneInput.classList.add('is-valid');
+        if (phoneError) phoneError.style.display = 'none';
+        if (phoneHelper) {
+          phoneHelper.innerHTML = '<span class="text-success fw-semibold"><i class="ti ti-circle-check"></i> Valid 10-digit Indian mobile number (+91 ' + val + ')</span>';
+          phoneHelper.style.display = 'block';
+        }
+        if (submitBtn) submitBtn.disabled = false;
+        return true;
+      }
+
+      if (phoneInput) {
+        phoneInput.addEventListener('input', validateIndianPhone);
+        phoneInput.addEventListener('blur', validateIndianPhone);
+        if (phoneInput.value) {
+          validateIndianPhone();
+        }
+      }
+
+      if (formEl) {
+        formEl.addEventListener('submit', function(e) {
+          if (!validateIndianPhone()) {
+            e.preventDefault();
+            phoneInput.focus();
+          }
+        });
+      }
+    });
+  </script>
   @endif
 
 </body>

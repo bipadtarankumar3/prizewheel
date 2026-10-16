@@ -333,17 +333,39 @@ class UserController extends Controller
         ]);
     }
 
+    public static function cleanAndValidateIndianMobile($phone, &$cleanNumber = null)
+    {
+        $clean = preg_replace('/[^0-9]/', '', (string)$phone);
+        if (strlen($clean) === 12 && str_starts_with($clean, '91')) {
+            $clean = substr($clean, 2);
+        } elseif (strlen($clean) === 11 && str_starts_with($clean, '0')) {
+            $clean = substr($clean, 1);
+        }
+        $cleanNumber = $clean;
+        // Valid Indian mobile numbers are strictly 10 digits and start with 6, 7, 8, or 9
+        return (strlen($clean) === 10 && in_array($clean[0], ['6', '7', '8', '9']));
+    }
+
     public function complete_first_login_profile(Request $request)
     {
         $request->validate([
-            'phone' => 'required|string|min:6|max:25',
+            'phone' => 'required|string',
             'name' => 'required|string|max:255',
         ]);
+
+        $cleanPhone = '';
+        if (!self::cleanAndValidateIndianMobile($request->phone, $cleanPhone)) {
+            $notification = [
+                'messege' => 'Please enter a valid 10-digit Indian mobile number (must start with 6, 7, 8, or 9).',
+                'alert-type' => 'error'
+            ];
+            return back()->with($notification)->withInput();
+        }
 
         $user = Auth::user();
         if ($user) {
             $user->name = $request->name;
-            $user->phone = $request->phone;
+            $user->phone = $cleanPhone;
 
             if ($request->filled('name_url')) {
                 $newSlug = Str::slug($request->name_url, '_');
@@ -1022,7 +1044,19 @@ class UserController extends Controller
                 $user->name_url = $request->name_url;
                 $user->email = $request->email;
                 
-                $user->phone = $request->phone;
+                if ($request->filled('phone')) {
+                    $cleanPhone = '';
+                    if (!self::cleanAndValidateIndianMobile($request->phone, $cleanPhone)) {
+                        $notification = array(
+                            'messege' => 'Please enter a valid 10-digit Indian mobile number (must start with 6, 7, 8, or 9).',
+                            'alert-type' => 'error'
+                        );
+                        return back()->with($notification)->withInput();
+                    }
+                    $user->phone = $cleanPhone;
+                } else {
+                    $user->phone = '';
+                }
                 if ($request->status != '') {
                     $user->status = $request->status;
                 }
@@ -1118,13 +1152,24 @@ class UserController extends Controller
                     }
                 }
 
+                $cleanPhone = '';
+                if ($request->filled('phone')) {
+                    if (!self::cleanAndValidateIndianMobile($request->phone, $cleanPhone)) {
+                        $notification = array(
+                            'messege' => 'Please enter a valid 10-digit Indian mobile number (must start with 6, 7, 8, or 9).',
+                            'alert-type' => 'error'
+                        );
+                        return back()->with($notification)->withInput();
+                    }
+                }
+
                 User::create([
                     'user_unique_id' => Str::random(10),
                     'name' => $request->name,
                     'name_url' => $nameurl,
                     'email' => $request->email,
                     'password' => Hash::make($request->password),
-                    'phone' => $request->phone,
+                    'phone' => $cleanPhone,
                     'type' => 'user',
                     'status' => $request->status,
                     'expiry_date' => $request->expiry_date,
@@ -1202,7 +1247,19 @@ class UserController extends Controller
             if ($request->password != '') {
                 $user->password = $request->password;
             }
-            $user->phone = $request->phone;
+            if ($request->filled('phone')) {
+                $cleanPhone = '';
+                if (!self::cleanAndValidateIndianMobile($request->phone, $cleanPhone)) {
+                    $notification = array(
+                        'messege' => 'Please enter a valid 10-digit Indian mobile number (must start with 6, 7, 8, or 9).',
+                        'alert-type' => 'error'
+                    );
+                    return back()->with($notification)->withInput();
+                }
+                $user->phone = $cleanPhone;
+            } else {
+                $user->phone = '';
+            }
             $user->note = $request->note;
             if (isset($request->file) && !empty($request->file)) {
                 if ($request->hasFile('file')) {

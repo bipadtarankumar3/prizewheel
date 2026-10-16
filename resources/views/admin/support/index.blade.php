@@ -1,10 +1,10 @@
 @extends('adminLayouts.home')
 @section('content')
 
-<div class="container-fluid">
+<div class="container-fluid px-2 px-sm-3 px-md-4 py-3">
 
   @php
-    $storeUrl = url('u/' . ($user->name_url ?: $user->id));
+    $storeUrl = str_replace('/public', '', url('u/' . ($user->name_url ?: $user->id)));
     $adminPhone = !empty($adminContact->phone) ? $adminContact->phone : '9304717260';
     $cleanAdminPhone = preg_replace('/[^0-9]/', '', $adminPhone);
     if (strlen($cleanAdminPhone) == 10) {
@@ -25,16 +25,17 @@
 
   <!-- Custom Styles for Support Page -->
   <style>
+    /* Support Hero Card */
     .support-hero-card {
       background: linear-gradient(135deg, #0b132b 0%, #1c2541 55%, #1e293b 100%);
-      border-radius: 20px;
+      border-radius: 18px;
       color: #ffffff;
-      padding: 30px;
+      padding: clamp(18px, 3.5vw, 32px);
       position: relative;
       overflow: hidden;
       box-shadow: 0 16px 36px -10px rgba(11, 19, 43, 0.35);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      margin-bottom: 25px;
+      margin-bottom: clamp(16px, 2.5vw, 24px);
     }
 
     .support-hero-card::after {
@@ -42,8 +43,8 @@
       position: absolute;
       top: -30%;
       right: -10%;
-      width: 420px;
-      height: 420px;
+      width: clamp(260px, 40vw, 420px);
+      height: clamp(260px, 40vw, 420px);
       background: radial-gradient(circle, rgba(255, 107, 0, 0.22) 0%, rgba(255, 107, 0, 0) 70%);
       border-radius: 50%;
       pointer-events: none;
@@ -53,15 +54,16 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 5px 13px;
+      padding: 5px 12px;
       border-radius: 9999px;
-      font-size: 11.5px;
+      font-size: clamp(10.5px, 2vw, 11.5px);
       font-weight: 700;
       letter-spacing: 0.3px;
       backdrop-filter: blur(8px);
       border: 1px solid rgba(255, 255, 255, 0.15);
       background: rgba(255, 255, 255, 0.08);
       color: #f8fafc;
+      white-space: nowrap;
     }
 
     .support-pill-tag.orange {
@@ -76,11 +78,208 @@
       border-color: rgba(16, 185, 129, 0.4);
     }
 
+    .support-hero-title {
+      font-size: clamp(19px, 3.2vw, 25px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+
+    .support-hero-desc {
+      font-size: clamp(13px, 2vw, 14px);
+      line-height: 1.55;
+      color: rgba(255, 255, 255, 0.72);
+      margin-bottom: 0;
+    }
+
+    .support-hero-btn-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .support-hero-btn {
+      padding: 12px 22px;
+      font-weight: 700;
+      font-size: 14px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .support-hero-btn-wa {
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      color: #ffffff !important;
+      border: none;
+      box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+    }
+
+    .support-hero-btn-wa:hover {
+      background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+      color: #ffffff !important;
+      transform: translateY(-1px);
+    }
+
+    .support-hero-btn-call {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff !important;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    }
+
+    .support-hero-btn-call:hover {
+      background: rgba(255, 255, 255, 0.25);
+      color: #ffffff !important;
+      transform: translateY(-1px);
+    }
+
+    /* Subscription Status Card */
+    .renewal-highlight-box {
+      border-radius: 18px;
+      padding: clamp(18px, 3vw, 26px);
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 6px 20px -4px rgba(15, 23, 42, 0.06);
+      margin-bottom: clamp(18px, 2.5vw, 25px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .renewal-banner-expired {
+      background: linear-gradient(135deg, #fff5f5 0%, #fee2e2 100%);
+      border: 1.5px solid #fca5a5;
+    }
+
+    .renewal-banner-urgent {
+      background: linear-gradient(135deg, #fffdf5 0%, #fef3c7 100%);
+      border: 1.5px solid #fcd34d;
+    }
+
+    .renewal-banner-active {
+      background: linear-gradient(135deg, #f7fdf9 0%, #dcfce7 100%);
+      border: 1.5px solid #86efac;
+    }
+
+    .status-pulse-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulseAnim 1.8s infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulseAnim {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { transform: scale(1.15); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    .dot-expired { background: #ef4444; }
+    .dot-warning { background: #f59e0b; }
+    .dot-active { background: #10b981; }
+
+    .store-meta-chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .store-meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: clamp(11.5px, 2vw, 12.5px);
+      color: #1e293b;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      max-width: 100%;
+    }
+
+    .store-meta-chip .chip-label {
+      font-weight: 700;
+      color: #475569;
+    }
+
+    .store-meta-chip .chip-val {
+      font-weight: 600;
+      color: #0f172a;
+      word-break: break-all;
+    }
+
+    .store-meta-chip .chip-link {
+      font-weight: 700;
+      color: #ff6b00;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .store-meta-chip .chip-link:hover {
+      text-decoration: underline;
+      color: #ea580c;
+    }
+
+    .renewal-expiry-card {
+      padding: clamp(14px, 2.5vw, 18px);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(8px);
+      border: 1.5px dashed rgba(220, 38, 38, 0.35);
+      text-align: left;
+    }
+
+    .renewal-banner-active .renewal-expiry-card {
+      border-color: rgba(34, 197, 94, 0.45);
+    }
+
+    .renewal-banner-urgent .renewal-expiry-card {
+      border-color: rgba(245, 158, 11, 0.45);
+    }
+
+    .renewal-expiry-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+
+    .renewal-expiry-value {
+      font-size: clamp(20px, 3.5vw, 24px);
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .renewal-expiry-note {
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.4;
+    }
+
+    /* Channel Cards */
     .support-channel-card {
       background: #ffffff;
       border-radius: 18px;
       border: 1px solid #e2e8f0;
-      padding: 24px;
+      padding: clamp(18px, 3vw, 24px);
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
       overflow: hidden;
@@ -110,14 +309,14 @@
     }
 
     .channel-icon-wrap {
-      width: 54px;
-      height: 54px;
+      width: 52px;
+      height: 52px;
       border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 26px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       flex-shrink: 0;
     }
 
@@ -136,9 +335,65 @@
       color: #ea580c;
     }
 
+    .channel-title {
+      font-size: clamp(16px, 2.5vw, 18px);
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .channel-desc {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #64748b;
+      margin-bottom: 14px;
+    }
+
+    .channel-info-box {
+      padding: 12px 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .channel-info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .channel-info-row .info-label {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .channel-info-row .info-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
+      word-break: break-all;
+    }
+
+    .info-email-link {
+      color: #ff6b00 !important;
+      text-decoration: none;
+    }
+
+    .info-email-link:hover {
+      text-decoration: underline;
+    }
+
     .support-btn-channel {
       width: 100%;
-      padding: 10px 16px;
+      min-height: 44px;
+      padding: 11px 18px;
       border-radius: 12px;
       font-weight: 700;
       font-size: 13.5px;
@@ -150,6 +405,7 @@
       transition: all 0.2s ease;
       border: none;
       cursor: pointer;
+      text-align: center;
     }
 
     .support-btn-whatsapp {
@@ -188,50 +444,73 @@
       color: #ffffff !important;
     }
 
-    /* Subscription Status Card */
-    .renewal-highlight-box {
-      border-radius: 18px;
-      padding: 24px;
-      background: #ffffff;
+    /* Steps & How It Works */
+    .step-card-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: #f8fafc;
       border: 1px solid #e2e8f0;
-      box-shadow: 0 6px 20px -4px rgba(15, 23, 42, 0.06);
-      margin-bottom: 25px;
-      position: relative;
-      overflow: hidden;
+      border-radius: 14px;
+      padding: clamp(14px, 2.5vw, 18px);
+      height: 100%;
+      transition: all 0.2s ease;
     }
 
-    .renewal-banner-expired {
-      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-      border: 1.5px solid #fca5a5;
+    .step-card-item:hover {
+      background: #ffffff;
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
     }
 
-    .renewal-banner-urgent {
-      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-      border: 1.5px solid #fcd34d;
+    .step-badge-num {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: #fff7ed;
+      color: #ff6b00;
+      font-weight: 800;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: 1.5px solid #ffedd5;
     }
 
-    .renewal-banner-active {
-      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-      border: 1.5px solid #86efac;
+    .step-card-text {
+      flex: 1;
+      min-width: 0;
     }
 
-    .status-pulse-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      display: inline-block;
-      animation: pulseAnim 1.8s infinite;
+    .perk-mini-box {
+      background: #ffffff;
+      border-radius: 14px;
+      border: 1px solid #e2e8f0;
+      padding: clamp(12px, 2vw, 16px);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+      height: 100%;
+      transition: transform 0.2s ease, border-color 0.2s ease;
     }
 
-    @keyframes pulseAnim {
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-      70% { transform: scale(1.15); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    .perk-mini-box:hover {
+      transform: translateY(-2px);
+      border-color: #cbd5e1;
     }
 
-    .dot-expired { background: #ef4444; }
-    .dot-warning { background: #f59e0b; }
-    .dot-active { background: #10b981; }
+    .perk-mini-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
 
     /* FAQ accordion custom styling */
     .support-accordion .accordion-item {
@@ -245,10 +524,10 @@
 
     .support-accordion .accordion-button {
       font-weight: 700;
-      font-size: 14.5px;
+      font-size: clamp(13.5px, 2.5vw, 15px);
       color: #0f172a;
       background: #ffffff;
-      padding: 16px 20px;
+      padding: clamp(14px, 2.5vw, 18px) clamp(16px, 3vw, 22px);
       box-shadow: none;
     }
 
@@ -258,50 +537,51 @@
     }
 
     .support-accordion .accordion-body {
-      padding: 16px 20px 20px 20px;
+      padding: clamp(14px, 2.5vw, 18px) clamp(16px, 3vw, 22px) clamp(16px, 3vw, 22px);
       font-size: 13.5px;
       color: #475569;
-      line-height: 1.6;
+      line-height: 1.65;
       background: #ffffff;
+      border-top: 1px solid #f1f5f9;
     }
 
-    /* Step card */
-    .step-badge-num {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: #fff7ed;
-      color: #ff6b00;
-      font-weight: 800;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      border: 1.5px solid #ffedd5;
+    /* Responsive Media Queries */
+    @media (min-width: 992px) {
+      .channel-desc {
+        min-height: 60px;
+      }
     }
 
-    .perk-mini-box {
-      background: #ffffff;
-      border-radius: 14px;
-      border: 1px solid #f1f5f9;
-      padding: 16px;
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
-      height: 100%;
+    @media (max-width: 991.98px) {
+      .renewal-expiry-card {
+        margin-top: 8px;
+      }
     }
 
-    .perk-mini-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      flex-shrink: 0;
+    @media (max-width: 767.98px) {
+      .support-hero-btn-wrap {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .support-hero-btn-wrap .support-hero-btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 575.98px) {
+      .store-meta-chip {
+        width: 100%;
+        justify-content: flex-start;
+      }
+      
+      .support-pill-tag {
+        font-size: 10.5px;
+        padding: 4px 9px;
+      }
     }
   </style>
 
@@ -311,7 +591,7 @@
   <div class="support-hero-card">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
       <div style="max-width: 720px;">
-        <div class="d-flex align-items-center gap-2 mb-2.5 flex-wrap">
+        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
           <span class="support-pill-tag orange">
             <i class="ti ti-lifebuoy"></i> Official Support Desk
           </span>
@@ -319,22 +599,22 @@
             <i class="ti ti-brand-whatsapp"></i> WhatsApp Live Assistance
           </span>
           <span class="support-pill-tag">
-            <i class="ti ti-clock"></i> Mon – Sat: 9:30 AM to 7:30 PM IST
+            <i class="ti ti-clock"></i> Mon – Sat: 9:30 AM – 7:30 PM IST
           </span>
         </div>
-        <h2 class="fw-bolder mb-2 text-white" style="font-size: 24px; letter-spacing: -0.02em;">
+        <h2 class="support-hero-title text-white">
           Need Help or Account Renewal? We've Got You Covered! 👋
         </h2>
-        <p class="mb-0 text-white-50" style="font-size: 14px; line-height: 1.55;">
+        <p class="support-hero-desc">
           Connect directly with our dedicated PrizeWheel operations team. Renew your store subscription, get campaign setup guidance, request QR stands, or report any technical inquiries with quick resolution.
         </p>
       </div>
 
-      <div class="d-flex align-items-center gap-2.5 flex-wrap">
-        <a href="{{ $encodedWaUrl }}" target="_blank" class="btn btn-sm px-3 py-2 fw-bold text-white shadow-sm d-flex align-items-center gap-2" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); border-radius: 12px; font-size: 13.5px; border:none;">
+      <div class="support-hero-btn-wrap">
+        <a href="{{ $encodedWaUrl }}" target="_blank" class="support-hero-btn support-hero-btn-wa">
           <i class="ti ti-brand-whatsapp fs-5"></i> Renew on WhatsApp
         </a>
-        <a href="tel:{{ $adminPhone }}" class="btn btn-sm px-3 py-2 fw-bold text-white shadow-sm d-flex align-items-center gap-2" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 12px; font-size: 13.5px; backdrop-filter: blur(8px);">
+        <a href="tel:{{ $adminPhone }}" class="support-hero-btn support-hero-btn-call">
           <i class="ti ti-phone-call fs-5"></i> Call Helpline
         </a>
       </div>
@@ -345,10 +625,10 @@
        SUBSCRIPTION STATUS & QUICK RENEWAL BANNER
        ========================================================== -->
   <div class="renewal-highlight-box @if($isExpired) renewal-banner-expired @elseif($daysRemaining <= 1) renewal-banner-urgent @else renewal-banner-active @endif" id="renewal-status">
-    <div class="row align-items-center g-3">
+    <div class="row align-items-center g-3 g-lg-4">
       
-      <div class="col-lg-8">
-        <div class="d-flex align-items-center gap-2 mb-2">
+      <div class="col-lg-7 col-xl-8">
+        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
           @if($isExpired)
             <span class="status-pulse-dot dot-expired"></span>
             <span class="badge bg-danger text-white px-2.5 py-1 rounded-pill fw-bold" style="font-size: 11px;">
@@ -368,12 +648,12 @@
           <span class="text-muted fs-2">• Current Account Details</span>
         </div>
 
-        <h4 class="fw-bold text-dark mb-1">
+        <h3 class="fw-bold text-dark mb-2" style="font-size: clamp(18px, 3.2vw, 23px);">
           Store: {{ $user->name }}
           <span class="text-muted fw-normal fs-3 ms-1">({{ $user->name_url ?: 'id-'.$user->id }})</span>
-        </h4>
+        </h3>
 
-        <p class="text-secondary mb-3 fs-3" style="line-height: 1.5;">
+        <p class="mb-3" style="color: #334155 !important; font-size: 14px; line-height: 1.55;">
           @if($isExpired)
             <strong class="text-danger">Your account access has expired!</strong> Customer spin wheels and promotional campaigns are currently inactive. Renew now to resume collecting customer leads instantly without losing any data.
           @elseif($daysRemaining <= 1)
@@ -383,37 +663,39 @@
           @endif
         </p>
 
-        <!-- Quick Store Info Badges -->
-        <div class="d-flex align-items-center gap-3 flex-wrap">
-          <div class="d-flex align-items-center gap-1.5 text-dark fs-2">
+        <!-- Quick Store Info Badges / Chips -->
+        <div class="store-meta-chip-list">
+          <div class="store-meta-chip">
             <i class="ti ti-mail text-primary fs-4"></i>
-            <span><strong>Email:</strong> {{ $user->email }}</span>
+            <span class="chip-label">Email:</span>
+            <span class="chip-val">{{ $user->email }}</span>
           </div>
 
           @if(!empty($user->phone))
-            <div class="d-flex align-items-center gap-1.5 text-dark fs-2">
+            <div class="store-meta-chip">
               <i class="ti ti-phone text-success fs-4"></i>
-              <span><strong>Phone:</strong> {{ $user->phone }}</span>
+              <span class="chip-label">Phone:</span>
+              <span class="chip-val">+91 {{ $user->phone }}</span>
             </div>
           @endif
 
-          <div class="d-flex align-items-center gap-1.5 text-dark fs-2">
+          <div class="store-meta-chip">
             <i class="ti ti-link text-warning fs-4"></i>
-            <span><strong>Live Wheel:</strong></span>
-            <a href="{{ $storeUrl }}" target="_blank" class="text-decoration-underline text-primary fw-semibold">
-              Open Wheel <i class="ti ti-external-link"></i>
+            <span class="chip-label">Live Wheel:</span>
+            <a href="{{ $storeUrl }}" target="_blank" class="chip-link">
+              Open Wheel <i class="ti ti-arrow-up-right"></i>
             </a>
           </div>
         </div>
       </div>
 
-      <div class="col-lg-4 text-lg-end">
-        <div class="p-3 rounded-3 text-start mb-2" style="background: rgba(255, 255, 255, 0.7); border: 1px dashed rgba(0,0,0,0.12);">
-          <div class="text-muted fs-2 mb-1 fw-semibold text-uppercase">Account Expiry Date</div>
-          <div class="fs-5 fw-bolder text-dark mb-1">
+      <div class="col-lg-5 col-xl-4">
+        <div class="renewal-expiry-card mb-3">
+          <div class="renewal-expiry-label">Account Expiry Date</div>
+          <div class="renewal-expiry-value">
             {{ !empty($user->expiry_date) ? date('d M Y', strtotime($user->expiry_date)) : '1-Day Free Trial' }}
           </div>
-          <div class="fs-2 text-muted">
+          <div class="renewal-expiry-note">
             All stored leads, prize slices, and wheel settings are permanently saved.
           </div>
         </div>
@@ -434,10 +716,10 @@
   <!-- ==========================================================
        CONTACT CHANNELS: WhatsApp, Helpline & Email Desk
        ========================================================== -->
-  <div class="row g-3 mb-4">
+  <div class="row g-3 g-md-4 mb-4">
 
     <!-- Channel 1: WhatsApp -->
-    <div class="col-md-4">
+    <div class="col-12 col-md-6 col-lg-4">
       <div class="support-channel-card card-whatsapp">
         <div>
           <div class="d-flex align-items-center justify-content-between mb-2">
@@ -448,19 +730,19 @@
               ⚡ Fastest Response
             </span>
           </div>
-          <h4 class="fw-bold text-dark mb-1">WhatsApp Support Desk</h4>
-          <p class="text-muted fs-3 mb-3">
+          <h4 class="channel-title">WhatsApp Support Desk</h4>
+          <p class="channel-desc">
             Quickest channel for account renewal activation, UPI payment confirmations, screenshot sharing, and fast onboarding queries.
           </p>
 
-          <div class="p-2.5 rounded-3 mb-3" style="background: #f8fafc; border: 1px solid #f1f5f9;">
-            <div class="d-flex align-items-center justify-content-between mb-1">
-              <span class="text-muted fs-2">Helpline Number:</span>
-              <strong class="text-dark fs-3">+91 {{ $adminPhone }}</strong>
+          <div class="channel-info-box">
+            <div class="channel-info-row">
+              <span class="info-label">Helpline Number:</span>
+              <strong class="info-value">+91 {{ $adminPhone }}</strong>
             </div>
-            <div class="d-flex align-items-center justify-content-between">
-              <span class="text-muted fs-2">Response Speed:</span>
-              <span class="badge bg-success text-white rounded-pill fs-1 px-2 py-0">Within 5-15 mins</span>
+            <div class="channel-info-row">
+              <span class="info-label">Response Speed:</span>
+              <span class="badge bg-success text-white rounded-pill fs-1 px-2 py-0.5">Within 5-15 mins</span>
             </div>
           </div>
         </div>
@@ -474,7 +756,7 @@
     </div>
 
     <!-- Channel 2: Phone Helpline -->
-    <div class="col-md-4">
+    <div class="col-12 col-md-6 col-lg-4">
       <div class="support-channel-card card-phone">
         <div>
           <div class="d-flex align-items-center justify-content-between mb-2">
@@ -485,18 +767,18 @@
               📞 Voice Support
             </span>
           </div>
-          <h4 class="fw-bold text-dark mb-1">Direct Call Helpline</h4>
-          <p class="text-muted fs-3 mb-3">
+          <h4 class="channel-title">Direct Call Helpline</h4>
+          <p class="channel-desc">
             Speak directly with an operations executive for urgent subscription renewal, wheel troubleshooting, or campaign strategy.
           </p>
 
-          <div class="p-2.5 rounded-3 mb-3" style="background: #f8fafc; border: 1px solid #f1f5f9;">
-            <div class="d-flex align-items-center justify-content-between mb-1">
-              <span class="text-muted fs-2">Direct Line:</span>
-              <strong class="text-dark fs-3">+91 {{ $adminPhone }}</strong>
+          <div class="channel-info-box">
+            <div class="channel-info-row">
+              <span class="info-label">Direct Line:</span>
+              <strong class="info-value">+91 {{ $adminPhone }}</strong>
             </div>
-            <div class="d-flex align-items-center justify-content-between">
-              <span class="text-muted fs-2">Available Hours:</span>
+            <div class="channel-info-row">
+              <span class="info-label">Available Hours:</span>
               <span class="text-dark fw-bold fs-2">9:30 AM – 7:30 PM IST</span>
             </div>
           </div>
@@ -511,7 +793,7 @@
     </div>
 
     <!-- Channel 3: Email Desk -->
-    <div class="col-md-4">
+    <div class="col-12 col-md-12 col-lg-4">
       <div class="support-channel-card card-email">
         <div>
           <div class="d-flex align-items-center justify-content-between mb-2">
@@ -522,18 +804,18 @@
               ✉️ Official Email
             </span>
           </div>
-          <h4 class="fw-bold text-dark mb-1">Email Help Desk</h4>
-          <p class="text-muted fs-3 mb-3">
+          <h4 class="channel-title">Email Help Desk</h4>
+          <p class="channel-desc">
             Ideal for requesting official GST tax invoices, formal enterprise customization, bulk multi-store licensing, and account records.
           </p>
 
-          <div class="p-2.5 rounded-3 mb-3" style="background: #f8fafc; border: 1px solid #f1f5f9;">
-            <div class="d-flex align-items-center justify-content-between mb-1">
-              <span class="text-muted fs-2">Email Address:</span>
-              <strong class="text-dark fs-2 text-truncate" style="max-width: 170px;" title="{{ $adminEmail }}">{{ $adminEmail }}</strong>
+          <div class="channel-info-box">
+            <div class="channel-info-row">
+              <span class="info-label">Email Address:</span>
+              <a href="mailto:{{ $adminEmail }}" class="info-value info-email-link" title="{{ $adminEmail }}">{{ $adminEmail }}</a>
             </div>
-            <div class="d-flex align-items-center justify-content-between">
-              <span class="text-muted fs-2">Typical Response:</span>
+            <div class="channel-info-row">
+              <span class="info-label">Typical Response:</span>
               <span class="text-dark fw-bold fs-2">Within 2–4 hours</span>
             </div>
           </div>
@@ -553,24 +835,24 @@
        HOW RENEWAL WORKS & WHAT'S INCLUDED
        ========================================================== -->
   <div class="card mb-4 border-0 shadow-sm" style="border-radius: 18px; overflow: hidden;">
-    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <div class="card-header bg-white py-3 px-3 px-md-4 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
       <div>
-        <h5 class="fw-bold text-dark mb-0">How Subscription Renewal Works 🚀</h5>
+        <h5 class="fw-bold text-dark mb-0 fs-4">How Subscription Renewal Works 🚀</h5>
         <p class="text-muted fs-2 mb-0">Easy 3-step renewal process with immediate activation</p>
       </div>
-      <a href="{{ $encodedWaUrl }}" target="_blank" class="btn btn-sm btn-outline-success fw-bold d-flex align-items-center gap-1" style="border-radius: 10px;">
-        <i class="ti ti-brand-whatsapp"></i> Chat for Pricing & Plans
+      <a href="{{ $encodedWaUrl }}" target="_blank" class="btn btn-sm btn-outline-success fw-bold d-inline-flex align-items-center gap-1.5 px-3 py-2" style="border-radius: 10px; font-size: 13px;">
+        <i class="ti ti-brand-whatsapp fs-4"></i> Chat for Pricing &amp; Plans
       </a>
     </div>
 
-    <div class="card-body p-4">
-      <div class="row g-4 mb-4">
+    <div class="card-body p-3 p-md-4">
+      <div class="row g-3 g-md-4 mb-4">
         
         <!-- Step 1 -->
-        <div class="col-md-4">
-          <div class="d-flex align-items-start gap-3">
+        <div class="col-12 col-md-4">
+          <div class="step-card-item">
             <div class="step-badge-num">1</div>
-            <div>
+            <div class="step-card-text">
               <h6 class="fw-bold text-dark mb-1 fs-3">Select Your Renewal Duration</h6>
               <p class="text-muted fs-2 mb-0" style="line-height: 1.5;">
                 Choose between 1 Month, 3 Months, 6 Months, or Annual store access based on your promotional event roadmap.
@@ -580,10 +862,10 @@
         </div>
 
         <!-- Step 2 -->
-        <div class="col-md-4">
-          <div class="d-flex align-items-start gap-3">
+        <div class="col-12 col-md-4">
+          <div class="step-card-item">
             <div class="step-badge-num">2</div>
-            <div>
+            <div class="step-card-text">
               <h6 class="fw-bold text-dark mb-1 fs-3">Instant UPI / QR Payment</h6>
               <p class="text-muted fs-2 mb-0" style="line-height: 1.5;">
                 Our support desk shares an instant UPI payment QR or bank link over WhatsApp. Pay conveniently using any UPI app (GPay, PhonePe, Paytm).
@@ -593,10 +875,10 @@
         </div>
 
         <!-- Step 3 -->
-        <div class="col-md-4">
-          <div class="d-flex align-items-start gap-3">
+        <div class="col-12 col-md-4">
+          <div class="step-card-item">
             <div class="step-badge-num">3</div>
-            <div>
+            <div class="step-card-text">
               <h6 class="fw-bold text-dark mb-1 fs-3">Immediate 5-Min Activation</h6>
               <p class="text-muted fs-2 mb-0" style="line-height: 1.5;">
                 Your account is extended right away with zero downtime. All campaigns, wheel prizes, QR stands, and leads stay exactly in place.
@@ -614,9 +896,9 @@
         <i class="ti ti-circle-check text-success me-1"></i> What You Get with Your PrizeWheel Renewal:
       </h6>
 
-      <div class="row g-3">
+      <div class="row g-2.5 g-md-3">
         
-        <div class="col-md-4 col-sm-6">
+        <div class="col-12 col-sm-6 col-lg-4">
           <div class="perk-mini-box">
             <div class="perk-mini-icon" style="background: #ecfdf5; color: #059669;">
               <i class="ti ti-disc"></i>
@@ -628,7 +910,7 @@
           </div>
         </div>
 
-        <div class="col-md-4 col-sm-6">
+        <div class="col-12 col-sm-6 col-lg-4">
           <div class="perk-mini-box">
             <div class="perk-mini-icon" style="background: #eff6ff; color: #2563eb;">
               <i class="ti ti-users"></i>
@@ -640,7 +922,7 @@
           </div>
         </div>
 
-        <div class="col-md-4 col-sm-6">
+        <div class="col-12 col-sm-6 col-lg-4">
           <div class="perk-mini-box">
             <div class="perk-mini-icon" style="background: #fdf2f8; color: #db2777;">
               <i class="ti ti-shield-check"></i>
@@ -652,7 +934,7 @@
           </div>
         </div>
 
-        <div class="col-md-4 col-sm-6">
+        <div class="col-12 col-sm-6 col-lg-4">
           <div class="perk-mini-box">
             <div class="perk-mini-icon" style="background: #fff7ed; color: #ea580c;">
               <i class="ti ti-adjustments"></i>
@@ -664,7 +946,7 @@
           </div>
         </div>
 
-        <div class="col-md-4 col-sm-6">
+        <div class="col-12 col-sm-6 col-lg-4">
           <div class="perk-mini-box">
             <div class="perk-mini-icon" style="background: #f5f3ff; color: #7c3aed;">
               <i class="ti ti-qrcode"></i>
@@ -676,7 +958,7 @@
           </div>
         </div>
 
-        <div class="col-md-4 col-sm-6">
+        <div class="col-12 col-sm-6 col-lg-4">
           <div class="perk-mini-box">
             <div class="perk-mini-icon" style="background: #f0fdf4; color: #16a34a;">
               <i class="ti ti-file-spreadsheet"></i>
@@ -694,59 +976,14 @@
   </div>
 
   <!-- ==========================================================
-       INTERACTIVE WHATSAPP MESSAGE BUILDER + FAQS
+       FREQUENTLY ASKED QUESTIONS
        ========================================================== -->
   <div class="row g-4 mb-4">
     
-    <!-- Left: Quick WhatsApp Inquiry Tool -->
-    <div class="col-lg-5">
-      <div class="card h-100 border-0 shadow-sm" style="border-radius: 18px;">
-        <div class="card-header bg-white py-3 border-bottom">
-          <div class="d-flex align-items-center gap-2">
-            <div style="width: 32px; height: 32px; border-radius: 8px; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center;">
-              <i class="ti ti-message-dots fs-5"></i>
-            </div>
-            <div>
-              <h5 class="fw-bold text-dark mb-0 fs-3">Quick WhatsApp Inquirer</h5>
-              <span class="text-muted fs-2">Select inquiry type &amp; message with one click</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-body p-4">
-          <div class="mb-3">
-            <label class="form-label fw-bold text-dark fs-2 mb-1">What can we help you with?</label>
-            <select class="form-select fs-3" id="inquiryReason" onchange="updateInquiryPreview()">
-              <option value="Account Subscription Renewal" selected>💳 Account Subscription Renewal</option>
-              <option value="Spin Wheel Configuration & Prize Setup">🎡 Spin Wheel & Prize Setup Assistance</option>
-              <option value="QR Stand Printout & Design Help">🖨️ QR Stand Printout & Branding Guidance</option>
-              <option value="Customer Leads & Excel Download Query">📊 Customer Leads & Analytics Question</option>
-              <option value="Billing, GST Invoice or Payment Receipt">🧾 Billing / Invoice / Payment Query</option>
-              <option value="Other Technical Query">⚙️ Other Technical Query</option>
-            </select>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-bold text-dark fs-2 mb-1">Additional Message or Notes (Optional):</label>
-            <textarea class="form-control fs-3" id="inquiryCustomNote" rows="3" placeholder="Type any specific question, campaign dates, or requirements here..." oninput="updateInquiryPreview()"></textarea>
-          </div>
-
-          <div class="p-3 rounded-3 mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
-            <div class="text-muted fs-1 fw-bold text-uppercase mb-1">Message Preview to be Sent:</div>
-            <div class="fs-2 text-dark font-monospace" id="waPreviewText" style="white-space: pre-wrap; max-height: 120px; overflow-y: auto; line-height: 1.45;"></div>
-          </div>
-
-          <button type="button" class="support-btn-channel support-btn-whatsapp w-100" onclick="sendCustomWhatsApp()">
-            <i class="ti ti-brand-whatsapp fs-5"></i> Send to Support on WhatsApp
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right: Frequently Asked Questions Accordion -->
-    <div class="col-lg-7">
-      <div class="card h-100 border-0 shadow-sm" style="border-radius: 18px;">
-        <div class="card-header bg-white py-3 border-bottom">
+    <!-- Frequently Asked Questions Accordion -->
+    <div class="col-12">
+      <div class="card border-0 shadow-sm" style="border-radius: 18px;">
+        <div class="card-header bg-white py-3 px-3 px-md-4 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
           <div class="d-flex align-items-center gap-2">
             <div style="width: 32px; height: 32px; border-radius: 8px; background: #fff7ed; color: #ff6b00; display: flex; align-items: center; justify-content: center;">
               <i class="ti ti-help fs-5"></i>
@@ -756,9 +993,12 @@
               <span class="text-muted fs-2">Quick answers about renewals, settings, and campaigns</span>
             </div>
           </div>
+          <a href="{{ $encodedWaUrl }}" target="_blank" class="btn btn-sm btn-outline-success fw-bold d-inline-flex align-items-center gap-1.5 px-3 py-2" style="border-radius: 10px; font-size: 13px;">
+            <i class="ti ti-brand-whatsapp fs-4"></i> Still have questions? Ask on WhatsApp
+          </a>
         </div>
 
-        <div class="card-body p-4">
+        <div class="card-body p-3 p-md-4">
           <div class="accordion support-accordion" id="supportFaqAccordion">
             
             <!-- FAQ 1 -->
@@ -839,59 +1079,5 @@
   </div>
 
 </div>
-
-<!-- Interactive JS for WhatsApp Message Builder -->
-<script>
-  const adminWaClean = '{{ $cleanAdminPhone }}';
-  const storeName = '{{ addslashes($user->name) }}';
-  const storeUrl = '{{ $storeUrl }}';
-  const storeEmail = '{{ addslashes($user->email) }}';
-  const accountStatus = '{{ $isExpired ? "Expired" : ($daysRemaining <= 1 ? "Expires in 1 day" : $daysRemaining . " days remaining") }}';
-
-  function generateWaMessage() {
-    const reason = document.getElementById('inquiryReason').value;
-    const note = document.getElementById('inquiryCustomNote').value.trim();
-
-    let text = "Hello PrizeWheel Support,\n\n";
-    text += "Inquiry: " + reason + "\n\n";
-    text += "Store Details:\n";
-    text += "• Store Name: " + storeName + "\n";
-    text += "• Store URL: " + storeUrl + "\n";
-    text += "• Account Email: " + storeEmail + "\n";
-    text += "• Account Status: " + accountStatus + "\n\n";
-
-    if (note) {
-      text += "Details / Message:\n" + note + "\n\n";
-    }
-
-    if (reason.includes("Renewal")) {
-      text += "Please share the available renewal plans, packages, and payment details.\n\n";
-    } else {
-      text += "Please assist me with this request.\n\n";
-    }
-
-    text += "Thank you!";
-    return text;
-  }
-
-  function updateInquiryPreview() {
-    const msg = generateWaMessage();
-    const previewEl = document.getElementById('waPreviewText');
-    if (previewEl) {
-      previewEl.innerText = msg;
-    }
-  }
-
-  function sendCustomWhatsApp() {
-    const msg = generateWaMessage();
-    const targetUrl = "https://wa.me/" + adminWaClean + "?text=" + encodeURIComponent(msg);
-    window.open(targetUrl, '_blank');
-  }
-
-  // Initialize preview on page load
-  document.addEventListener('DOMContentLoaded', function() {
-    updateInquiryPreview();
-  });
-</script>
 
 @endsection

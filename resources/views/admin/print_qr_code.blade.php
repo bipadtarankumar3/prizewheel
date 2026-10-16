@@ -580,7 +580,7 @@
 <body>
 
   @php
-    $wheelUrl = URL::to("u/".(Auth::user()->name_url ?? 'store'));
+    $wheelUrl = str_replace('/public', '', URL::to("u/".(Auth::user()->name_url ?? 'store')));
   @endphp
 
   <!-- Studio Topbar Controls (Hidden on Print) -->

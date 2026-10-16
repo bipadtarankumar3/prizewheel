@@ -4,7 +4,7 @@
 <div class="container-fluid">
 
 @php
-  $storeUrl = url('u/' . (Auth::user()->name_url ?: Auth::user()->id));
+  $storeUrl = str_replace('/public', '', url('u/' . (Auth::user()->name_url ?: Auth::user()->id)));
 @endphp
 
 @if (Auth::user()->type == 'admin')
@@ -204,7 +204,7 @@
        STORE / CAMPAIGN USER DASHBOARD
        ========================================== --}}
   @php
-    $storeUrl = url('u/' . (Auth::user()->name_url ?: Auth::user()->id));
+    $storeUrl = str_replace('/public', '', url('u/' . (Auth::user()->name_url ?: Auth::user()->id)));
     $activeCampaign = $campaigns->where('status', 'active')->first() ?? $campaigns->first();
   @endphp
 
