@@ -400,7 +400,9 @@
                                 <input type="checkbox" id="header_select_all" title="Select All Leads" style="cursor: pointer;">
                             </th>
                             <th>Sl.</th>
-                            <th>Customer Profile</th>
+                            <th>Name</th>
+                            <th>Phone Number</th>
+                            <th>Email</th>
                             <th>WhatsApp</th>
                             <th>Prize Won</th>
                             <th>Interested Model</th>
@@ -418,23 +420,27 @@
                                 </td>
                                 <td class="font-weight-bold text-muted">{{ $key + 1 }}</td>
                                 <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="customer-avatar-mini">
-                                            {{ strtoupper(substr($item->name ?? 'C', 0, 1)) }}
-                                        </div>
-                                        <div>
-                                            <div class="font-weight-bold text-dark" style="font-size: 0.92rem;">
-                                                {{ $item->name ?? 'Anonymous' }}
-                                            </div>
-                                            <div class="text-muted" style="font-size: 0.76rem;">
-                                                <i class="ti ti-phone text-muted me-1"></i>
-                                                <a href="tel:{{ $item->phone }}" class="text-muted">{{ $item->phone }}</a>
-                                                @if(!empty($item->email))
-                                                    &bull; <a href="mailto:{{ $item->email }}" class="text-muted">{{ Str::limit($item->email, 20) }}</a>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <span class="font-weight-bold text-dark" style="font-size: 0.9rem;">
+                                        {{ $item->name ?? 'Anonymous' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    @if(!empty($item->phone))
+                                        <a href="tel:{{ $item->phone }}" class="text-dark font-weight-semibold" style="font-size: 0.86rem; text-decoration: none;">
+                                            <i class="ti ti-phone text-primary me-1"></i>{{ $item->phone }}
+                                        </a>
+                                    @else
+                                        <span class="text-muted font-italic" style="font-size: 0.78rem;">-</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if(!empty($item->email))
+                                        <a href="mailto:{{ $item->email }}" class="text-dark" style="font-size: 0.85rem; text-decoration: none;" title="{{ $item->email }}">
+                                            <i class="ti ti-mail text-info me-1"></i>{{ $item->email }}
+                                        </a>
+                                    @else
+                                        <span class="text-muted font-italic" style="font-size: 0.78rem;">-</span>
+                                    @endif
                                 </td>
                                 <td>
                                     @if(!empty($item->whatsapp_number))
@@ -583,6 +589,9 @@
             dom: 'Bfrtip',
             pageLength: 25,
             order: [[ 1, 'asc' ]],
+            columnDefs: [
+                { orderable: false, targets: [0, 8, 11] }
+            ],
             buttons: [
                 {
                     extend: 'pdfHtml5',
@@ -591,7 +600,7 @@
                     pageSize: 'LEGAL',
                     title: '{{ $camping->title ?? "Campaign" }} - Leads Registry',
                     exportOptions: {
-                        columns: [1, 2, 3, 4, 5, 6, 7, 8],
+                        columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                         modifier: {
                             page: 'all'
                         }
@@ -601,7 +610,7 @@
                     extend: 'copy',
                     text: '<i class="ti ti-copy me-1"></i> Copy',
                     exportOptions: {
-                        columns: [1, 2, 3, 4, 5, 6, 7, 8],
+                        columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                         modifier: {
                             page: 'all'
                         }
@@ -612,7 +621,7 @@
                     text: '<i class="ti ti-file-spreadsheet me-1"></i> Excel',
                     title: '{{ $camping->title ?? "Campaign" }} - Leads Registry',
                     exportOptions: {
-                        columns: [1, 2, 3, 4, 5, 6, 7, 8],
+                        columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                         modifier: {
                             page: 'all'
                         }
@@ -622,7 +631,7 @@
                     extend: 'print',
                     text: '<i class="ti ti-printer me-1"></i> Print',
                     exportOptions: {
-                        columns: [1, 2, 3, 4, 5, 6, 7, 8],
+                        columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                         modifier: {
                             page: 'all'
                         }
