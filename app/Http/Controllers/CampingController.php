@@ -235,7 +235,7 @@ class CampingController extends Controller
                     'messege'=>'Campaign Updated successfully',
                     'alert-type'=>'success'
                 );
-                return back()->with($notification);
+                return redirect('admin/camping_list')->with($notification);
             } else {
 
 
@@ -259,7 +259,7 @@ class CampingController extends Controller
                     'messege'=>'Campaign inserted successfully',
                     'alert-type'=>'success'
                 );
-                return back()->with($notification);
+                return redirect('admin/camping_list')->with($notification);
 
             }
             

@@ -299,25 +299,44 @@
 
                 {{-- Futuristic Actions --}}
                 <td class="text-end">
-                  <div class="d-inline-flex align-items-center gap-1">
-                    {{-- View Inquiries Leads Link --}}
-                    <a href="{{ url('admin/spinner_form_list/' . $item->id) }}" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold" title="Inspect Customer Leads">
-                      <i class="ti ti-users me-1"></i> Leads ({{ $item->total_joined ?? 0 }})
+                  <div class="d-inline-flex align-items-center gap-1 flex-nowrap">
+                    {{-- Create Spinner Button: Redirects directly to Spinner Page --}}
+                    <a href="{{ url('admin/spinner_list?campaign_id=' . $item->id) }}" 
+                       class="btn btn-sm text-white rounded-pill px-3 fw-bold btn-create-spinner d-inline-flex align-items-center justify-content-center" 
+                       style="background: linear-gradient(135deg, #ff6b00 0%, #ea580c 100%); border: none; box-shadow: 0 2px 8px rgba(255, 107, 0, 0.28); white-space: nowrap; height: 36px;" 
+                       title="Create Spinner for {{ $item->campaign_name }}">
+                      <i class="ti ti-plus me-1"></i> Create Spinner
+                    </a>
+
+                    {{-- View Inquiries Leads Link (Icon + Count only) --}}
+                    <a href="{{ url('admin/spinner_form_list/' . $item->id) }}" 
+                       class="btn btn-sm btn-primary rounded-pill px-3 fw-bold d-inline-flex align-items-center justify-content-center" 
+                       style="white-space: nowrap; height: 36px;" 
+                       title="{{ $item->total_joined ?? 0 }} Customer Leads">
+                      <i class="ti ti-users me-1"></i> {{ $item->total_joined ?? 0 }}
                     </a>
 
                     {{-- Edit Campaign --}}
-                    <a href="{{ url('admin/edit_camping/' . $item->id) }}" class="btn btn-sm btn-light text-dark rounded-circle p-2" title="Edit Campaign Settings">
+                    <a href="{{ url('admin/edit_camping/' . $item->id) }}" 
+                       class="btn btn-sm btn-light text-dark rounded-circle d-inline-flex align-items-center justify-content-center p-0" 
+                       style="width: 36px; height: 36px;" 
+                       title="Edit Campaign Settings">
                       <i class="ti ti-pencil"></i>
                     </a>
 
                     {{-- Copy Live Wheel Link --}}
-                    <button type="button" class="btn btn-sm btn-light text-primary rounded-circle p-2" onclick="copyStoreUrl('{{ $storeUrl }}')" title="Copy Live Wheel Link">
+                    <button type="button" 
+                            class="btn btn-sm btn-light text-primary rounded-circle d-inline-flex align-items-center justify-content-center p-0" 
+                            style="width: 36px; height: 36px;" 
+                            onclick="copyStoreUrl('{{ $storeUrl }}')" 
+                            title="Copy Live Wheel Link">
                       <i class="ti ti-copy"></i>
                     </button>
 
                     {{-- Delete Campaign (Checked for Spins Safety) --}}
                     <button type="button" 
-                            class="btn btn-sm btn-light text-danger rounded-circle p-2" 
+                            class="btn btn-sm btn-light text-danger rounded-circle d-inline-flex align-items-center justify-content-center p-0" 
+                            style="width: 36px; height: 36px;" 
                             onclick="handleCampaignDelete('{{ $item->id }}', '{{ addslashes($item->campaign_name) }}', {{ (int)($item->slices_count ?? 0) }})" 
                             title="Delete Campaign">
                       <i class="ti ti-trash"></i>
@@ -413,7 +432,19 @@
   </div>
 </div>
 
+<style>
+  .btn-create-spinner {
+    transition: all 0.2s ease;
+  }
+  .btn-create-spinner:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(255, 107, 0, 0.45) !important;
+    color: #ffffff !important;
+  }
+</style>
+
 <script>
+
   function handleCampaignDelete(campId, campName, slicesCount) {
     if (slicesCount > 0) {
       document.getElementById('blocked_camp_name').innerText = campName;

@@ -1,6 +1,10 @@
 @extends('adminLayouts.home')
 @section('content')
 
+@php
+  $storeUrl = str_replace('/public', '', url('u/' . (Auth::user()->name_url ?: Auth::user()->id)));
+@endphp
+
 <style>
     /* Modern Dashboard Styling for Spinner & Campaign Manager */
     :root {
@@ -102,9 +106,9 @@
         color: #ffffff !important;
     }
 
-    .btn-hero-create-camp {
+    .btn-hero-launch-wheel {
         background: #ffffff;
-        color: #4f46e5 !important;
+        color: #0f172a !important;
         border: 1.5px solid #cbd5e1;
         font-size: 0.88rem;
         font-weight: 700;
@@ -116,13 +120,14 @@
         gap: 8px;
         transition: all 0.25s ease;
         text-decoration: none;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
     }
-    .btn-hero-create-camp:hover {
-        background: #4f46e5;
+    .btn-hero-launch-wheel:hover {
+        background: #0f172a;
         color: #ffffff !important;
-        border-color: #4f46e5;
+        border-color: #0f172a;
         transform: translateY(-2px);
-        box-shadow: 0 8px 20px -3px rgba(79, 70, 229, 0.35);
+        box-shadow: 0 8px 20px -3px rgba(15, 23, 42, 0.25);
     }
 
     /* Summary Metric Cards */
@@ -506,8 +511,8 @@
                     <button type="button" onclick="add_spinner_btn()" class="btn-hero-add-spinner" id="hero_add_spinner_btn">
                         <i class="fas fa-plus"></i> Add New Spinner
                     </button>
-                    <a href="{{URL::to('admin/add_camping_page')}}" class="btn-hero-create-camp">
-                        <i class="fas fa-layer-group"></i> Create Campaign
+                    <a href="{{ $storeUrl }}" target="_blank" class="btn-hero-launch-wheel" title="Open live customer wheel">
+                        <i class="fas fa-external-link-alt"></i> Launch Wheel
                     </a>
                 </div>
             </div>

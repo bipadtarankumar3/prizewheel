@@ -126,11 +126,12 @@ class SpinnerController extends Controller
     }
 
 
-    public function add_spinner_page(){
+    public function add_spinner_page(Request $request){
 
         if(Auth::check()){
             $camping = Camping::where('created_by',Auth::user()->id)->get();
-            return view('user.spinner.create',compact('camping'));
+            $selected_camping_id = $request->camping_id ?? $request->id ?? '';
+            return view('user.spinner.create',compact('camping', 'selected_camping_id'));
         }
     }
 
@@ -210,16 +211,31 @@ class SpinnerController extends Controller
                     Camping::where('id', $request->camping_id)->update(['total_form' => $TotalSpinner]);
                 
                     // Return success notification
-                    return Response::json([
-                        'message' => 'Spinner updated successfully',
-                        'alert-type' => 'success',
-                    ]);
+                    if ($request->ajax()) {
+                        return Response::json([
+                            'message' => 'Spinner updated successfully',
+                            'alert-type' => 'success',
+                        ]);
+                    } else {
+                        $notification = array(
+                            'messege' => 'Spinner updated successfully',
+                            'alert-type' => 'success',
+                        );
+                        return redirect('admin/camping_list')->with($notification);
+                    }
                 } else {
                     // Spinner not found
-                    return Response::json([
-                        'message' => 'Spinner not found',
-                        'alert-type' => 'error',
-                    ]);
+                    if ($request->ajax()) {
+                        return Response::json([
+                            'message' => 'Spinner not found',
+                            'alert-type' => 'error',
+                        ]);
+                    } else {
+                        return redirect('admin/camping_list')->with([
+                            'messege' => 'Spinner not found',
+                            'alert-type' => 'error',
+                        ]);
+                    }
                 }
 
             } else {
@@ -264,7 +280,11 @@ class SpinnerController extends Controller
                     'messege'=>'Spinner inserted successfully',
                     'alert-type'=>'success'
                 );
-                return Response::json($notification);
+                if ($request->ajax()) {
+                    return Response::json($notification);
+                } else {
+                    return redirect('admin/camping_list')->with($notification);
+                }
 
             }
             
