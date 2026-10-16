@@ -502,39 +502,7 @@
                       <!-- Body Cards -->
                       <div class="qr-flow-body">
                         
-                        <!-- Option 1: Chances Mode -->
-                        <div class="qr-flow-card {{ Auth::user()->default_spinn == 2 ? 'active' : '' }}">
-                          <div class="d-flex align-items-center justify-content-between mb-2">
-                            <div class="d-flex align-items-center gap-2">
-                              <div class="qr-flow-icon-circle qr-flow-icon-star">
-                                <i class="ti ti-percentage"></i>
-                              </div>
-                              <span class="fw-bold text-dark fs-3">Chances Mode</span>
-                              <span class="qr-flow-tag-recommended">Recommended</span>
-                            </div>
-                            <div>
-                              @if(Auth::user()->default_spinn == 2)
-                                <span class="qr-flow-btn-active-badge"><i class="ti ti-check"></i> ACTIVE</span>
-                              @else
-                                <form action="{{ URL::to('admin/change_spin_mode') }}" method="POST" class="m-0">
-                                  @csrf
-                                  <input type="hidden" name="spin_mode" value="2">
-                                  <button type="submit" class="qr-flow-btn-activate">Activate</button>
-                                </form>
-                              @endif
-                            </div>
-                          </div>
-                          <div class="d-flex align-items-start gap-2 fs-2 text-dark mb-2">
-                            <i class="ti ti-check text-success fs-4 mt-1 flex-shrink-0"></i>
-                            <span><strong>More Quantity = More Wins:</strong> Set higher chances for prizes you have more stock of so they win more often.</span>
-                          </div>
-                          <div class="d-flex align-items-start gap-2 fs-2 text-dark">
-                            <i class="ti ti-ban text-danger fs-4 mt-1 flex-shrink-0"></i>
-                            <span><strong>Chance 0 = Never Won:</strong> Any prize set with <strong>0 chances</strong> will <strong>never</strong> be won.</span>
-                          </div>
-                        </div>
-
-                        <!-- Option 2: Skip Mode -->
+                        <!-- Option 1: Skip Mode -->
                         <div class="qr-flow-card {{ Auth::user()->default_spinn == 1 ? 'active' : '' }}">
                           <div class="d-flex align-items-center justify-content-between mb-2">
                             <div class="d-flex align-items-center gap-2">
@@ -563,6 +531,38 @@
                           <div class="d-flex align-items-start gap-2 fs-2 text-dark">
                             <i class="ti ti-gift text-primary fs-4 mt-1 flex-shrink-0"></i>
                             <span><strong>Active Prizes Only:</strong> Customers only win from available prizes that have quantity and are not skipped.</span>
+                          </div>
+                        </div>
+
+                        <!-- Option 2: Chances Mode -->
+                        <div class="qr-flow-card {{ Auth::user()->default_spinn == 2 ? 'active' : '' }}">
+                          <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                              <div class="qr-flow-icon-circle qr-flow-icon-star">
+                                <i class="ti ti-percentage"></i>
+                              </div>
+                              <span class="fw-bold text-dark fs-3">Chances Mode</span>
+                              <span class="qr-flow-tag-recommended">Recommended</span>
+                            </div>
+                            <div>
+                              @if(Auth::user()->default_spinn == 2)
+                                <span class="qr-flow-btn-active-badge"><i class="ti ti-check"></i> ACTIVE</span>
+                              @else
+                                <form action="{{ URL::to('admin/change_spin_mode') }}" method="POST" class="m-0">
+                                  @csrf
+                                  <input type="hidden" name="spin_mode" value="2">
+                                  <button type="submit" class="qr-flow-btn-activate">Activate</button>
+                                </form>
+                              @endif
+                            </div>
+                          </div>
+                          <div class="d-flex align-items-start gap-2 fs-2 text-dark mb-2">
+                            <i class="ti ti-check text-success fs-4 mt-1 flex-shrink-0"></i>
+                            <span><strong>More Quantity = More Wins:</strong> Set higher chances for prizes you have more stock of so they win more often.</span>
+                          </div>
+                          <div class="d-flex align-items-start gap-2 fs-2 text-dark">
+                            <i class="ti ti-ban text-danger fs-4 mt-1 flex-shrink-0"></i>
+                            <span><strong>Chance 0 = Never Won:</strong> Any prize set with <strong>0 chances</strong> will <strong>never</strong> be won.</span>
                           </div>
                         </div>
 

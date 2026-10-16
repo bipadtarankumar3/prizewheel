@@ -1033,12 +1033,12 @@
             <div class="accordion-item">
               <h2 class="accordion-header" id="faqHeading3">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse3" aria-expanded="false" aria-controls="faqCollapse3">
-                  3. What is the difference between Chances Mode and Skip Mode?
+                  3. What is the difference between Skip Mode and Chances Mode?
                 </button>
               </h2>
               <div id="faqCollapse3" class="accordion-collapse collapse" aria-labelledby="faqHeading3" data-bs-parent="#supportFaqAccordion">
                 <div class="accordion-body">
-                  In <strong>Chances Mode</strong>, customers win prizes based on the probability / chance number you set for each slice (higher chance = more frequent wins; 0 chances = never won). In <strong>Skip Mode</strong>, any slice marked as "Skip" is guaranteed never to be awarded, and only available items with quantity are won. You can switch modes anytime via the header dropdown.
+                  In <strong>Skip Mode</strong>, any slice marked as "Skip" is guaranteed never to be awarded, and only available items with quantity are won. In <strong>Chances Mode</strong>, customers win prizes based on the probability / chance number you set for each slice (higher chance = more frequent wins; 0 chances = never won). You can switch modes anytime via the header dropdown.
                 </div>
               </div>
             </div>
