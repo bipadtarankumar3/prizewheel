@@ -1511,6 +1511,400 @@
         font-size: 14px;
       }
     }
+
+    /* ==========================================================================
+       LEGAL MODAL (TERMS OF SERVICE & PRIVACY POLICY)
+       ========================================================================== */
+    .legal-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: modalFadeIn 0.22s ease-out;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .legal-modal-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 640px;
+      max-height: min(90vh, 740px);
+      border-radius: 22px;
+      box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(226, 232, 240, 0.9);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalScaleUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalScaleUp {
+      from { transform: scale(0.94) translateY(10px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .legal-modal-header {
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      flex-shrink: 0;
+    }
+    .legal-modal-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      flex: 1;
+    }
+    .legal-modal-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: #fff7ed;
+      color: #ff6b00;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+      border: 1px solid rgba(255, 107, 0, 0.25);
+      flex-shrink: 0;
+    }
+    .legal-modal-title {
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+      margin: 0;
+      line-height: 1.25;
+    }
+    .legal-modal-subtitle {
+      font-size: 0.77rem;
+      color: #64748b;
+      margin: 2px 0 0;
+      line-height: 1.35;
+    }
+    .legal-modal-close {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      color: #64748b;
+      font-size: 22px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .legal-modal-close:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+      border-color: #cbd5e1;
+    }
+    .legal-modal-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 10px 22px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      flex-shrink: 0;
+    }
+    .legal-tab-btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border-radius: 10px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .legal-tab-btn:hover {
+      background: rgba(255, 107, 0, 0.08);
+      color: #ff6b00;
+    }
+    .legal-tab-btn.active {
+      background: #ff6b00;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+    }
+    .legal-modal-body {
+      padding: 20px 22px;
+      overflow-y: auto;
+      flex: 1 1 auto;
+      min-height: 0;
+      font-size: 0.88rem;
+      line-height: 1.62;
+      color: #334155;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 transparent;
+    }
+    .legal-modal-body::-webkit-scrollbar {
+      width: 6px;
+    }
+    .legal-modal-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .legal-modal-body::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 6px;
+    }
+    .legal-section {
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px dashed #e2e8f0;
+    }
+    .legal-section:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    .legal-badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: #fff7ed;
+      color: #ea580c;
+      border: 1px solid rgba(255, 107, 0, 0.2);
+      margin-bottom: 6px;
+    }
+    .legal-section h4 {
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 6px 0;
+    }
+    .legal-section p {
+      margin: 0;
+      color: #475569;
+    }
+    .legal-modal-footer {
+      padding: 14px 22px 16px;
+      border-top: 1px solid #e2e8f0;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .legal-modal-footer-note {
+      font-size: 0.74rem;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      line-height: 1.35;
+    }
+    .legal-modal-btn-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .legal-btn-secondary {
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      min-height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .legal-btn-secondary:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .legal-btn-primary {
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border: none;
+      background: linear-gradient(135deg, #ff6b00 0%, #ea580c 100%);
+      color: #ffffff;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(255, 107, 0, 0.35);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      min-height: 42px;
+    }
+    .legal-btn-primary:hover {
+      background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+      box-shadow: 0 6px 18px rgba(255, 107, 0, 0.45);
+      transform: translateY(-1px);
+    }
+
+    /* === FULL RESPONSIVE MEDIA QUERIES FOR ALL MOBILE SIZES === */
+    @media (max-width: 640px) {
+      .legal-modal-backdrop {
+        padding: 12px 10px;
+      }
+      .legal-modal-card {
+        max-height: 94vh;
+        border-radius: 18px;
+      }
+      .legal-modal-header {
+        padding: 12px 14px 10px;
+        gap: 8px;
+      }
+      .legal-modal-title-wrap {
+        gap: 10px;
+      }
+      .legal-modal-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+        border-radius: 10px;
+      }
+      .legal-modal-title {
+        font-size: 0.98rem;
+        line-height: 1.25;
+      }
+      .legal-modal-subtitle {
+        font-size: 0.72rem;
+        line-height: 1.3;
+      }
+      .legal-modal-close {
+        width: 32px;
+        height: 32px;
+        font-size: 19px;
+        border-radius: 8px;
+      }
+      .legal-modal-tabs {
+        padding: 6px 12px;
+        gap: 6px;
+      }
+      .legal-tab-btn {
+        padding: 7px 8px;
+        font-size: 0.78rem;
+        gap: 5px;
+        border-radius: 8px;
+      }
+      .legal-modal-body {
+        padding: 12px 14px;
+        font-size: 0.82rem;
+        line-height: 1.55;
+      }
+      .legal-section {
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+      }
+      .legal-section h4 {
+        font-size: 0.9rem;
+        margin-bottom: 3px;
+      }
+      .legal-badge {
+        font-size: 0.62rem;
+        padding: 1px 6px;
+        margin-bottom: 3px;
+      }
+      .legal-modal-footer {
+        padding: 10px 14px 12px;
+        gap: 8px;
+      }
+      .legal-modal-footer-note {
+        font-size: 0.68rem;
+        gap: 4px;
+      }
+      .legal-modal-btn-row {
+        gap: 8px;
+        width: 100%;
+      }
+      .legal-btn-secondary,
+      .legal-btn-primary {
+        flex: 1 1 50%;
+        min-width: 0;
+        padding: 8px 10px;
+        font-size: 0.8rem;
+        border-radius: 8px;
+        min-height: 38px;
+        text-align: center;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .legal-modal-backdrop {
+        padding: 8px 6px;
+      }
+      .legal-modal-card {
+        max-height: 96vh;
+        border-radius: 16px;
+      }
+      .legal-modal-header {
+        padding: 10px 12px 8px;
+      }
+      .legal-modal-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+      }
+      .legal-modal-title {
+        font-size: 0.92rem;
+      }
+      .legal-modal-subtitle {
+        display: none; /* Hide subtitle on tiny screens to save maximum space */
+      }
+      .legal-modal-tabs {
+        padding: 5px 8px;
+      }
+      .legal-tab-btn {
+        padding: 6px 4px;
+        font-size: 0.72rem;
+        gap: 3px;
+      }
+      .legal-modal-body {
+        padding: 10px 10px;
+        font-size: 0.78rem;
+      }
+      .legal-modal-footer {
+        padding: 8px 10px 10px;
+      }
+      .legal-modal-footer-note {
+        display: none; /* Hide helper note on tiny screens to prioritize action buttons */
+      }
+      .legal-btn-secondary,
+      .legal-btn-primary {
+        font-size: 0.76rem;
+        padding: 7px 6px;
+        min-height: 36px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -2187,9 +2581,9 @@
 
               <!-- Terms Checkbox -->
               <div style="margin: 10px 0 14px;">
-                <label class="checkbox-label" style="font-size:11.5px; align-items:flex-start;">
-                  <input type="checkbox" name="terms" required checked style="margin-top:2px;" />
-                  <span>I agree to the <a href="#" style="color:var(--primary); text-decoration:none; font-weight:700;">Terms of Service</a> & <a href="#" style="color:var(--primary); text-decoration:none; font-weight:700;">Privacy Policy</a></span>
+                <label class="checkbox-label" style="font-size:11.5px; align-items:flex-start; cursor:pointer;" onclick="handleTermsLabelClick(event)">
+                  <input type="checkbox" name="terms" id="termsCheckbox" required onclick="handleTermsCheckboxClick(event)" style="margin-top:2px; cursor:pointer; accent-color:var(--primary);" />
+                  <span id="termsLabelText">I agree to the <a href="javascript:void(0)" onclick="openLegalModal('terms'); event.stopPropagation();" style="color:var(--primary); text-decoration:none; font-weight:700;">Terms of Service</a> & <a href="javascript:void(0)" onclick="openLegalModal('privacy'); event.stopPropagation();" style="color:var(--primary); text-decoration:none; font-weight:700;">Privacy Policy</a></span>
                 </label>
               </div>
 
@@ -2218,6 +2612,139 @@
 
     </div>
   </main>
+
+  <!-- Terms of Service & Privacy Policy Modal -->
+  <div class="legal-modal-backdrop" id="legalModalBackdrop" style="display: none;" onclick="handleLegalBackdropClick(event)">
+    <div class="legal-modal-card" role="dialog" aria-modal="true" aria-labelledby="legalModalTitle">
+      
+      <!-- Modal Header -->
+      <div class="legal-modal-header">
+        <div class="legal-modal-title-wrap">
+          <div class="legal-modal-icon">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div>
+            <h3 class="legal-modal-title" id="legalModalTitle">Legal Agreements & Policies</h3>
+            <p class="legal-modal-subtitle">Review our Terms of Service & Privacy Policy to activate your account</p>
+          </div>
+        </div>
+        <button type="button" class="legal-modal-close" onclick="closeLegalModal()" title="Close dialog">&times;</button>
+      </div>
+
+      <!-- Tab Buttons -->
+      <div class="legal-modal-tabs">
+        <button type="button" class="legal-tab-btn active" id="tabTermsBtn" onclick="switchLegalTab('terms')">
+          <i class="fa-solid fa-file-contract"></i>
+          <span>Terms of Service</span>
+        </button>
+        <button type="button" class="legal-tab-btn" id="tabPrivacyBtn" onclick="switchLegalTab('privacy')">
+          <i class="fa-solid fa-user-shield"></i>
+          <span>Privacy Policy</span>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="legal-modal-body">
+        
+        <!-- Terms Pane -->
+        <div class="legal-pane" id="paneTerms">
+          <div class="legal-section">
+            <span class="legal-badge">Clause 1</span>
+            <h4>Acceptance of Terms</h4>
+            <p>Welcome to PrizeWheel. By registering, accessing, or using our interactive gamification platform, you confirm that you are at least 18 years of age and agree to be legally bound by these Terms of Service. If you are registering on behalf of a business entity, you represent and warrant that you possess the authority to bind such entity to these Terms.</p>
+          </div>
+
+          <div class="legal-section">
+            <span class="legal-badge">Clause 2</span>
+            <h4>Account Registration & 1-Day Trial</h4>
+            <p>During registration, you agree to provide true, accurate, and current business details, including business name, official contact number, and authorized email address. New registered accounts receive a complimentary 1-Day Full Access Trial to test and configure prize campaigns. After the trial period, continuous campaign access requires subscription activation or renewal according to your chosen plan.</p>
+          </div>
+
+          <div class="legal-section">
+            <span class="legal-badge">Clause 3</span>
+            <h4>Campaigns & Prize Fulfilment</h4>
+            <p>You are solely responsible for all prizes, discount vouchers, gifts, and promotional promises advertised on your custom wheel campaigns. You warrant that all promotional contents comply with applicable local trade, commercial, and consumer protection laws. PrizeWheel provides software infrastructure only and does not supply physical awards or settle merchant-customer prize disputes.</p>
+          </div>
+
+          <div class="legal-section">
+            <span class="legal-badge">Clause 4</span>
+            <h4>Lead Capture & Customer Communications</h4>
+            <p>Customer contact records (names, phone numbers, email addresses) captured via wheel forms belong to you as data controller. You agree to obtain proper customer consent before sending promotional WhatsApp, SMS, or email communications and adhere to relevant anti-spam regulations.</p>
+          </div>
+
+          <div class="legal-section">
+            <span class="legal-badge">Clause 5</span>
+            <h4>Platform Integrity & Prohibited Use</h4>
+            <p>You agree not to reverse engineer, scrape, bypass rate limits, inject malicious scripts, or exploit the wheel spin mechanics. Any attempt to artificially manipulate win probabilities or compromise server infrastructure will result in immediate account termination without refund.</p>
+          </div>
+
+          <div class="legal-section">
+            <span class="legal-badge">Clause 6</span>
+            <h4>Limitation of Liability</h4>
+            <p>PrizeWheel is provided on an "as-is" and "as-available" basis. We disclaim all implied warranties of merchantability or fitness for a particular purpose. In no event shall PrizeWheel be liable for indirect, incidental, or consequential business losses or lost revenue.</p>
+          </div>
+        </div>
+
+        <!-- Privacy Pane -->
+        <div class="legal-pane" id="panePrivacy" style="display: none;">
+          <div class="legal-section">
+            <span class="legal-badge">Privacy 1</span>
+            <h4>Information We Collect</h4>
+            <p>We collect information provided directly by you during account creation (business name, owner/representative name, email address, WhatsApp/mobile phone number, and encrypted authentication credentials). We also record server logs, IP addresses, and campaign analytics to ensure platform security and fraud prevention.</p>
+          </div>
+
+          <div class="legal-section">
+            <span class="legal-badge">Privacy 2</span>
+            <h4>How We Use Collected Data</h4>
+            <p>Collected information is used strictly to provide, maintain, and enhance platform services; verify authentic human users; deliver transaction notifications; provide technical customer support; and verify campaign performance metrics.</p>
+          </div>
+
+          <div class="legal-section">
+            <span class="legal-badge">Privacy 3</span>
+            <h4>Zero Unauthorized Resale</h4>
+            <p><strong>We do not sell, rent, or trade your personal or customer lead data to third-party data brokers.</strong> Your captured customer leads remain strictly associated with your merchant account and can be exported by you at any time.</p>
+          </div>
+
+          <div class="legal-section">
+            <span class="legal-badge">Privacy 4</span>
+            <h4>Data Security & Encryption</h4>
+            <p>We implement enterprise-grade security protocols, including 256-bit SSL encryption in transit, strict database access controls, salted credential hashing, and regular security reviews to safeguard your information against unauthorized access, loss, or disclosure.</p>
+          </div>
+
+          <div class="legal-section">
+            <span class="legal-badge">Privacy 5</span>
+            <h4>Cookies & Session Storage</h4>
+            <p>We use essential cookies and session tokens to remember your login state, maintain active dashboard sessions, and prevent cross-site request forgery (CSRF) attacks.</p>
+          </div>
+
+          <div class="legal-section">
+            <span class="legal-badge">Privacy 6</span>
+            <h4>Your Rights & Contact</h4>
+            <p>You maintain the right to review, update, or request the deletion of your account information at any time. For privacy inquiries or assistance, reach our support team via the helpline number listed on our platform.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="legal-modal-footer">
+        <div class="legal-modal-footer-note">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Clicking "I Agree & Accept" will mark the agreement checkbox as accepted.</span>
+        </div>
+        <div class="legal-modal-btn-row">
+          <button type="button" class="legal-btn-secondary" onclick="closeLegalModal()">
+            Decline / Close
+          </button>
+          <button type="button" class="legal-btn-primary" onclick="acceptTermsAndClose()">
+            <i class="fa-solid fa-check"></i>
+            <span>I Agree & Accept</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
   <!-- jQuery & Toastr JS -->
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
@@ -2366,9 +2893,123 @@
         });
     }
 
+    /* ==========================================================================
+       TERMS & PRIVACY MODAL LOGIC
+       ========================================================================== */
+    function openLegalModal(tab) {
+      const modal = document.getElementById('legalModalBackdrop');
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        switchLegalTab(tab || 'terms');
+      }
+    }
+
+    function closeLegalModal() {
+      const modal = document.getElementById('legalModalBackdrop');
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+    }
+
+    function handleLegalBackdropClick(event) {
+      if (event.target && event.target.id === 'legalModalBackdrop') {
+        closeLegalModal();
+      }
+    }
+
+    function switchLegalTab(tab) {
+      const tabTerms = document.getElementById('tabTermsBtn');
+      const tabPrivacy = document.getElementById('tabPrivacyBtn');
+      const paneTerms = document.getElementById('paneTerms');
+      const panePrivacy = document.getElementById('panePrivacy');
+
+      if (!tabTerms || !tabPrivacy || !paneTerms || !panePrivacy) return;
+
+      if (tab === 'privacy') {
+        tabTerms.classList.remove('active');
+        tabPrivacy.classList.add('active');
+        paneTerms.style.display = 'none';
+        panePrivacy.style.display = 'block';
+      } else {
+        tabPrivacy.classList.remove('active');
+        tabTerms.classList.add('active');
+        panePrivacy.style.display = 'none';
+        paneTerms.style.display = 'block';
+      }
+    }
+
+    let termsAccepted = false;
+
+    function acceptTermsAndClose() {
+      termsAccepted = true;
+      const termsCheckbox = document.getElementById('termsCheckbox');
+      if (termsCheckbox) {
+        termsCheckbox.checked = true;
+        if (typeof $ !== 'undefined') {
+          $(termsCheckbox).trigger('change');
+        }
+      }
+      closeLegalModal();
+      if (typeof toastr !== 'undefined') {
+        toastr.success("Terms of Service & Privacy Policy accepted!");
+      }
+    }
+
+    function handleTermsCheckboxClick(e) {
+      const termsCheckbox = document.getElementById('termsCheckbox');
+      if (!termsAccepted) {
+        if (e) {
+          e.preventDefault();
+        }
+        if (termsCheckbox) {
+          termsCheckbox.checked = false;
+        }
+        openLegalModal('terms');
+        return false;
+      } else {
+        if (termsCheckbox && !termsCheckbox.checked) {
+          termsAccepted = false;
+        }
+      }
+    }
+
+    function handleTermsLabelClick(e) {
+      if (e.target && (e.target.id === 'termsCheckbox' || (e.target.tagName && e.target.tagName.toLowerCase() === 'a'))) {
+        return;
+      }
+      handleTermsCheckboxClick(e);
+    }
+
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeLegalModal();
+      }
+    });
+
+    // Ensure terms checkbox starts unchecked
+    document.addEventListener('DOMContentLoaded', function() {
+      const termsCheckbox = document.getElementById('termsCheckbox');
+      if (termsCheckbox) {
+        termsCheckbox.checked = false;
+        termsAccepted = false;
+      }
+    });
+
     const signupForm = document.getElementById('signupForm');
     if (signupForm) {
       signupForm.addEventListener('submit', function (e) {
+        const termsCheckbox = document.getElementById('termsCheckbox');
+        if (termsCheckbox && !termsCheckbox.checked) {
+          e.preventDefault();
+          openLegalModal('terms');
+          if (typeof toastr !== 'undefined') {
+            toastr.info("Please review and accept our Terms of Service & Privacy Policy to continue.");
+          }
+          return false;
+        }
+
         const p1 = document.getElementById('regPassword').value;
         const p2 = document.getElementById('regConfirmPassword').value;
         if (p1 !== p2) {
