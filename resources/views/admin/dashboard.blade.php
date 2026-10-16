@@ -238,15 +238,15 @@
       </div>
 
       <div class="d-flex align-items-center gap-2 flex-wrap">
+        <a href="{{ url('admin/add_camping_page') }}" class="dash-hero-btn dash-hero-btn-primary">
+          <i class="ti ti-plus"></i> New Campaign
+        </a>
+        <a href="{{ $storeUrl }}" target="_blank" class="dash-hero-btn dash-hero-btn-secondary">
+          <i class="ti ti-external-link"></i> Launch Wheel
+        </a>
         <button type="button" class="dash-hero-btn dash-hero-btn-secondary" onclick="copyStoreUrl('{{ $storeUrl }}')">
           <i class="ti ti-copy"></i> Copy Wheel Link
         </button>
-        <a href="{{ $storeUrl }}" target="_blank" class="dash-hero-btn dash-hero-btn-primary">
-          <i class="ti ti-external-link"></i> Launch Wheel
-        </a>
-        <a href="{{ url('admin/add_camping_page') }}" class="dash-hero-btn dash-hero-btn-secondary">
-          <i class="ti ti-plus"></i> New Campaign
-        </a>
       </div>
     </div>
   </div>
