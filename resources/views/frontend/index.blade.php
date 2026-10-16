@@ -599,20 +599,28 @@
         margin: 18px 0 8px 0 !important;
       }
 
+      .blast .spinner_image_show {
+        max-width: 140px !important;
+        max-height: 125px !important;
+        object-fit: contain !important;
+        border-radius: 16px !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12) !important;
+        margin: 0 auto 12px auto !important;
+      }
+
       .blast .award_text {
         font-family: 'Outfit', sans-serif !important;
-        font-weight: 900 !important;
-        font-size: 1.85rem !important;
-        background: linear-gradient(135deg, #ff6b00 0%, #ea580c 50%, #f59e0b 100%) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-        margin: 8px 0 24px 0 !important;
-        padding: 12px 24px !important;
-        background-color: #fff7ed !important;
+        font-weight: 800 !important;
+        font-size: 1.55rem !important;
+        color: #059669 !important;
+        text-shadow: none !important;
+        background: #ecfdf5 !important;
+        border: 2px dashed #10b981 !important;
         border-radius: 20px !important;
-        border: 1.5px dashed #fed7aa !important;
+        padding: 10px 24px !important;
+        margin: 12px 0 20px 0 !important;
         display: inline-block !important;
-        letter-spacing: -0.01em !important;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15) !important;
       }
 
       .reedem-btn {
@@ -934,17 +942,16 @@
   <!-- Winner Celebration Overlay -->
   <div class="blast" id="blast" style="display: none">
     <div class="content">
-      <div class="trophy">
-        <img src="https://i.ibb.co/kVZ3CN6/trophy.png" class="trophy_img" alt="trophy">
-        <br>
-        <img src="" alt="" class="spinner_image_show mt-3" style="max-height: 90px; object-fit: contain; display: none;">
+      <div class="trophy" style="text-align: center; margin-bottom: 8px;">
+        <img src="{{asset('frontend/spinner/wheel/trophy.png')}}" class="trophy_img" alt="trophy" style="max-height: 110px; object-fit: contain; display: none;">
+        <img src="" alt="Won Prize" class="spinner_image_show" onerror="this.onerror=null; this.src='{{asset('frontend/spinner/wheel/trophy.png')}}';" style="max-height: 110px; object-fit: contain; display: none;">
       </div>
       <div class="text text-center">
         <h2>Congratulations, you won!</h2>
         <div class="award_text">Award</div>
       </div>
       <div class="text text-center mt-3">
-        <button class="btn reedem-btn" onclick="check_user_spinner_submit()">Redeem Prize</button>
+        <button class="btn reedem-btn" onclick="check_user_spinner_submit()">REEDEM</button>
       </div>
     </div>
   </div>
@@ -1000,7 +1007,7 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLongTitle">Submit your details</h5>
+          <h5 class="modal-title" id="exampleModalLongTitle"><i class="fas fa-trophy mr-2 text-warning"></i> Claim Your Prize — Enter Details</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -1011,11 +1018,11 @@
             <input type="hidden" name="spinner_id" id="spinner_id">
             <input type="hidden" name="spinner_name" id="spinner_name">
             <input type="hidden" name="spinner_value" id="spinner_value">
-            <div class="form-row text-center mb-3">
-              <div class="col-12">
-                <img src="" alt="" class="spinner_image mb-2" style="max-height: 85px; object-fit: contain; display: none;">
-                <h4 class="font-weight-bold text-success mb-1">Congratulations, you won!</h4>
-                <h3 class="spinner_name_text font-weight-bold text-dark"></h3>
+            <div class="text-center mb-4">
+              <img src="" alt="Prize" class="spinner_image mb-2" style="max-height: 85px; max-width: 130px; object-fit: contain; display: none;">
+              <h3 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin-bottom: 6px;">Congratulations, you won!</h3>
+              <div style="background: #ecfdf5; border: 1.5px dashed #10b981; border-radius: 9999px; display: inline-block; padding: 6px 24px;">
+                <span class="spinner_name_text" style="font-size: 1.25rem; font-weight: 800; color: #059669;"></span>
               </div>
             </div>
             @php
@@ -1369,12 +1376,35 @@ const selectPrize = () => {
               $('.award_text').html(prizes[selected].text);
               $('#blast').addClass('show-blast').css('display', 'flex').show();
 
-              if (prizes[selected].image !='') {
-                  $('.spinner_image_show').attr('src',prizes[selected].image);
-                  $('.spinner_image').attr('src',prizes[selected].image);
-              }else{
-                $('.trophy_img').attr('src','https://i.ibb.co/kVZ3CN6/trophy.png');
-                $('.spinner_image').attr('src','https://i.ibb.co/kVZ3CN6/trophy.png');
+              let prizeImg = (prizes[selected] && prizes[selected].image && typeof prizes[selected].image === 'string' && prizes[selected].image.trim() !== '') ? prizes[selected].image.trim() : '';
+
+              function resolveSafeImageUrl(url) {
+                  if (!url || typeof url !== 'string') return '';
+                  url = url.trim();
+                  if (!url) return '';
+                  if (url.startsWith('http://') || url.startsWith('https://')) {
+                      try {
+                          let parsed = new URL(url);
+                          if (parsed.hostname !== window.location.hostname) {
+                              return "{{ URL::to('image-proxy') }}?url=" + encodeURIComponent(url);
+                          }
+                      } catch(e) {
+                          return "{{ URL::to('image-proxy') }}?url=" + encodeURIComponent(url);
+                      }
+                  }
+                  return url;
+              }
+
+              let safeImg = resolveSafeImageUrl(prizeImg);
+
+              if (safeImg !== '') {
+                  $('.spinner_image_show').attr('src', safeImg).css('display', 'inline-block');
+                  $('.trophy_img').css('display', 'none');
+                  $('.spinner_image').attr('src', safeImg).css('display', 'inline-block');
+              } else {
+                  $('.trophy_img').attr('src', "{{asset('frontend/spinner/wheel/trophy.png')}}").css('display', 'inline-block');
+                  $('.spinner_image_show').css('display', 'none');
+                  $('.spinner_image').attr('src', "{{asset('frontend/spinner/wheel/trophy.png')}}").css('display', 'inline-block');
               }
 
               $('#spinner_id').val(prizes[selected].id);
@@ -1641,12 +1671,14 @@ setupWheel();
 
 
       function check_user_spinner_submit(){
+        proceedingToForm = true;
         $('#blast').removeClass('show-blast').fadeOut(250, function(){
-          $('#ReedemModal').modal('show');
+          $('#FormModal').modal('show');
+          setTimeout(function(){ proceedingToForm = false; }, 400);
         });
       }
 
-      $('#ReedemModal').on('hidden.bs.modal', function () {
+      $('#FormModal').on('hidden.bs.modal', function () {
         if (!proceedingToForm && !$('#FormModal').hasClass('show') && !$('.FormModal').hasClass('show') && !$('#FormModal').is(':visible')) {
           $('#blast').addClass('show-blast').fadeIn(200);
         }

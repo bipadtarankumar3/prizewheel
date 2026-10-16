@@ -727,4 +727,35 @@ class FrontendController extends Controller
         
         
     }
+
+    public function image_proxy(Request $request)
+    {
+        $url = $request->query('url');
+        if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
+            return response('Invalid URL', 400);
+        }
+
+        try {
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $data = curl_exec($ch);
+            $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpCode === 200 && $data !== false && !empty($data)) {
+                return response($data, 200, [
+                    'Content-Type' => $contentType ?: 'image/jpeg',
+                    'Access-Control-Allow-Origin' => '*',
+                    'Cache-Control' => 'public, max-age=86400',
+                ]);
+            }
+        } catch (\Throwable $e) {}
+
+        return redirect($url);
+    }
 }

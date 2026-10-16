@@ -768,10 +768,10 @@
                                 <th>Campaign</th>
                                 <th>Prize Name</th>
                                 <th>Max Qty</th>
+                                <th>Image</th>
                                 @if (Auth::user()->default_spinn == 2)
                                     <th>Chances</th>
                                 @else
-                                    <th>Image</th>
                                     <th>Skip</th>
                                 @endif
                                 <th>Wheel Color</th>
@@ -800,6 +800,14 @@
                                         </span>
                                     </td>
 
+                                    <td>
+                                        @if(!empty($item->image))
+                                            <img src="{{$item->image}}" alt="" width="48px" height="48px" style="object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                        @else
+                                            <span class="text-muted small">No Image</span>
+                                        @endif
+                                    </td>
+
                                     @if (Auth::user()->default_spinn == 2)
                                         <td>
                                             @if((float)$item->chances > 0 && $item->skip != 'Yes')
@@ -809,13 +817,6 @@
                                             @endif
                                         </td>
                                     @else
-                                        <td>
-                                            @if(!empty($item->image))
-                                                <img src="{{$item->image}}" alt="" width="48px" height="48px" style="object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                            @else
-                                                <span class="text-muted small">No Image</span>
-                                            @endif
-                                        </td>
                                         <td>
                                             @if($item->skip == 'Yes')
                                                 <span class="badge bg-light-danger text-danger">Yes</span>
@@ -895,6 +896,9 @@
         dataTableInstance = $("#zero_config").DataTable({
             dom: 'Bfrtip',
             pageLength: 15,
+            columnDefs: [
+                { orderable: false, targets: [0, 5, 9] }
+            ],
             buttons: [
                 {
                     extend: 'pdfHtml5',

@@ -37,6 +37,7 @@ Route::post('/u/spinner_form_check/post',[FrontendController::class,'spinner_for
 Route::post('/u/spinner_round_check',[FrontendController::class,'spinner_round_check']);
 Route::post('/u/spinner_value_check',[FrontendController::class,'spinner_value_check']);
 Route::get('/dummy',[FrontendController::class,'dummy']);
+Route::get('/image-proxy', [FrontendController::class, 'image_proxy']);
 
 Route::get('login',[UserController::class,'login'])->name('login');
 Route::post('login_post',[UserController::class,'login_post']);

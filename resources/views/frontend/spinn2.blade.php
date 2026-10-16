@@ -364,6 +364,14 @@
         filter: drop-shadow(0 12px 24px rgba(245, 158, 11, 0.45)) !important;
         animation: trophyFloat 3s ease-in-out infinite !important;
       }
+      .blast .spinner_image_show {
+        max-width: 140px !important;
+        max-height: 125px !important;
+        object-fit: contain !important;
+        border-radius: 16px !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12) !important;
+        margin: 0 auto 12px auto !important;
+      }
       @keyframes trophyFloat {
         0%, 100% { transform: translateY(0); }
         50% { transform: translateY(-8px); }
@@ -741,16 +749,16 @@
     
 <div class="blast" id="blast" style="display: none">
     <div class="content">
-        <div class="trophy">
-            <img src="{{asset('frontend/spinner/wheel/trophy.png')}}" class="trophy_img" alt="trophy" crossorigin="anonymous" style="max-height: 110px; object-fit: contain;">
-            <img src="" alt="" class="spinner_image_show" crossorigin="anonymous" style="max-height: 110px; object-fit: contain; display: none;">
+        <div class="trophy" style="text-align: center; margin-bottom: 8px;">
+            <img src="{{asset('frontend/spinner/wheel/trophy.png')}}" class="trophy_img" alt="trophy" style="max-height: 110px; object-fit: contain; display: none;">
+            <img src="" alt="Won Prize" class="spinner_image_show" onerror="this.onerror=null; this.src='{{asset('frontend/spinner/wheel/trophy.png')}}';" style="max-height: 110px; object-fit: contain; display: none;">
         </div>
         <div class="text text-center">
             <h2 class="my-3">Congratulations, you won!</h2>
             <h1 class="award_text">Award</h1>
         </div>
         <div class="text text-center">
-            <button class="btn btn-warning reedem-btn" onclick="check_user_spinner_submit()" >Reedem</button>
+            <button class="btn btn-warning reedem-btn" onclick="check_user_spinner_submit()" >REEDEM</button>
         </div>
 
     </div>
@@ -1356,19 +1364,41 @@
                 $('.award_text').html(finalPrize.text);
                 $('#blast').addClass('show-blast').fadeIn(300);
 
-                let hasCustomImg = (finalPrize.image && finalPrize.image !== '');
-                let pImg = hasCustomImg 
-                    ? finalPrize.image 
-                    : (window.currentServerPrize && window.currentServerPrize.image ? window.currentServerPrize.image : "{{asset('frontend/spinner/wheel/trophy.png')}}");
-
-                if (hasCustomImg) {
-                    $('.spinner_image_show').attr('src', pImg).show();
-                    $('.trophy_img').hide();
-                } else {
-                    $('.trophy_img').attr('src', "{{asset('frontend/spinner/wheel/trophy.png')}}").show();
-                    $('.spinner_image_show').hide();
+                let pImg = '';
+                if (finalPrize && finalPrize.image && typeof finalPrize.image === 'string' && finalPrize.image.trim() !== '') {
+                    pImg = finalPrize.image.trim();
+                } else if (window.currentServerPrize && window.currentServerPrize.image && typeof window.currentServerPrize.image === 'string' && window.currentServerPrize.image.trim() !== '') {
+                    pImg = window.currentServerPrize.image.trim();
                 }
-                $('.spinner_image').attr('src', pImg);
+
+                function resolveSafeImageUrl(url) {
+                    if (!url || typeof url !== 'string') return '';
+                    url = url.trim();
+                    if (!url) return '';
+                    if (url.startsWith('http://') || url.startsWith('https://')) {
+                        try {
+                            let parsed = new URL(url);
+                            if (parsed.hostname !== window.location.hostname) {
+                                return "{{ URL::to('image-proxy') }}?url=" + encodeURIComponent(url);
+                            }
+                        } catch(e) {
+                            return "{{ URL::to('image-proxy') }}?url=" + encodeURIComponent(url);
+                        }
+                    }
+                    return url;
+                }
+
+                let safeImg = resolveSafeImageUrl(pImg);
+
+                if (safeImg !== '') {
+                    $('.spinner_image_show').attr('src', safeImg).css('display', 'inline-block');
+                    $('.trophy_img').css('display', 'none');
+                    $('.spinner_image').attr('src', safeImg).css('display', 'inline-block');
+                } else {
+                    $('.trophy_img').attr('src', "{{asset('frontend/spinner/wheel/trophy.png')}}").css('display', 'inline-block');
+                    $('.spinner_image_show').css('display', 'none');
+                    $('.spinner_image').attr('src', "{{asset('frontend/spinner/wheel/trophy.png')}}").css('display', 'inline-block');
+                }
 
                 let prizeId = finalPrize.id || (window.currentServerPrize ? window.currentServerPrize.id : '');
                 let prizeName = finalPrize.text || (window.currentServerPrize ? window.currentServerPrize.name : '');
@@ -1559,12 +1589,20 @@
         //   }
         // });
 
+        proceedingToForm = true;
         $('#blast').removeClass('show-blast').fadeOut(250, function(){
-          $('#ReedemModal').modal('show');
+          $('#FormModal').modal('show');
+          setTimeout(function(){ proceedingToForm = false; }, 400);
+
+          if (window.cachedWinningScreenshot) {
+            applyScreenshot(window.cachedWinningScreenshot, 'screenshot-input', null, false);
+          } else {
+            captureScreenshot('blast', 'screenshot-input', null, false);
+          }
         });
       }
 
-      $('#ReedemModal').on('hidden.bs.modal', function () {
+      $('#FormModal').on('hidden.bs.modal', function () {
         if (!proceedingToForm && !$('#FormModal').hasClass('show') && !$('.FormModal').hasClass('show') && !$('#FormModal').is(':visible')) {
           $('#blast').addClass('show-blast').fadeIn(200);
         }
