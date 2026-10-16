@@ -87,6 +87,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth']], function () {
     Route::get('/show-qrcode', [UserController::class,'showQRCode'])->name('show-qrcode');
     Route::post('/spin_pi_clear', [UserController::class,'spin_pi_clear']);
     Route::post('/change_spin_mode', [UserController::class,'change_spin_mode']);
+    Route::get('support', [UserController::class,'support'])->name('admin.support');
 
 
     // ----------------- UserController ------------------------

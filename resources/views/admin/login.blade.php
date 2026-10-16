@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
-  <title>PrizeWheel | Digital Spin Wheel & Multi-Platform Engagement Hub</title>
+  <title>Prize Wheel | Digital Spin Wheel & Multi-Platform for Prize Distribution</title>
   <meta name="description" content="Digital Spin Wheel, Reviews & Rewards Hub. Boost 5-star Google Reviews and engage customers with gamified prize wheels." />
   <link rel="shortcut icon" type="image/png" href="{{ asset('frontend/spinner/wheel/trophy.png') }}" />
   

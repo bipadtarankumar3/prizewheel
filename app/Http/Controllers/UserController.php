@@ -1167,6 +1167,28 @@ class UserController extends Controller
             return view('admin.user.profile',compact('user','id'));
         }
     }
+
+    public function support(){
+        if(Auth::check()){
+            $user = Auth::user();
+            $adminContact = User::where('type', 'admin')->first();
+
+            $daysRemaining = 0;
+            $isExpired = false;
+            if (!empty($user->expiry_date)) {
+                $expiryDate = \Carbon\Carbon::parse($user->expiry_date)->endOfDay();
+                $nowDate = \Carbon\Carbon::now();
+                $diff = (int)$nowDate->diffInDays($expiryDate, false);
+                $daysRemaining = max(0, $diff);
+                if ($nowDate->greaterThan($expiryDate)) {
+                    $isExpired = true;
+                }
+            }
+
+            return view('admin.support.index', compact('user', 'adminContact', 'daysRemaining', 'isExpired'));
+        }
+        return redirect('login');
+    }
     
     public function profile_update(Request $request){
 

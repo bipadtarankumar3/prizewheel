@@ -247,6 +247,14 @@
                     <span class="hide-menu">Popup</span>
                   </a>
                 </li>
+                <li class="sidebar-item {{ Request::is('admin/support*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/support*') ? 'active' : '' }}" href="{{URL::to('admin/support')}}" aria-expanded="false">
+                    <span>
+                      <i class="ti ti-lifebuoy"></i>
+                    </span>
+                    <span class="hide-menu">Support</span>
+                  </a>
+                </li>
                 <!-- <li class="sidebar-item {{ Request::is('admin/expired_camping_list*') ? 'selected' : '' }}">
                   <a class="sidebar-link {{ Request::is('admin/expired_camping_list*') ? 'active' : '' }}" href="{{URL::to('admin/expired_camping_list')}}" aria-expanded="false">
                     <span>
@@ -335,6 +343,14 @@
                       <i class="ti ti-calendar-off"></i>
                     </span>
                     <span class="hide-menu">Expired Campaigns</span>
+                  </a>
+                </li>
+                <li class="sidebar-item {{ Request::is('admin/support*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/support*') ? 'active' : '' }}" href="{{URL::to('admin/support')}}" aria-expanded="false">
+                    <span>
+                      <i class="ti ti-lifebuoy"></i>
+                    </span>
+                    <span class="hide-menu">Support</span>
                   </a>
                 </li>
               @endif
@@ -441,7 +457,7 @@
                   @endphp
 
                   <li class="nav-item">
-                    <a href="{{URL::to('admin/profile')}}" class="trial-expiry-pill-btn" title="View your subscription & account details">
+                    <a href="{{URL::to('admin/support')}}" class="trial-expiry-pill-btn" title="Renew your account subscription & get support">
                       <span class="trial-pulse-dot"></span>
                       @if($daysRemaining <= 1)
                         <span>Only <strong>1 day left</strong> to expire your account access</span>
@@ -631,6 +647,14 @@
                             <i class="ti ti-user"></i>
                           </div>
                           <span class="fw-semibold text-dark" style="font-size: 13px;">Account &amp; Profile</span>
+                          <i class="ti ti-chevron-right ms-auto text-muted" style="font-size: 12px; opacity: 0.4;"></i>
+                        </a>
+
+                        <a href="{{URL::to('admin/support')}}" class="d-flex align-items-center gap-2.5 p-2 rounded-3 text-dark text-decoration-none" style="transition: all 0.2s ease;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                          <div style="width: 34px; height: 34px; border-radius: 9px; background: #f0fdf4; color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">
+                            <i class="ti ti-lifebuoy"></i>
+                          </div>
+                          <span class="fw-semibold text-dark" style="font-size: 13px;">Help &amp; Support</span>
                           <i class="ti ti-chevron-right ms-auto text-muted" style="font-size: 12px; opacity: 0.4;"></i>
                         </a>
 
