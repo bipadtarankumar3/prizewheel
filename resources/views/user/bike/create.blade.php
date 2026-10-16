@@ -7,11 +7,16 @@
         <div class="card-body px-4 py-3">
           <div class="row align-items-center">
             <div class="col-9">
-              <h4 class="fw-semibold mb-8">Create Choose Option </h4>
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <button type="button" onclick="if(window.history.length > 1){ window.history.back(); } else { window.location.href='{{ URL::to('admin/bike_model') }}'; }" class="btn btn-sm btn-light border rounded-pill px-3 py-1 font-weight-bold text-dark d-inline-flex align-items-center shadow-xs" title="Go back">
+                  <i class="ti ti-arrow-left me-1"></i> Back
+                </button>
+                <h4 class="fw-semibold mb-0">Create Choose Option</h4>
+              </div>
               <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                  <li class="breadcrumb-item"><a class="text-muted text-decoration-none" href="">Choose Option </a></li>
-                  <li class="breadcrumb-item" aria-current="page">Create Choose Option </li>
+                <ol class="breadcrumb mb-0">
+                  <li class="breadcrumb-item"><a class="text-muted text-decoration-none" href="{{ URL::to('admin/bike_model') }}">Choose Option</a></li>
+                  <li class="breadcrumb-item" aria-current="page">Create Choose Option</li>
                 </ol>
               </nav>
             </div>
@@ -61,11 +66,9 @@
                         <button type="submit" class="btn btn-info rounded-pill px-4 waves-effect waves-light">
                           Save
                         </button>
-                        <a href="{{URL::to('admin/bike_model')}}">
-                          <button type="button" class="btn btn-dark rounded-pill px-4 waves-effect waves-light">
-                            Cancel
-                          </button>
-                        </a>
+                        <button type="button" onclick="if(window.history.length > 1){ window.history.back(); } else { window.location.href='{{ URL::to('admin/bike_model') }}'; }" class="btn btn-dark rounded-pill px-4 waves-effect waves-light">
+                          Cancel
+                        </button>
                       </div>
                     </div>
     

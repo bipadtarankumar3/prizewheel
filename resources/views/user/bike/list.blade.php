@@ -232,9 +232,14 @@
     <div class="user-hero-card">
         <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
             <div>
-                <span class="hero-badge-pill">
-                    <i class="ti ti-motorbike me-1"></i> Form Customization &bull; Dropdown Catalog
-                </span>
+                <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                    <button type="button" onclick="if(window.history.length > 1){ window.history.back(); } else { window.location.href='{{ URL::to('admin/form_access') }}'; }" class="btn btn-sm btn-light border rounded-pill px-3 py-1 font-weight-bold text-dark d-inline-flex align-items-center shadow-xs" title="Go back to previous page">
+                        <i class="ti ti-arrow-left me-1"></i> Back
+                    </button>
+                    <span class="hero-badge-pill">
+                        <i class="ti ti-motorbike me-1"></i> Form Customization &bull; Dropdown Catalog
+                    </span>
+                </div>
                 <h1 class="user-hero-title">
                     Choose Option (Model) Catalog
                     <span class="badge badge-light border text-muted ml-2" style="font-size: 0.78rem; font-weight: 600;">
@@ -247,6 +252,9 @@
             </div>
 
             <div class="d-flex align-items-center flex-wrap gap-2 mt-3 mt-md-0">
+                <button type="button" onclick="if(window.history.length > 1){ window.history.back(); } else { window.location.href='{{ URL::to('admin/form_access') }}'; }" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-2 font-weight-bold d-inline-flex align-items-center">
+                    <i class="ti ti-arrow-left me-1"></i> Back
+                </button>
                 <a href="{{ URL::to('admin/form_access') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-2 font-weight-bold">
                     <i class="ti ti-adjustments me-1"></i> Form Fields Access
                 </a>
