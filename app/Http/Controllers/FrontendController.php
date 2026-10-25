@@ -114,7 +114,7 @@ class FrontendController extends Controller
                                 ->orderBy('id', 'desc')
                                 ->first();
 
-                            return view('frontend.index',compact(
+                            return view('frontend.skip',compact(
                                 'spinner_data_json',
                                 'spinner_skip_json',
                                 'rotation_time',
@@ -196,7 +196,7 @@ class FrontendController extends Controller
                                 ->first();
                             
 
-                            return view('frontend.spinn2',compact(
+                            return view('frontend.chances',compact(
                                 'spinner_data_json',
                                 'spinner_skip_json',
                                 'rotation_time',
