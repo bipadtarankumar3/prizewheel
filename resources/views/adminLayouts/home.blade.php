@@ -296,14 +296,6 @@
                     <span class="hide-menu">Dashboard</span>
                   </a>
                 </li>
-                <li class="sidebar-item {{ Request::is('admin/billing*') ? 'selected' : '' }}">
-                  <a class="sidebar-link {{ Request::is('admin/billing*') ? 'active' : '' }}" href="{{URL::to('admin/billing')}}" aria-expanded="false">
-                    <span>
-                      <i class="ti ti-crown"></i>
-                    </span>
-                    <span class="hide-menu">My Subscription</span>
-                  </a>
-                </li>
                 <li class="sidebar-item {{ Request::is('admin/camping_list*') ? 'selected' : '' }}">
                   <a class="sidebar-link {{ Request::is('admin/camping_list*') ? 'active' : '' }}" href="{{URL::to('admin/camping_list')}}" aria-expanded="false">
                     <span>
@@ -383,6 +375,14 @@
                       <i class="ti ti-lifebuoy"></i>
                     </span>
                     <span class="hide-menu">Support</span>
+                  </a>
+                </li>
+                <li class="sidebar-item {{ Request::is('admin/billing*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/billing*') ? 'active' : '' }}" href="{{URL::to('admin/billing')}}" aria-expanded="false">
+                    <span>
+                      <i class="ti ti-crown"></i>
+                    </span>
+                    <span class="hide-menu">My Subscription</span>
                   </a>
                 </li>
               @endif
