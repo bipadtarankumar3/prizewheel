@@ -48,9 +48,12 @@
       }
 
       body.default-bg {
-        background-color: #f8fafc !important;
-        background-image: radial-gradient(rgba(148, 163, 184, 0.38) 1.2px, transparent 1.2px) !important;
-        background-size: 26px 26px !important;
+        background-color: #faf5ea !important;
+        background-image: 
+          radial-gradient(rgba(217, 119, 6, 0.22) 1.4px, transparent 1.4px),
+          linear-gradient(180deg, #fffdf8 0%, #faf3e0 45%, #f7ecd2 100%) !important;
+        background-size: 26px 26px, 100% 100% !important;
+        background-attachment: fixed !important;
       }
 
       /* Atom Particle Canvas & Glow Overlay */
@@ -73,9 +76,10 @@
         inset: 0;
         z-index: 0;
         background:
-          radial-gradient(ellipse 65% 55% at 20% 25%, rgba(255, 107, 0, 0.08) 0%, transparent 65%),
-          radial-gradient(ellipse 60% 60% at 80% 75%, rgba(99, 102, 241, 0.07) 0%, transparent 65%),
-          radial-gradient(ellipse 50% 50% at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 70%);
+          radial-gradient(ellipse 70% 60% at 50% 15%, rgba(251, 191, 36, 0.18) 0%, transparent 70%),
+          radial-gradient(ellipse 65% 55% at 20% 40%, rgba(245, 158, 11, 0.13) 0%, transparent 65%),
+          radial-gradient(ellipse 60% 60% at 80% 65%, rgba(217, 119, 6, 0.11) 0%, transparent 65%),
+          radial-gradient(ellipse 55% 50% at 50% 85%, rgba(253, 230, 138, 0.16) 0%, transparent 70%);
         pointer-events: none;
       }
 

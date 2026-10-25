@@ -41,11 +41,11 @@
         this.alpha = 0.35 + Math.random() * 0.45;
         
         const palette = [
-          `rgba(255, 107, 0, ${this.alpha})`,
-          `rgba(249, 115, 22, ${this.alpha * 0.9})`,
-          `rgba(245, 158, 11, ${this.alpha * 0.85})`,
-          `rgba(99, 102, 241, ${this.alpha * 0.75})`,
-          `rgba(14, 165, 233, ${this.alpha * 0.7})`
+          `rgba(217, 119, 6, ${this.alpha})`,
+          `rgba(245, 158, 11, ${this.alpha * 0.95})`,
+          `rgba(251, 191, 36, ${this.alpha * 0.9})`,
+          `rgba(252, 211, 77, ${this.alpha * 0.85})`,
+          `rgba(234, 88, 12, ${this.alpha * 0.75})`
         ];
         this.color = palette[Math.floor(Math.random() * palette.length)];
       }
@@ -85,9 +85,9 @@
         this.pulse = Math.random() * Math.PI * 2;
         
         this.orbits = [
-          { r: 42 * scale, tilt: 0.45, angle: 0, rotAngle: 0.2, speed: 0.016, color: 'rgba(255, 107, 0, 0.45)', electronColor: '#ff6b00' },
-          { r: 72 * scale, tilt: 0.50, angle: Math.PI / 3, rotAngle: 1.25, speed: -0.012, color: 'rgba(99, 102, 241, 0.40)', electronColor: '#6366f1' },
-          { r: 104 * scale, tilt: 0.42, angle: (Math.PI * 2) / 3, rotAngle: 2.35, speed: 0.009, color: 'rgba(245, 158, 11, 0.42)', electronColor: '#f59e0b' }
+          { r: 42 * scale, tilt: 0.45, angle: 0, rotAngle: 0.2, speed: 0.016, color: 'rgba(245, 158, 11, 0.45)', electronColor: '#d97706' },
+          { r: 72 * scale, tilt: 0.50, angle: Math.PI / 3, rotAngle: 1.25, speed: -0.012, color: 'rgba(251, 191, 36, 0.42)', electronColor: '#f59e0b' },
+          { r: 104 * scale, tilt: 0.42, angle: (Math.PI * 2) / 3, rotAngle: 2.35, speed: 0.009, color: 'rgba(217, 119, 6, 0.40)', electronColor: '#b45309' }
         ];
 
         this.baseX = x;
@@ -114,9 +114,9 @@
 
         // Halo
         const haloGrad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.coreR * 6 * pulseFactor);
-        haloGrad.addColorStop(0, 'rgba(255, 107, 0, 0.35)');
-        haloGrad.addColorStop(0.5, 'rgba(249, 115, 22, 0.12)');
-        haloGrad.addColorStop(1, 'rgba(255, 107, 0, 0)');
+        haloGrad.addColorStop(0, 'rgba(251, 191, 36, 0.38)');
+        haloGrad.addColorStop(0.5, 'rgba(245, 158, 11, 0.14)');
+        haloGrad.addColorStop(1, 'rgba(251, 191, 36, 0)');
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.coreR * 6 * pulseFactor, 0, Math.PI * 2);
         ctx.fillStyle = haloGrad;
@@ -125,7 +125,7 @@
         // Core
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.coreR * pulseFactor, 0, Math.PI * 2);
-        ctx.fillStyle = '#ff6b00';
+        ctx.fillStyle = '#f59e0b';
         ctx.fill();
 
         // Highlight
@@ -198,7 +198,7 @@
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(255, 107, 0, ${alpha})`;
+            ctx.strokeStyle = `rgba(217, 119, 6, ${alpha})`;
             ctx.lineWidth = 1.0;
             ctx.stroke();
           }
@@ -215,7 +215,7 @@
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(MOUSE.x, MOUSE.y);
-            ctx.strokeStyle = `rgba(255, 107, 0, ${alpha})`;
+            ctx.strokeStyle = `rgba(217, 119, 6, ${alpha})`;
             ctx.lineWidth = 1.3;
             ctx.stroke();
           }
