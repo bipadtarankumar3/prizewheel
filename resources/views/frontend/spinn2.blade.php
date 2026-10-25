@@ -415,6 +415,26 @@
         box-shadow: 0 16px 35px -4px rgba(245, 158, 11, 0.65) !important;
       }
 
+      /* Background Blur when Modal is Open */
+      body.modal-open .main_page_wrapper,
+      body.modal-open #atomCanvas,
+      body.modal-open .share_floating_bar {
+        filter: blur(10px) brightness(0.92);
+        -webkit-filter: blur(10px) brightness(0.92);
+        transition: filter 0.35s ease, -webkit-filter 0.35s ease;
+        pointer-events: none;
+        user-select: none;
+      }
+
+      .modal-backdrop {
+        background-color: rgba(15, 23, 42, 0.65) !important;
+        backdrop-filter: blur(10px) saturate(130%) !important;
+        -webkit-backdrop-filter: blur(10px) saturate(130%) !important;
+      }
+      .modal-backdrop.show {
+        opacity: 1 !important;
+      }
+
       /* Modals: FormModal & ReedemModal */
       .modal-content {
         border: none !important;
@@ -734,7 +754,7 @@
                             </div>
                             <div class="wheel_cta_wrapper mt-3">
                                 <button id="spin_button" class="btn spin_form_btn" onClick="submit_from()">
-                                    <i class="fas fa-play-circle mr-2"></i> Spin To Win
+                                    <i class="fas fa-play-circle mr-2"></i> {{ ($spin_form_timing ?? 'after_spin') == 'before_spin' ? 'Enter Details & Spin' : 'Spin To Win' }}
                                 </button>
                             </div>
                         </div>
@@ -826,7 +846,7 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLongTitle"><i class="fas fa-trophy mr-2 text-warning"></i> Claim Your Prize — Enter Details</h5>
+              <h5 class="modal-title" id="formModalTitle"><i class="fas fa-trophy mr-2 text-warning"></i> Claim Your Prize — Enter Details</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
@@ -837,14 +857,23 @@
                 <input type="hidden" name="spinner_id" id="spinner_id">
                 <input type="hidden" name="spinner_name" id="spinner_name">
                 <input type="hidden" name="spinner_value" id="spinner_value">
+                <input type="hidden" name="camping_id" value="{{ $Camping->id }}">
                 <input type="hidden" id="screenshot-input" name="screenshot-file">
 
-                <div class="text-center mb-4">
+                <div class="winner-header-info text-center mb-4">
                   <img src="" alt="Prize" class="spinner_image mb-2" style="max-height: 85px; max-width: 130px; object-fit: contain;">
                   <h3 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin-bottom: 6px;">Congratulations, you won!</h3>
                   <div style="background: #ecfdf5; border: 1.5px dashed #10b981; border-radius: 9999px; display: inline-block; padding: 6px 24px;">
                     <span class="spinner_name_text" style="font-size: 1.25rem; font-weight: 800; color: #059669;"></span>
                   </div>
+                </div>
+
+                <div class="prespin-header-info text-center mb-4" style="display: none;">
+                  <div style="width: 54px; height: 54px; border-radius: 50%; background: #eff6ff; color: #2563eb; display: inline-flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 8px;">
+                    <i class="fas fa-user-edit"></i>
+                  </div>
+                  <h3 style="font-size: 1.3rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Enter Details to Spin & Win</h3>
+                  <p class="text-muted small mb-0">Please fill in your contact information below to unlock your spin!</p>
                 </div>
 
                 @php
@@ -1081,139 +1110,161 @@
                //location.href='#p_mobile';
           }
           
+          const spinFormTiming = "{{ $spin_form_timing ?? 'after_spin' }}";
+          // Server-side source of truth: if no pending form record for this IP, clear stale sessionStorage
+          @php $serverPreSpinId2 = $preSpinFormRecord ? $preSpinFormRecord->id : null; @endphp
+          const serverPreSpinFormId2 = {{ $serverPreSpinId2 ? $serverPreSpinId2 : 'null' }};
+          if (!serverPreSpinFormId2) {
+            sessionStorage.removeItem('preSpinFormId_{{ $user->id }}');
+            sessionStorage.removeItem('preSpinName_{{ $user->id }}');
+            sessionStorage.removeItem('spin_completed_{{ $user->id }}');
+          }
+          let preSpinFormId = serverPreSpinFormId2 ? String(serverPreSpinFormId2) : (sessionStorage.getItem('preSpinFormId_{{ $user->id }}') || null);
+          let submittedUserName = sessionStorage.getItem('preSpinName_{{ $user->id }}') || '';
+
+          function openPreSpinModal() {
+            $('#formModalTitle').html('<i class="fas fa-user-edit mr-2 text-primary"></i> Enter Details to Spin & Win');
+            $('.winner-header-info').hide();
+            $('.prespin-header-info').show();
+            $('.take_screen_button').hide();
+            $('#screenshot-preview-card').hide();
+            $('.form_submit_button').show().html('<i class="fas fa-play-circle mr-1"></i> Submit & Spin Wheel');
+            $('#FormModal').modal({
+              backdrop: 'static',
+              keyboard: false,
+              show: true
+            });
+          }
+
+          $(document).ready(function() {
+            @php
+              $isLimitFinished2 = ($SpinnerFormAccessCount !== 'NO_LIMIT' && ($user->spin_whell_round - $SpinnerFormAccessCount) <= 0);
+            @endphp
+            const isLimitFinished2 = {{ $isLimitFinished2 ? 'true' : 'false' }};
+            const hasCompletedSession2 = sessionStorage.getItem('spin_completed_{{ $user->id }}') === 'true';
+
+            if (spinFormTiming === 'before_spin' && !preSpinFormId && !isLimitFinished2 && !hasCompletedSession2) {
+              setTimeout(function() {
+                openPreSpinModal();
+              }, 400);
+            }
+          });
+
+          function startActualSpin() {
+            executeSpinRound();
+          }
+
+          function executeSpinRound() {
+            $(".spin_form_btn").attr('disabled', 'disabled');
+
+            $.ajax({
+              url: "{{URL::to('u/spinner_round_check')}}",
+              type: 'post',
+              data: {
+                user_id:'{{$user->id}}',
+                campaign_id:'{{$Camping->id}}',
+              },
+              headers: {'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')},
+              success: function(data) {
+                $('.spin_time_count').html(data.total_count);
+                if (data.status == false) {
+                  swal({
+                    title: "Oh! Sorry",
+                    text: "<h2>"+data.message+"</h2><p style='margin:7px'><b>Helpline Number</b></p><a href='tel:{{$user->phone}}'><p><i class='fas fa-phone'></i> {{$user->phone}}</a></p>",
+                    html: true,
+                    type: "error",
+                    confirmButtonText: "Ok"
+                  });
+
+                  document.getElementById('error').play();
+                  playing = true;
+                  $(".spin_form_btn").removeAttr('disabled');
+                  return;
+                } else {
+                  hide_alert_error();
+                  hide_prize_msg();
+
+                  try {
+                    document.getElementById('circleSound').play();
+                  } catch(e){}
+                  playing = true;
+
+                  $.ajax({
+                    url: "{{URL::to('form_submit')}}",
+                    type: 'POST',
+                    headers: {
+                      'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    data: {
+                      campaign_id: "{{$campaign_id}}",
+                      name: $('#p_name').val() || submittedUserName,
+                      mobile: $('#p_mobile').val(),
+                      _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                      if (response.success && response.data) {
+                        window.currentServerPrize = response.data;
+                        calculatePrize(response.data.segment_number, response.data.degree, response.data.after_angle);
+                        show_code_msg('Your code is <b>' + response.data.code + '</b>');
+                      } else {
+                        if (playing == true) {
+                          try { document.getElementById('circleSound').pause(); } catch(e){}
+                          playing = false;
+                        }
+                        swal("Notice", response.message || "No prize available for selection.", "info");
+                        $(".spin_form_btn").removeAttr('disabled');
+                        wheelSpinning = false;
+                      }
+                    },
+                    error: function(xhr, status, error) {
+                      if (playing == true) {
+                        try { document.getElementById('circleSound').pause(); } catch(e){}
+                        playing = false;
+                      }
+                      swal("Error", "Could not connect to server. Please try again.", "error");
+                      $(".spin_form_btn").removeAttr('disabled');
+                      wheelSpinning = false;
+                    }
+                  });
+
+                  swal.close();
+                }
+                $('.confirm').removeAttr('disabled');
+              },
+              error: function(err) {
+                $('.confirm').removeAttr('disabled');
+                $(".spin_form_btn").removeAttr('disabled');
+              }
+            });
+          }
+
           function submit_from()
           {
-
-            
-        swal({
-            title: "Best Of Luck",
-            text: "If you click on 'Yes' button it will reduce your spin limit",
-            type: "success",
-            showCancelButton: true,
-            confirmButtonColor: 'green',
-            confirmButtonText: 'Yes, I am sure!',
-            cancelButtonText: "No, cancel it!",
-            closeOnConfirm: false,
-            closeOnCancel: false
-        },
-        function(isConfirm){
-
-            if (isConfirm){
-
-                $('.confirm').attr('disabled','disabled');
-
-                
-                $.ajax({
-                url: "{{URL::to('u/spinner_round_check')}}",
-                    type: 'post',
-                    // dataType: 'application/json',
-                    data:  {
-                        user_id:'{{$user->id}}',
-                        campaign_id:'{{$Camping->id}}',
-                    },
-                    headers: {'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')},
-                    success: function(data) {
-                    
-                        $('.spin_time_count').html(data.total_count);
-                        if (data.status == false) {
-                        swal({
-                            title: "Oh! Sorry",
-                            text: "<h2>"+data.message+"</h2><p style='margin:7px'><b>Helpline Number</b></p><a href='tel:{{$user->phone}}'><p><i class='fas fa-phone'></i> {{$user->phone}}</a>",
-                            html: true,
-                            type: "error",
-                            confirmButtonText: "Ok"
-                        });
-
-                        document.getElementById('error').play();
-                        playing = true;
-                        return;
-
-                        }else{
-
-                            hide_alert_error();
-                            hide_prize_msg();
-            
-
-                            // if($('#p_name').val() == '' || $('#p_name').val() == ' ' )
-                            // {
-                            //     //alert('Enter name !');
-                                
-                            //     show_alert_error('Enter name !');
-                                
-                            // }
-                                        
-                            // else if($('#p_mobile').val() == '' || $('#p_mobile').val() == ' ' || (!$('#p_mobile').val().match('[0-9]{10}')) ||   ($('#p_mobile').val().length!=10)  )
-                            // {
-                            //    // alert('Enter valid 10 digit mobile number !');
-                                
-                            //    //show_alert_error('Enter valid 10 digit mobile number !');
-                            // }
-                            
-                            // else
-                            // {
-                                document.getElementById('circleSound').play();
-                                playing = true;
-
-                                    $.ajax({
-                                    url: "{{URL::to('form_submit')}}",
-                                    type: 'POST',
-                                    headers: {
-                                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // Set the CSRF token
-                                    },
-                                    data: {
-                                        campaign_id: "{{$campaign_id}}",
-                                        name: $('#p_name').val(),
-                                        mobile: $('#p_mobile').val(),
-                                        // Add any other fields you need to send
-                                        _token: '{{ csrf_token() }}' // Include CSRF token for security
-                                    },
-                                    success: function(response) {
-                                        if (response.success && response.data) {
-                                            window.currentServerPrize = response.data;
-                                            // Call calculatePrize with the received segment number
-                                            calculatePrize(response.data.segment_number, response.data.degree, response.data.after_angle);
-                                            show_code_msg('Your code is <b>' + response.data.code + '</b>');
-                                        } else {
-                                            if (playing == true) {
-                                                try { document.getElementById('circleSound').pause(); } catch(e){}
-                                                playing = false;
-                                            }
-                                            swal("Notice", response.message || "No prize available for selection.", "info");
-                                            $(".spin_form_btn").removeAttr('disabled');
-                                            wheelSpinning = false;
-                                        }
-                                    },
-                                    error: function(xhr, status, error) {
-                                        if (playing == true) {
-                                            try { document.getElementById('circleSound').pause(); } catch(e){}
-                                            playing = false;
-                                        }
-                                        swal("Error", "Could not connect to server. Please try again.", "error");
-                                        $(".spin_form_btn").removeAttr('disabled');
-                                        wheelSpinning = false;
-                                    }
-                                });
-
-                            // }
-
-                            swal.close();
-
-                        }
-                        $('.confirm').removeAttr('disabled');
-                        
-                    },
-                    error: function(err) {
-                        reject(err) // Reject the promise and go to catch()
-                    }
-                });
-
-            } else {
-            swal("Cancelled", "Your spin wheel is cancled :)", "error");
+            if (spinFormTiming === 'before_spin' && !preSpinFormId) {
+              openPreSpinModal();
+              return;
             }
-            }  
-            
-            )
-        }
+
+            swal({
+              title: "Best Of Luck",
+              text: "If you click on 'Yes' button it will reduce your spin limit",
+              type: "success",
+              showCancelButton: true,
+              confirmButtonColor: 'green',
+              confirmButtonText: 'Yes, I am sure!',
+              cancelButtonText: "No, cancel it!",
+              closeOnConfirm: false,
+              closeOnCancel: false
+            },
+            function(isConfirm){
+              if (isConfirm){
+                $('.confirm').attr('disabled','disabled');
+                executeSpinRound();
+              } else {
+                swal("Cancelled", "Your spin wheel is cancelled :)", "error");
+              }
+            });
+          }
     
              
        
@@ -1465,6 +1516,12 @@
     function open_form_modal(){
       proceedingToForm = true;
       $('#ReedemModal').one('hidden.bs.modal', function(){
+        $('#formModalTitle').html('<i class="fas fa-trophy mr-2 text-warning"></i> Claim Your Prize — Enter Details');
+        $('.winner-header-info').show();
+        $('.prespin-header-info').hide();
+        $('.take_screen_button').show();
+        $('#screenshot-preview-card').show();
+        $('.form_submit_button').show().html('Submit');
         $('#FormModal').modal('show');
         setTimeout(function(){ proceedingToForm = false; }, 400);
 
@@ -1493,41 +1550,59 @@
         var address  = $('#address').val();
         var bike_model_id  = $('#bike_model_id').val();
  
+        var isPreSpin = (spinFormTiming === 'before_spin' && !preSpinFormId);
+        var actionurl = isPreSpin ? "{{URL::to('u/spinner_form_before_spin')}}" : e.currentTarget.action;
+
         $('.form_submit_button').attr('disabled','disabled');
         $('#preloader').show();
-        //get the action-url of the form
-        var actionurl = e.currentTarget.action;
 
-        //do your own request an handle the results
         $.ajax({
                 url: actionurl,
                 type: 'post',
-                // dataType: 'application/json',
                 data:  new FormData(this),
                 contentType: false,
                 cache: false,
                 processData:false,
                 success: function(data) {
                   $('.form_submit_button').removeAttr('disabled');
+                  $('#preloader').hide();
+
+                  if (isPreSpin && (data.status == 1 || data.message == 'PreSpinFormSubmitted')) {
+                    preSpinFormId = data.form_id;
+                    submittedUserName = data.name || $('#name').val();
+                    sessionStorage.setItem('preSpinFormId_{{ $user->id }}', preSpinFormId);
+                    sessionStorage.setItem('preSpinName_{{ $user->id }}', submittedUserName);
+
+                    $('#p_name').val(submittedUserName);
+                    $('#p_mobile').val($('#phone').val());
+
+                    proceedingToForm = false;
+                    $('#FormModal').modal('hide');
+
+                    // Immediately start actual spin!
+                    setTimeout(function() {
+                      startActualSpin();
+                    }, 400);
+                    return;
+                  }
+
                   if (data.message == 'Inserted') {
-                    
                     swal({
                       title: "Success",
                       text: "<h4>Thank You For Submit Us Details</h4><span>Our Team Will be Contact You Soon </span> <p  style='margin:7px'><b>Helpline Number </b></p><a href='tel:{{$user->phone}}'><p><i class='fas fa-phone'></i> {{$user->phone}}</a></p>", 
                       html: true,
                       type: "success",
-                      confirmButtonText: "Cool",
-                      confirmButtonColor: "#DD6B55",
                       confirmButtonText: "Ok",
+                      confirmButtonColor: "#DD6B55",
                     }, function(isConfirm) {
                         if (isConfirm) {
+                          sessionStorage.removeItem('preSpinFormId_{{ $user->id }}');
+                          sessionStorage.removeItem('preSpinName_{{ $user->id }}');
                           location.reload(true);
                         } else {
                             return false;
                         }
                     });
-                    
-
                   } else if(data.message == 'AlreadyInserted'){
                     swal({
                       title: "Error!",
@@ -1544,7 +1619,6 @@
                       confirmButtonText: "Ok"
                     });
                   }
-                  $('#preloader').hide();
                 },
                 error: function(xhr, status, error) {
                   $('.form_submit_button').removeAttr('disabled');
@@ -1561,36 +1635,59 @@
 
 
       function check_user_spinner_submit(){
-        // $.ajax({
-        //   url: "{{URL::to('u/spinner_form_check/post')}}",
-        //   type: 'post',
-        //   // dataType: 'application/json',
-        //   data:  {
-        //     id:''
-        //   },
-        //   headers: {'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')},
-        //   success: function(data) {
-        //     if (data.message == 'AlreadyInserted') {
-        //       swal({
-        //         title: "Error!",
-        //         text: "<h2>Already Submitted</h2><p style='margin:7px'><b>Helpline Number</b></p><a href='tel:{{$user->phone}}'><p><i class='fas fa-phone'></i> {{$user->phone}}</a>",
-        //         html: true,
-        //         type: "error",
-        //         confirmButtonText: "Ok"
-        //       });
+        if (spinFormTiming === 'before_spin') {
+          $('#preloader').show();
+          $('.reedem-btn').attr('disabled', 'disabled');
 
-        //       document.getElementById('error').play();
-        //   playing = true;
+          var formId = preSpinFormId || sessionStorage.getItem('preSpinFormId_{{ $user->id }}') || '';
+          var spinnerId = (window.currentServerPrize && window.currentServerPrize.id) ? window.currentServerPrize.id : $('#spinner_id').val();
 
-        //     }else {
-        //       $('#ReedemModal').modal('show');
-        //     }
-              
-        //   }
-        // });
+          $.ajax({
+            url: "{{URL::to('u/spinner_form_update_prize')}}",
+            type: 'POST',
+            data: {
+              form_id: formId,
+              spinner_id: spinnerId,
+              campaign_id: '{{$Camping->id}}',
+              _token: $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(data) {
+              $('#preloader').hide();
+              $('.reedem-btn').removeAttr('disabled');
+              if (data.status == 1 || data.message == 'PrizeUpdated') {
+                $('#blast').removeClass('show-blast').fadeOut(250);
+                swal({
+                  title: "Prize Claimed!",
+                  text: "<h4>Congratulations " + (submittedUserName || '') + "!</h4><p>Your prize <b>" + (data.prize_name || '') + "</b> has been confirmed!</p><p style='margin:7px'><b>Helpline Number</b></p><a href='tel:{{$user->phone}}'><p><i class='fas fa-phone'></i> {{$user->phone}}</a></p>",
+                  html: true,
+                  type: "success",
+                  confirmButtonText: "Ok",
+                  confirmButtonColor: "#10b981"
+                }, function(isConfirm) {
+                  sessionStorage.removeItem('preSpinFormId_{{ $user->id }}');
+                  sessionStorage.removeItem('preSpinName_{{ $user->id }}');
+                  sessionStorage.setItem('spin_completed_{{ $user->id }}', 'true');
+                  location.reload(true);
+                });
+              } else {
+                swal("Error", data.message || "Failed to update prize", "error");
+              }
+            },
+            error: function(err) {
+              $('#preloader').hide();
+              $('.reedem-btn').removeAttr('disabled');
+              swal("Error", "Something went wrong updating prize. Please try again.", "error");
+            }
+          });
+          return;
+        }
 
         proceedingToForm = true;
         $('#blast').removeClass('show-blast').fadeOut(250, function(){
+          $('#formModalTitle').html('<i class="fas fa-trophy mr-2 text-warning"></i> Claim Your Prize — Enter Details');
+          $('.winner-header-info').show();
+          $('.prespin-header-info').hide();
+          $('.form_submit_button').html('Submit');
           $('#FormModal').modal('show');
           setTimeout(function(){ proceedingToForm = false; }, 400);
 

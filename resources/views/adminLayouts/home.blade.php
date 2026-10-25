@@ -385,6 +385,14 @@
                     <span class="hide-menu">My Subscription</span>
                   </a>
                 </li>
+                <li class="sidebar-item {{ Request::is('admin/settings*') || Request::is('admin/sitesetting*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/settings*') || Request::is('admin/sitesetting*') ? 'active' : '' }}" href="{{URL::to('admin/settings')}}" aria-expanded="false">
+                    <span>
+                      <i class="ti ti-settings"></i>
+                    </span>
+                    <span class="hide-menu">Settings</span>
+                  </a>
+                </li>
               @endif
             </ul>
           </nav>

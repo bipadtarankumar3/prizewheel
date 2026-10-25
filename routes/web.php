@@ -14,6 +14,7 @@ use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\PopupalertController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\SitesettingController;
 
 
 
@@ -34,6 +35,8 @@ Route::get('/u/{user_name}',[FrontendController::class,'index']);
 Route::post('/u/review_form_submit',[FrontendController::class,'review_form_submit']);
 Route::post('/u/private_feedback',[FrontendController::class,'private_feedback']);
 Route::post('/u/spinner_form/post',[FrontendController::class,'spinner_form']);
+Route::post('/u/spinner_form_before_spin',[FrontendController::class,'spinner_form_before_spin']);
+Route::post('/u/spinner_form_update_prize',[FrontendController::class,'spinner_form_update_prize']);
 Route::post('/u/spinner_form_check/post',[FrontendController::class,'spinner_form_check']);
 Route::post('/u/spinner_round_check',[FrontendController::class,'spinner_round_check']);
 Route::post('/u/spinner_value_check',[FrontendController::class,'spinner_value_check']);
@@ -219,6 +222,13 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth']], function () {
     Route::post('subscription/verify_payment', [SubscriptionController::class, 'verify_razorpay_payment'])->name('user.subscription.verify_payment');
     Route::get('invoice/{paymentId}', [SubscriptionController::class, 'invoice_view'])->name('subscription.invoice.view');
     // ----------------- Subscription, Plans & Razorpay End---------------------
+
+    // ----------------- Settings (Key-Value) ------------------------
+    Route::get('settings', [SitesettingController::class, 'index'])->name('admin.settings');
+    Route::get('sitesetting', [SitesettingController::class, 'index'])->name('admin.sitesetting');
+    Route::post('save_settings', [SitesettingController::class, 'save_settings'])->name('admin.save_settings');
+    Route::post('add_sitesetting', [SitesettingController::class, 'save_settings'])->name('admin.add_sitesetting');
+    // ----------------- Settings End --------------------------------
 });
 
 Route::get('return_to_admin', [UserController::class,'return_to_admin'])->middleware('auth');

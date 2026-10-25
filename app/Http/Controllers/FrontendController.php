@@ -104,9 +104,16 @@ class FrontendController extends Controller
                                 $SpinnerFormAccessCount = SpinnerFormAccess::where('ip_address',$ip_address)->where('campaign_id',$campaign_id)->count();
                             }
                             
-                            $sitesetting = sitesetting::first();
-                            
-        
+                            $sitesetting = sitesetting::where('user_id', $user->id)->first();
+                            $spin_form_timing = sitesetting::getSetting($user->id, 'spin_form_timing', 'after_spin');
+
+                            // Check if this IP already submitted pre-spin form but hasn't claimed yet
+                            $preSpinFormRecord = \App\Models\SpinnerForm::where('camping_id', $Camping->id)
+                                ->where('mac_address', $ip_address)
+                                ->whereNull('spinner_id')
+                                ->orderBy('id', 'desc')
+                                ->first();
+
                             return view('frontend.index',compact(
                                 'spinner_data_json',
                                 'spinner_skip_json',
@@ -116,7 +123,9 @@ class FrontendController extends Controller
                                 'BikeModel',
                                 'SpinnerFormAccessCount',
                                 'FormFields',
-                                'sitesetting'
+                                'sitesetting',
+                                'spin_form_timing',
+                                'preSpinFormRecord'
                             ));
                         } else {
                                  
@@ -171,14 +180,22 @@ class FrontendController extends Controller
                                 $SpinnerFormAccessCount = SpinnerFormAccess::where('ip_address',$ip_address)->where('campaign_id',$campaign_id)->count();
                             }
                             
-                            $sitesetting = sitesetting::first();
+                            $sitesetting = sitesetting::where('user_id', $user->id)->first();
+                            $spin_form_timing = sitesetting::getSetting($user->id, 'spin_form_timing', 'after_spin');
     
                             $spinn_count = count($Spinner);
                             // dd($spinn_count);
                                 // Calculate degree for each segment
                             $degreeIncrement = 360 / $spinn_count;
+
+                            // Check if this IP already submitted pre-spin form but hasn't claimed yet
+                            $preSpinFormRecord = \App\Models\SpinnerForm::where('camping_id', $Camping->id)
+                                ->where('mac_address', $ip_address)
+                                ->whereNull('spinner_id')
+                                ->orderBy('id', 'desc')
+                                ->first();
                             
-    
+
                             return view('frontend.spinn2',compact(
                                 'spinner_data_json',
                                 'spinner_skip_json',
@@ -192,6 +209,8 @@ class FrontendController extends Controller
                                 'campaign_id',
                                 'degreeIncrement',
                                 'spinn_count',
+                                'spin_form_timing',
+                                'preSpinFormRecord'
                             ));
                         }
                         
@@ -670,7 +689,7 @@ class FrontendController extends Controller
             if ($Camping->number_of_total_spinn > 0 ) {
                 
 
-                $SpinnerMacAddr = SpinnerForm::where('mac_address',$ip_address)->where('camping_id',$campaign_id)->first();
+                $SpinnerMacAddr = SpinnerForm::where('mac_address',$ip_address)->where('camping_id',$campaign_id)->whereNotNull('spinner_id')->first();
                 if ($SpinnerMacAddr) {
                     $data = array(
                         'message'=>'You have already submitted details',
@@ -758,4 +777,270 @@ class FrontendController extends Controller
 
         return redirect($url);
     }
+
+    /**
+     * Submit lead enquiry form BEFORE spinning the wheel
+     */
+    public function spinner_form_before_spin(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $ip_address = request()->ip();
+            $camping_id = $request->camping_id;
+
+            $Camping = Camping::where('id', $camping_id)->first();
+            if (!$Camping || $Camping->total_form < 1) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'CampaignNotAvailable',
+                ]);
+            }
+
+            // Check if already submitted details for this phone or IP with a completed prize
+            $alreadySubmitted = SpinnerForm::where('camping_id', $camping_id)
+                ->where(function($q) use ($ip_address, $request) {
+                    if (!empty($request->phone)) {
+                        $q->where('phone', $request->phone);
+                    }
+                })
+                ->whereNotNull('spinner_id')
+                ->first();
+
+            if ($alreadySubmitted) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'AlreadyInserted',
+                ]);
+            }
+
+            $url = '';
+            if ($request->hasFile('screenshot')) {
+                try {
+                    $screenshot = $request->file('screenshot');
+                    $milisecond = round(microtime(true) * 1000);
+                    $name = $screenshot->getClientOriginalName();
+                    $actual_name = str_replace(" ", "_", $name);
+                    $uploadName = $milisecond . "_" . $actual_name;
+                    $uploadDir = public_path('upload/');
+                    if (!file_exists($uploadDir)) {
+                        @mkdir($uploadDir, 0777, true);
+                    }
+                    $screenshot->move($uploadDir, $uploadName);
+                    $url = asset('upload/' . $uploadName);
+                } catch (\Throwable $e) {
+                    Log::warning("Screenshot file upload failed: " . $e->getMessage());
+                }
+            } elseif ($request->filled('screenshot-file') || $request->filled('screenshot_file')) {
+                try {
+                    $base64Screenshot = trim($request->input('screenshot-file') ?? $request->input('screenshot_file') ?? '');
+                    if (!empty($base64Screenshot) && preg_match('/^data:image\/([a-zA-Z0-9\+\-\.]+);base64,/', $base64Screenshot, $type)) {
+                        $data = substr($base64Screenshot, strpos($base64Screenshot, ',') + 1);
+                        $ext = strtolower($type[1]);
+                        if ($ext === 'jpeg') $ext = 'jpg';
+                        if (!in_array($ext, ['jpg', 'png', 'gif', 'webp'])) $ext = 'png';
+                        $data = str_replace(' ', '+', $data);
+                        $decoded = base64_decode($data);
+                        if ($decoded !== false && strlen($decoded) > 50) {
+                            $uploadDir = public_path('upload/');
+                            if (!file_exists($uploadDir)) {
+                                @mkdir($uploadDir, 0777, true);
+                            }
+                            $milisecond = round(microtime(true) * 1000);
+                            $filename = $milisecond . "_screenshot." . $ext;
+                            file_put_contents($uploadDir . $filename, $decoded);
+                            $url = asset('upload/' . $filename);
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    Log::warning("Base64 screenshot decode failed: " . $e->getMessage());
+                }
+            }
+
+            date_default_timezone_set("Asia/Calcutta");
+            $userDate = User::where('id', $Camping->created_by)->first();
+            $FormFields = FormFields::where('user_id', $userDate->id ?? $Camping->created_by)->first();
+            $hasWhatsapp = (!isset($FormFields) || $FormFields->whatsapp_no != 'off');
+            $whatsapp_number = $hasWhatsapp ? (!empty($request->whatsapp_number) ? $request->whatsapp_number : $request->phone) : null;
+
+            $form = SpinnerForm::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'whatsapp_number' => $whatsapp_number,
+                'address' => $request->address,
+                'schreenshot' => $url,
+                'spinner_id' => null, // Will be bound after spinning and clicking redeem
+                'camping_id' => $Camping->id,
+                'bike_model_id' => $request->bike_model_id,
+                'mac_address' => $ip_address,
+                'status' => 'pending_prize',
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'PreSpinFormSubmitted',
+                'form_id' => $form->id,
+                'name' => $form->name,
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error("Error in spinner_form_before_spin: " . $e->getMessage());
+            return response()->json([
+                'status' => 0,
+                'message' => 'Error: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Update prize on existing enquiry form record when user clicks redeem after spin
+     */
+    public function spinner_form_update_prize(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $spinner_id = decrypt($request->spinner_id);
+            $Spinner = Spinner::where('id', $spinner_id)->first();
+            if (!$Spinner) {
+                return response()->json(['status' => 0, 'message' => 'Invalid Spinner item'], 400);
+            }
+
+            $form_id = $request->form_id;
+            $ip_address = request()->ip();
+
+            $form = null;
+            if (!empty($form_id)) {
+                $form = SpinnerForm::where('id', $form_id)->first();
+            }
+            if (!$form) {
+                $form = SpinnerForm::where('mac_address', $ip_address)
+                    ->where('camping_id', $Spinner->camping_id)
+                    ->whereNull('spinner_id')
+                    ->orderBy('id', 'desc')
+                    ->first();
+            }
+            if (!$form) {
+                $form = SpinnerForm::where('camping_id', $Spinner->camping_id)
+                    ->where(function($q) {
+                        $q->whereNull('spinner_id')->orWhere('status', 'pending_prize');
+                    })
+                    ->orderBy('id', 'desc')
+                    ->first();
+            }
+
+            if (!$form) {
+                return response()->json(['status' => 0, 'message' => 'Enquiry form record not found'], 404);
+            }
+
+            // Handle optional screenshot upload on redeem
+            if ($request->hasFile('screenshot')) {
+                try {
+                    $screenshot = $request->file('screenshot');
+                    $milisecond = round(microtime(true) * 1000);
+                    $name = $screenshot->getClientOriginalName();
+                    $actual_name = str_replace(" ", "_", $name);
+                    $uploadName = $milisecond . "_" . $actual_name;
+                    $uploadDir = public_path('upload/');
+                    if (!file_exists($uploadDir)) {
+                        @mkdir($uploadDir, 0777, true);
+                    }
+                    $screenshot->move($uploadDir, $uploadName);
+                    $form->schreenshot = asset('upload/' . $uploadName);
+                } catch (\Throwable $e) {
+                    Log::warning("Screenshot file upload failed on update: " . $e->getMessage());
+                }
+            } elseif ($request->filled('screenshot-file') || $request->filled('screenshot_file')) {
+                try {
+                    $base64Screenshot = trim($request->input('screenshot-file') ?? $request->input('screenshot_file') ?? '');
+                    if (!empty($base64Screenshot) && preg_match('/^data:image\/([a-zA-Z0-9\+\-\.]+);base64,/', $base64Screenshot, $type)) {
+                        $data = substr($base64Screenshot, strpos($base64Screenshot, ',') + 1);
+                        $ext = strtolower($type[1]);
+                        if ($ext === 'jpeg') $ext = 'jpg';
+                        if (!in_array($ext, ['jpg', 'png', 'gif', 'webp'])) $ext = 'png';
+                        $data = str_replace(' ', '+', $data);
+                        $decoded = base64_decode($data);
+                        if ($decoded !== false && strlen($decoded) > 50) {
+                            $uploadDir = public_path('upload/');
+                            if (!file_exists($uploadDir)) {
+                                @mkdir($uploadDir, 0777, true);
+                            }
+                            $milisecond = round(microtime(true) * 1000);
+                            $filename = $milisecond . "_screenshot." . $ext;
+                            file_put_contents($uploadDir . $filename, $decoded);
+                            $form->schreenshot = asset('upload/' . $filename);
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    Log::warning("Base64 screenshot decode failed on update: " . $e->getMessage());
+                }
+            }
+
+            // Bind winning prize to this submitted form!
+            $form->spinner_id = $Spinner->id;
+            $form->status = 'completed';
+            $form->save();
+
+            // Update Camping stats & Spinner stock
+            $Camping = Camping::where('id', $Spinner->camping_id)->first();
+            if ($Camping) {
+                $form_submitted = $Camping->form_submitted + 1;
+                Camping::where('id', $Camping->id)->update([
+                    'form_submitted' => $form_submitted,
+                    'number_of_total_spinn' => max(0, $Camping->number_of_total_spinn - 1),
+                ]);
+            }
+
+            Spinner::where('id', $Spinner->id)->update([
+                'value' => max(0, $Spinner->value - 1)
+            ]);
+
+            // WhatsApp Notification to customer
+            $userDate = User::where('id', $Camping->created_by ?? 0)->first();
+            if ($userDate && !empty($form->phone) && !empty($userDate->wp_key)) {
+                try {
+                    $string = $Spinner->name ?? '';
+                    $replaced = str_replace(' ', '%20', $string);
+                    $message = 'Congratulations,%20' . urlencode($form->name) . '%20You%20have%20won%20the%20' . $replaced . ',%20Our%20team%20will%20contact%20you%20soon.%20If%20have%20you%20any%20Query,%20Please%20reply%20Hello';
+
+                    $curl = curl_init();
+                    curl_setopt_array($curl, array(
+                        CURLOPT_URL => 'http://api.vyyapar.com/wapp/api/send?apikey=' . $userDate->wp_key . '&mobile=' . $form->phone . '&msg=' . $message,
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_ENCODING => '',
+                        CURLOPT_MAXREDIRS => 10,
+                        CURLOPT_TIMEOUT => 5,
+                        CURLOPT_FOLLOWLOCATION => true,
+                        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                        CURLOPT_CUSTOMREQUEST => 'GET',
+                    ));
+                    $response = curl_exec($curl);
+                    curl_close($curl);
+
+                    $count = ($userDate->wp_count == '') ? 1 : ($userDate->wp_count + 1);
+                    User::where('id', $userDate->id)->update(['wp_count' => $count]);
+                } catch (\Throwable $wpEx) {
+                    Log::warning("WhatsApp API error: " . $wpEx->getMessage());
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'PrizeUpdated',
+                'prize_name' => $Spinner->name,
+                'form_id' => $form->id,
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error("Error in spinner_form_update_prize: " . $e->getMessage());
+            return response()->json([
+                'status' => 0,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
+
