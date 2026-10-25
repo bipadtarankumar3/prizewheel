@@ -231,6 +231,30 @@
                     <span class="hide-menu">User</span>
                   </a>
                 </li>
+                <li class="sidebar-item {{ Request::is('admin/plans*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/plans*') ? 'active' : '' }}" href="{{URL::to('admin/plans')}}" aria-expanded="false">
+                    <span>
+                      <i class="ti ti-packages"></i>
+                    </span>
+                    <span class="hide-menu">Plans & Pricing</span>
+                  </a>
+                </li>
+                <li class="sidebar-item {{ Request::is('admin/razorpay_settings*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/razorpay_settings*') ? 'active' : '' }}" href="{{URL::to('admin/razorpay_settings')}}" aria-expanded="false">
+                    <span>
+                      <i class="ti ti-credit-card"></i>
+                    </span>
+                    <span class="hide-menu">Razorpay Gateway</span>
+                  </a>
+                </li>
+                <li class="sidebar-item {{ Request::is('admin/payments*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/payments*') ? 'active' : '' }}" href="{{URL::to('admin/payments')}}" aria-expanded="false">
+                    <span>
+                      <i class="ti ti-receipt"></i>
+                    </span>
+                    <span class="hide-menu">Payments & Revenue</span>
+                  </a>
+                </li>
                 <li class="sidebar-item {{ Request::is('admin/notice*') ? 'selected' : '' }}">
                   <a class="sidebar-link {{ Request::is('admin/notice*') ? 'active' : '' }}" href="{{URL::to('admin/notice')}}" aria-expanded="false">
                     <span>
@@ -270,6 +294,14 @@
                       <i class="ti ti-layout-dashboard"></i>
                     </span>
                     <span class="hide-menu">Dashboard</span>
+                  </a>
+                </li>
+                <li class="sidebar-item {{ Request::is('admin/billing*') ? 'selected' : '' }}">
+                  <a class="sidebar-link {{ Request::is('admin/billing*') ? 'active' : '' }}" href="{{URL::to('admin/billing')}}" aria-expanded="false">
+                    <span>
+                      <i class="ti ti-crown"></i>
+                    </span>
+                    <span class="hide-menu">My Subscription</span>
                   </a>
                 </li>
                 <li class="sidebar-item {{ Request::is('admin/camping_list*') ? 'selected' : '' }}">
@@ -447,24 +479,21 @@
                 @if(Auth::user()->type == 'user')
                   <!-- TRIAL ACCESS EXPIRATION BUTTON -->
                   @php
-                    $userExpiry = Auth::user()->expiry_date;
-                    $daysRemaining = 1;
-                    if (!empty($userExpiry)) {
-                        $expiryDate = \Carbon\Carbon::parse($userExpiry)->endOfDay();
-                        $nowDate = \Carbon\Carbon::now();
-                        $daysRemaining = max(0, (int)$nowDate->diffInDays($expiryDate, false));
-                    }
+                    $isUserExp = Auth::user()->isExpired();
+                    $daysRemaining = Auth::user()->daysRemaining();
                   @endphp
 
                   <li class="nav-item">
-                    <a href="{{URL::to('admin/support')}}" class="trial-expiry-pill-btn" title="Renew your account subscription & get support">
-                      <span class="trial-pulse-dot"></span>
-                      @if($daysRemaining <= 1)
-                        <span>Only <strong>1 day left</strong> to expire your account access</span>
+                    <a href="{{URL::to('admin/billing')}}" class="trial-expiry-pill-btn {{ $isUserExp ? 'bg-danger text-white border-0' : '' }}" title="Manage your subscription & renew plan">
+                      <span class="trial-pulse-dot" style="{{ $isUserExp ? 'background: #fff;' : '' }}"></span>
+                      @if($isUserExp)
+                        <span class="text-white fw-bold">⚠️ Subscription Expired — Renew Now</span>
+                      @elseif($daysRemaining <= 1)
+                        <span>Only <strong>1 day left</strong> to expire access</span>
                       @else
                         <span><strong>{{ $daysRemaining }} days left</strong> to expire access</span>
                       @endif
-                      <span class="trial-renew-action">Renew <i class="ti ti-arrow-right"></i></span>
+                      <span class="trial-renew-action" style="{{ $isUserExp ? 'background: rgba(255,255,255,0.25); color: #fff;' : '' }}">Renew <i class="ti ti-arrow-right"></i></span>
                     </a>
                   </li>
 
@@ -1410,6 +1439,266 @@
         });
       }
     });
+  </script>
+  @endif
+
+  @php
+    $isExpiredUserGlobal = Auth::check() && Auth::user()->type === 'user' && Auth::user()->isExpired();
+    if ($isExpiredUserGlobal && (empty($subscriptionPlansForModal) || count($subscriptionPlansForModal) === 0)) {
+        $modalAdminId = Auth::user()->admin_id ?: 1;
+        $subscriptionPlansForModal = \App\Models\Plan::where(function($q) use ($modalAdminId) {
+            $q->where('admin_id', $modalAdminId)->orWhere('admin_id', 1);
+        })->where('status', 'active')->orderBy('price', 'asc')->get();
+    }
+  @endphp
+
+  @if($isExpiredUserGlobal)
+  <!-- ============================================================== -->
+  <!-- UNCLOSABLE SUBSCRIPTION EXPIRED MODAL                          -->
+  <!-- ============================================================== -->
+  <style>
+    #subscriptionExpiredModal .btn-close { display: none !important; }
+    #subscriptionExpiredModal { z-index: 99999 !important; }
+    .modal-backdrop.show { z-index: 99998 !important; opacity: 0.88 !important; background-color: #0b1120 !important; }
+  </style>
+
+  <div class="modal fade show" id="subscriptionExpiredModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="subscriptionExpiredModalLabel" aria-modal="true" role="dialog" style="display: none;">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+      <div class="modal-content rounded-4 border-0 shadow-2xl overflow-hidden" style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);">
+        
+        <!-- Header Banner -->
+        <div class="p-4 p-md-5 text-center text-white" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);">
+          <div class="d-inline-flex p-3 rounded-circle bg-white bg-opacity-20 mb-3 shadow-sm">
+            <i class="ti ti-lock fs-1 text-white"></i>
+          </div>
+          <h2 class="fw-extrabold mb-2" style="letter-spacing: -0.5px;">Your Store Subscription Has Expired</h2>
+          <p class="mb-0 text-white-50 mx-auto" style="max-width: 650px; font-size: 15px; line-height: 1.6;">
+            Customer wheel spins, promotional campaigns, and dashboard operations are locked. Please choose a subscription plan below to pay via Razorpay and immediately resume access.
+          </p>
+        </div>
+
+        <!-- Body: Available Plans -->
+        <div class="modal-body p-4 p-md-5 bg-light">
+          <div class="row g-4 justify-content-center">
+            @if(!empty($subscriptionPlansForModal) && count($subscriptionPlansForModal) > 0)
+              @foreach($subscriptionPlansForModal as $modalPlan)
+                <div class="col-lg-4 col-md-6">
+                  <div class="card h-100 border-0 rounded-4 shadow-sm position-relative" style="border: 2px solid {{ $modalPlan->is_popular ? '#ff6b00' : '#e2e8f0' }} !important; background: #fff;">
+                    @if($modalPlan->is_popular)
+                      <div class="position-absolute top-0 end-0 py-1 px-3 text-white text-uppercase fw-bold" style="background: #ff6b00; font-size: 10px; letter-spacing: 0.5px; border-bottom-left-radius: 10px;">
+                        ★ Popular
+                      </div>
+                    @endif
+                    <div class="card-body p-4 d-flex flex-column">
+                      <span class="badge rounded-pill px-3 py-1 mb-2 fw-semibold bg-light text-dark border align-self-start">
+                        {{ $modalPlan->duration_days }} Days Access
+                      </span>
+                      <h4 class="fw-bold mb-1 text-dark">{{ $modalPlan->name }}</h4>
+                      <p class="text-muted small mb-3">{{ $modalPlan->description ?: 'Complete Prize Wheel Package' }}</p>
+                      
+                      <div class="p-3 rounded-3 mb-3" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
+                        <span class="fs-5 fw-bold text-dark">₹</span>
+                        <span class="display-6 fw-extrabold text-dark" style="letter-spacing: -1px;">{{ number_format($modalPlan->price, 0) }}</span>
+                        <span class="text-muted small">/ {{ $modalPlan->duration_days }} Days</span>
+                      </div>
+
+                      <ul class="list-unstyled mb-4 small d-flex flex-column gap-2 flex-grow-1">
+                        <li class="d-flex align-items-center gap-2">
+                          <i class="ti ti-circle-check-filled text-success fs-5"></i>
+                          <span><strong>{{ $modalPlan->spin_rounds_limit === -1 ? 'Unlimited' : number_format($modalPlan->spin_rounds_limit) }}</strong> Spins</span>
+                        </li>
+                        <li class="d-flex align-items-center gap-2">
+                          <i class="ti ti-circle-check-filled text-success fs-5"></i>
+                          <span><strong>{{ $modalPlan->campaigns_limit === -1 ? 'Unlimited' : $modalPlan->campaigns_limit }}</strong> Campaigns</span>
+                        </li>
+                        <li class="d-flex align-items-center gap-2">
+                          <i class="ti ti-circle-check-filled text-success fs-5"></i>
+                          <span>WhatsApp & IP Fraud Protection</span>
+                        </li>
+                        @if(!empty($modalPlan->features_list))
+                          @php
+                            $modalCleanFeatures = preg_split('/(\\\\r\\\\n|\\\\n|\\\\r|\r\n|\n|\r)/', $modalPlan->features_list);
+                          @endphp
+                          @foreach($modalCleanFeatures as $feat)
+                            @if(trim($feat))
+                              <li class="d-flex align-items-center gap-2">
+                                <i class="ti ti-circle-check-filled text-primary fs-5"></i>
+                                <span>{{ trim($feat) }}</span>
+                              </li>
+                            @endif
+                          @endforeach
+                        @endif
+                      </ul>
+
+                      <button type="button" class="btn btn-primary w-100 rounded-pill py-2 fw-bold pay-modal-plan-btn shadow-sm" data-plan-id="{{ $modalPlan->id }}" style="background: {{ $modalPlan->is_popular ? '#ff6b00' : '#0284c7' }}; border-color: {{ $modalPlan->is_popular ? '#ff6b00' : '#0284c7' }};">
+                        <i class="ti ti-bolt me-1"></i> Pay ₹{{ number_format($modalPlan->price, 0) }} &amp; Unlock
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              @endforeach
+            @else
+              <div class="col-12 text-center py-4">
+                <p class="text-muted mb-0">No active plans are currently listed. Please contact your administrator for assistance.</p>
+              </div>
+            @endif
+          </div>
+        </div>
+
+        <div class="modal-footer bg-white border-top p-3 justify-content-between">
+          <small class="text-muted">
+            <i class="ti ti-shield-check text-success me-1"></i> 256-bit Secure Razorpay Checkout (UPI, Cards, NetBanking)
+          </small>
+          <div class="d-flex align-items-center gap-2">
+            <a href="{{ url('admin/logout') }}" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+              <i class="ti ti-logout me-1"></i> Sign Out
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+    (function() {
+      function forceOpenExpiredModal() {
+        var modalEl = document.getElementById('subscriptionExpiredModal');
+        if (!modalEl) return;
+
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl, {
+            backdrop: 'static',
+            keyboard: false
+          });
+          modal.show();
+        } else if (typeof jQuery !== 'undefined') {
+          jQuery('#subscriptionExpiredModal').modal({
+            backdrop: 'static',
+            keyboard: false,
+            show: true
+          });
+        }
+
+        modalEl.addEventListener('hide.bs.modal', function(e) {
+          e.preventDefault();
+          return false;
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener("DOMContentLoaded", forceOpenExpiredModal);
+      } else {
+        forceOpenExpiredModal();
+      }
+      window.addEventListener("load", forceOpenExpiredModal);
+      setTimeout(forceOpenExpiredModal, 400);
+      setTimeout(forceOpenExpiredModal, 1200);
+
+      document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.pay-modal-plan-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var planId = this.getAttribute('data-plan-id');
+            var originalText = this.innerHTML;
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Preparing Gateway...';
+
+            fetch("{{ url('admin/subscription/create_order') }}", {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+              },
+              body: JSON.stringify({ plan_id: planId })
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(orderData) {
+              btn.disabled = false;
+              btn.innerHTML = originalText;
+
+              if (!orderData.success) {
+                alert(orderData.message || 'Unable to connect to payment gateway.');
+                return;
+              }
+
+              var options = {
+                key: orderData.razorpay_key,
+                amount: orderData.amount,
+                currency: orderData.currency,
+                name: "Prize Wheel",
+                description: orderData.plan_description,
+                image: "{{ asset('frontend/spinner/wheel/trophy.png') }}",
+                order_id: orderData.order_id,
+                prefill: {
+                  name: orderData.user_name,
+                  email: orderData.user_email,
+                  contact: orderData.user_phone
+                },
+                theme: { color: "#ff6b00" },
+                handler: function (response) {
+                  btn.disabled = true;
+                  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Verifying Payment...';
+
+                  fetch("{{ url('admin/subscription/verify_payment') }}", {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                      'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      razorpay_payment_id: response.razorpay_payment_id,
+                      razorpay_order_id: response.razorpay_order_id,
+                      razorpay_signature: response.razorpay_signature,
+                      payment_id: orderData.payment_id
+                    })
+                  })
+                  .then(function(vRes) { return vRes.json(); })
+                  .then(function(vData) {
+                    if (vData.success) {
+                      alert(vData.message || 'Payment successful! Your store is now renewed and unlocked.');
+                      window.location.reload();
+                    } else {
+                      alert(vData.message || 'Payment verification failed.');
+                      btn.disabled = false;
+                      btn.innerHTML = originalText;
+                    }
+                  })
+                  .catch(function(err) {
+                    console.error(err);
+                    alert('Verification error. Please refresh and check your billing history.');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                  });
+                },
+                modal: {
+                  ondismiss: function() {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                  }
+                }
+              };
+
+              var rzp = new Razorpay(options);
+              rzp.on('payment.failed', function(resp) {
+                alert("Payment Failed: " + resp.error.description);
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+              });
+              rzp.open();
+            })
+            .catch(function(err) {
+              console.error(err);
+              alert('Network error connecting to payment gateway.');
+              btn.disabled = false;
+              btn.innerHTML = originalText;
+            });
+          });
+        });
+      });
+    })();
   </script>
   @endif
 

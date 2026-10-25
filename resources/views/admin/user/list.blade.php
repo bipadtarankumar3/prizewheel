@@ -464,6 +464,38 @@
             </a>
         </div>
 
+        <!-- 7. Total Store Payments Count -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <a href="{{ URL::to('admin/payments') }}" class="text-decoration-none">
+                <div class="user-stat-card stat-purple">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="stat-bubble-icon bubble-purple">
+                            <i class="ti ti-receipt-2"></i>
+                        </div>
+                        <span class="badge bg-light-info text-primary fw-bold rounded-pill px-2">Payments</span>
+                    </div>
+                    <div class="stat-val-num text-dark">{{ number_format($totalPaymentsCount ?? 0) }}</div>
+                    <p class="stat-val-label">Total Invoices</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- 8. Total Revenue Received -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <a href="{{ URL::to('admin/payments') }}" class="text-decoration-none">
+                <div class="user-stat-card stat-emerald">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="stat-bubble-icon bubble-emerald">
+                            <i class="ti ti-wallet"></i>
+                        </div>
+                        <span class="badge bg-light-success text-success fw-bold rounded-pill px-2">Revenue</span>
+                    </div>
+                    <div class="stat-val-num text-success">₹{{ number_format($totalRevenueSum ?? 0, 0) }}</div>
+                    <p class="stat-val-label">Total Collected</p>
+                </div>
+            </a>
+        </div>
+
     </div>
 
     <!-- Quick Preset Filter & Date Range Toolbar -->
@@ -571,6 +603,7 @@
                                 <th>Contact Details</th>
                                 <th>Active Status</th>
                                 <th>Expiry Date</th>
+                                <th>Plan &amp; Billing</th>
                                 <th>Wheel &amp; Activity</th>
                                 <th>Account Note</th>
                                 <th class="text-center" style="width: 160px;">Quick Access</th>
@@ -699,6 +732,25 @@
                                         @endif
                                     </td>
 
+                                    <!-- Plan & Payments Info -->
+                                    <td>
+                                        <div>
+                                            <span class="badge bg-light-primary text-primary fw-bold px-2 py-1 rounded-pill">
+                                                <i class="ti ti-crown me-1"></i> {{ $item->plan ? $item->plan->name : '1-Day Trial' }}
+                                            </span>
+                                        </div>
+                                        <div class="mt-1 small">
+                                            <span class="fw-bold text-dark">{{ $item->payments_made_count ?? 0 }}</span>
+                                            <span class="text-muted">Invoices</span>
+                                            <span class="badge bg-success-subtle text-success ms-1 fw-bold">₹{{ number_format($item->total_paid ?? 0, 0) }}</span>
+                                        </div>
+                                        <div class="mt-1">
+                                            <a href="{{ url('admin/payments?user_id='.$item->id) }}" class="badge bg-light text-primary border text-decoration-none" title="View all payments for this store">
+                                                <i class="ti ti-receipt me-1"></i> View Payments
+                                            </a>
+                                        </div>
+                                    </td>
+
                                     <!-- Wheel & Activity Counts -->
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
@@ -747,6 +799,18 @@
                                                     <i class="ti ti-external-link"></i> Live Wheel
                                                 </a>
                                             @endif
+
+                                            <!-- Extra Access Above Plan -->
+                                            <button type="button" class="action-pill-btn w-100 justify-content-center" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;" data-bs-toggle="modal" data-bs-target="#extraAccessModal{{ $item->id }}" title="Grant Extra Access / Bonus Limits Above Plan">
+                                                <i class="ti ti-shield-plus"></i> Extra Access
+                                            </button>
+
+                                            <!-- Send Expiry Alert if Expired -->
+                                            @if($isExpired)
+                                                <a href="{{ url('admin/send_expiry_alert/'.$item->id) }}" class="action-pill-btn w-100 justify-content-center" style="background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa;" title="Send Expiry Alert Email to Store Owner" onclick="return confirm('Send subscription expiry alert email to {{ $item->email }}?')">
+                                                    <i class="ti ti-mail-fast"></i> Send Alert
+                                                </a>
+                                            @endif
                                         </div>
                                     </td>
 
@@ -773,6 +837,93 @@
     </div>
 
 </div>
+
+<!-- Extra Access Modals for Each Store -->
+@foreach($user as $item)
+  @php
+    $override = json_decode($item->custom_access_override ?? '{}', true);
+  @endphp
+  <div class="modal fade" id="extraAccessModal{{ $item->id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content rounded-4 border-0 shadow">
+        <div class="modal-header border-bottom p-4">
+          <div class="d-flex align-items-center gap-2">
+            <div class="p-2 rounded-3 bg-primary-subtle text-primary">
+              <i class="ti ti-shield-plus fs-4"></i>
+            </div>
+            <div>
+              <h5 class="modal-title fw-bold text-dark">Grant Extra Access Above Planning</h5>
+              <small class="text-muted">Override limits and grant custom privileges for <strong>{{ $item->name }}</strong></small>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <form action="{{ url('admin/grant_extra_access/' . $item->id) }}" method="POST">
+          @csrf
+          <div class="modal-body p-4">
+            <div class="row g-3">
+              
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-dark">Current / Custom Expiry Date</label>
+                <input type="date" name="new_expiry_date" class="form-control" value="{{ $item->expiry_date ?: date('Y-m-d') }}">
+                <small class="text-muted">Directly extend or override store expiry date.</small>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-dark">Bonus Wheel Spins (Above Plan)</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="ti ti-disc"></i></span>
+                  <input type="number" name="extra_spin_rounds" class="form-control" value="{{ $item->extra_spin_rounds ?: 0 }}" min="0">
+                </div>
+                <small class="text-muted">Added on top of plan quota.</small>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-dark">Bonus Active Campaigns Limit</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="ti ti-speakerphone"></i></span>
+                  <input type="number" name="extra_campaigns_limit" class="form-control" value="{{ $item->extra_campaigns_limit ?: 0 }}" min="0">
+                </div>
+                <small class="text-muted">Extra campaigns allowed simultaneously.</small>
+              </div>
+
+              <div class="col-12 mt-3">
+                <label class="form-label fw-bold small text-dark">Feature Access Overrides (Bypass Plan Restrictions)</label>
+                <div class="d-flex flex-wrap gap-4 p-3 rounded-3 bg-light border">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" name="override_ip_skip" id="ov_ip_{{ $item->id }}" {{ !empty($override['allow_ip_skip']) ? 'checked' : '' }}>
+                    <label class="form-check-label fw-semibold" for="ov_ip_{{ $item->id }}">Grant IP Skip Protection</label>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" name="override_whatsapp" id="ov_wa_{{ $item->id }}" {{ !empty($override['allow_whatsapp']) ? 'checked' : '' }}>
+                    <label class="form-check-label fw-semibold" for="ov_wa_{{ $item->id }}">Grant WhatsApp Alerts</label>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" name="override_branding" id="ov_br_{{ $item->id }}" {{ !empty($override['allow_branding']) ? 'checked' : '' }}>
+                    <label class="form-check-label fw-semibold" for="ov_br_{{ $item->id }}">Grant Custom Branding</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label fw-bold small text-dark">Admin Internal Note</label>
+                <input type="text" name="override_note" class="form-control" placeholder="e.g. VIP client bonus access granted" value="{{ $override['admin_note'] ?? '' }}">
+              </div>
+
+            </div>
+          </div>
+
+          <div class="modal-footer border-top p-3">
+            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold" style="background: #ff6b00; border-color: #ff6b00;">Apply Extra Access</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+@endforeach
 
 @endsection
 

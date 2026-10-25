@@ -53,4 +53,64 @@ class User extends Authenticatable
     {
         return $this->hasMany(Camping::class, 'created_by', 'id')->whereDate('end_date', '<', date('Y-m-d'));
     }
+
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class, 'plan_id');
+    }
+
+    public function admin()
+    {
+        return $this->belongsTo(User::class, 'admin_id');
+    }
+
+    public function subUsers()
+    {
+        return $this->hasMany(User::class, 'admin_id');
+    }
+
+    public function plans()
+    {
+        return $this->hasMany(Plan::class, 'admin_id');
+    }
+
+    public function paymentsReceived()
+    {
+        return $this->hasMany(Payment::class, 'admin_id');
+    }
+
+    public function paymentsMade()
+    {
+        return $this->hasMany(Payment::class, 'user_id');
+    }
+
+    /**
+     * Check if user account subscription is expired
+     */
+    public function isExpired()
+    {
+        if ($this->type === 'admin') {
+            return false;
+        }
+        if (empty($this->expiry_date)) {
+            return true;
+        }
+        return strtotime($this->expiry_date) < strtotime(date('Y-m-d'));
+    }
+
+    /**
+     * Days remaining in subscription
+     */
+    public function daysRemaining()
+    {
+        if ($this->type === 'admin') {
+            return 9999;
+        }
+        if (empty($this->expiry_date)) {
+            return 0;
+        }
+        $diff = strtotime($this->expiry_date) - strtotime(date('Y-m-d'));
+        return max(0, (int)ceil($diff / 86400));
+    }
 }
+

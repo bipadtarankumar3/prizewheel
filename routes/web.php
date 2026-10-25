@@ -13,6 +13,7 @@ use App\Http\Controllers\PrivateReviewController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\PopupalertController;
+use App\Http\Controllers\SubscriptionController;
 
 
 
@@ -198,6 +199,26 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth']], function () {
     Route::any('popup_alert', [PopupalertController::class,'popup_alert']);
     Route::any('add_popup_alert', [PopupalertController::class,'add_popup_alert']);
     // ----------------- Popupalert End------------------------
+
+    // ----------------- Subscription, Plans & Razorpay ------------------------
+    Route::get('plans', [SubscriptionController::class, 'plans_index'])->name('admin.plans.index');
+    Route::post('plans/store', [SubscriptionController::class, 'plan_store'])->name('admin.plans.store');
+    Route::post('plans/update/{id}', [SubscriptionController::class, 'plan_update'])->name('admin.plans.update');
+    Route::get('plans/delete/{id}', [SubscriptionController::class, 'plan_delete'])->name('admin.plans.delete');
+    Route::post('plans/toggle_status/{id}', [SubscriptionController::class, 'plan_toggle_status'])->name('admin.plans.toggle_status');
+
+    Route::get('razorpay_settings', [SubscriptionController::class, 'razorpay_settings_page'])->name('admin.razorpay.settings');
+    Route::post('razorpay_settings', [SubscriptionController::class, 'razorpay_settings_update'])->name('admin.razorpay.update');
+
+    Route::get('payments', [SubscriptionController::class, 'admin_payments_index'])->name('admin.payments.index');
+    Route::post('grant_extra_access/{userId}', [SubscriptionController::class, 'grant_extra_access'])->name('admin.users.grant_extra_access');
+    Route::get('send_expiry_alert/{userId}', [SubscriptionController::class, 'send_expiry_alert'])->name('admin.users.send_expiry_alert');
+
+    Route::get('billing', [SubscriptionController::class, 'user_billing_page'])->name('user.billing.index');
+    Route::post('subscription/create_order', [SubscriptionController::class, 'create_razorpay_order'])->name('user.subscription.create_order');
+    Route::post('subscription/verify_payment', [SubscriptionController::class, 'verify_razorpay_payment'])->name('user.subscription.verify_payment');
+    Route::get('invoice/{paymentId}', [SubscriptionController::class, 'invoice_view'])->name('subscription.invoice.view');
+    // ----------------- Subscription, Plans & Razorpay End---------------------
 });
 
 Route::get('return_to_admin', [UserController::class,'return_to_admin'])->middleware('auth');

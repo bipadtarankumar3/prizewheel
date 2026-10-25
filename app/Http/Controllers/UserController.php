@@ -937,6 +937,8 @@ class UserController extends Controller
                 }
             }
 
+            $admin = Auth::user();
+
             // High-detail metrics
             $array['totalUsersCount'] = User::where('type','user')->count();
             $array['todayRegisteredCount'] = User::where('type','user')->whereDate('created_at', $today)->count();
@@ -948,9 +950,18 @@ class UserController extends Controller
             $array['newUsersCount'] = $array['todayRegisteredCount'];
             $array['renewUsersCount'] = User::where('type','user')->where('last_renewed_at', '>=', $oneMonthAgo)->count();
 
+            // Total Payments & Revenue for this Admin
+            $array['totalRevenueSum'] = \App\Models\Payment::where('admin_id', $admin->id)->where('status', 'success')->sum('amount');
+            $array['totalPaymentsCount'] = \App\Models\Payment::where('admin_id', $admin->id)->count();
+            $array['successfulPaymentsCount'] = \App\Models\Payment::where('admin_id', $admin->id)->where('status', 'success')->count();
+
             $array['user'] = User::where('type','user')
                 ->whereRaw($where)
-                ->withCount(['campings', 'spinners', 'expiredCampings'])
+                ->with(['plan'])
+                ->withCount(['campings', 'spinners', 'expiredCampings', 'paymentsMade'])
+                ->withSum(['paymentsMade as total_paid' => function($q) {
+                    $q->where('status', 'success');
+                }], 'amount')
                 ->orderBy('id','desc')
                 ->get();
 
