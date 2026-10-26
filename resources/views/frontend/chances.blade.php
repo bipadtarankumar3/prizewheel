@@ -729,6 +729,7 @@
 
     function openPreSpinModal() {
       $('#formModalTitle').html('<i class="fas fa-user-edit mr-2 text-primary"></i> Enter Details to Spin & Win');
+      $('#FormModal .modal-header .close').hide();
       $('.winner-header-info').hide();
       $('.prespin-header-info').show();
       $('.take_screen_button').hide();
@@ -1029,6 +1030,7 @@
       proceedingToForm = true;
       $('#ReedemModal').one('hidden.bs.modal', function(){
         $('#formModalTitle').html('<i class="fas fa-trophy mr-2 text-warning"></i> Claim Your Prize — Enter Details');
+        $('#FormModal .modal-header .close').show();
         $('.winner-header-info').show();
         $('.prespin-header-info').hide();
         $('.take_screen_button').show();
@@ -1184,6 +1186,7 @@
       proceedingToForm = true;
       $('#blast').removeClass('show-blast').fadeOut(250, function(){
         $('#formModalTitle').html('<i class="fas fa-trophy mr-2 text-warning"></i> Claim Your Prize — Enter Details');
+        $('#FormModal .modal-header .close').show();
         $('.winner-header-info').show();
         $('.prespin-header-info').hide();
         $('.form_submit_button').html('Submit');
@@ -1198,9 +1201,18 @@
       });
     }
 
+    $('#FormModal').on('hide.bs.modal', function (e) {
+      if (spinFormTiming === 'before_spin' && !preSpinFormId) {
+        e.preventDefault();
+        return false;
+      }
+    });
+
     $('#FormModal').on('hidden.bs.modal', function () {
       if (!proceedingToForm && !$('#FormModal').hasClass('show') && !$('.FormModal').hasClass('show') && !$('#FormModal').is(':visible')) {
-        $('#blast').addClass('show-blast').fadeIn(200);
+        if (spinFormTiming !== 'before_spin' && ($('#blast').hasClass('show-blast') || $('#blast').is(':visible'))) {
+          $('#blast').addClass('show-blast').fadeIn(200);
+        }
       }
     });
 
