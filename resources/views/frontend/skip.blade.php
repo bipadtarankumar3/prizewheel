@@ -12,6 +12,40 @@
     </title>
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 
+    @php
+      $ogTitle = ($Camping->title_status == 'on' && !empty($Camping->title)) ? $Camping->title : 'Prize Wheel - Spin & Win!';
+      $ogDesc = ($Camping->sub_title_status == 'on' && !empty($Camping->sub_title)) ? $Camping->sub_title : 'Spin the wheel now and win exciting prizes!';
+      $rawLogo = !empty($user->logo) ? $user->logo : '';
+      $ogImage = '';
+      if (!empty($rawLogo)) {
+          $ogImage = (filter_var($rawLogo, FILTER_VALIDATE_URL)) ? $rawLogo : url($rawLogo);
+      }
+      $ogUrl = url()->current();
+    @endphp
+
+    <!-- Open Graph / WhatsApp / Facebook Meta Tags -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{ $ogUrl }}" />
+    <meta property="og:title" content="{{ $ogTitle }}" />
+    <meta property="og:description" content="{{ $ogDesc }}" />
+    @if(!empty($ogImage))
+    <meta property="og:image" content="{{ $ogImage }}" />
+    <meta property="og:image:secure_url" content="{{ $ogImage }}" />
+    <meta property="og:image:width" content="600" />
+    <meta property="og:image:height" content="600" />
+    <meta property="og:image:alt" content="{{ $ogTitle }}" />
+    @endif
+    <meta property="og:site_name" content="Prize Wheel" />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="{{ $ogUrl }}" />
+    <meta name="twitter:title" content="{{ $ogTitle }}" />
+    <meta name="twitter:description" content="{{ $ogDesc }}" />
+    @if(!empty($ogImage))
+    <meta name="twitter:image" content="{{ $ogImage }}" />
+    @endif
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
