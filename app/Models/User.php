@@ -21,6 +21,15 @@ class User extends Authenticatable
     protected $guarded = [];  
 
     /**
+     * The model's default values for attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'default_spinn' => '2',
+    ];  
+
+    /**
      * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>
