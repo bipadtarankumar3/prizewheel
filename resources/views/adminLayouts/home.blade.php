@@ -164,6 +164,33 @@
         padding-bottom: 40px !important;
       }
     }
+
+    /* === EXPIRED SUBSCRIPTION HEADER PILL === */
+    .trial-expiry-pill-btn.pill-expired {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+      border: 1px solid #b91c1c !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35) !important;
+    }
+    .trial-expiry-pill-btn.pill-expired:hover {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+      color: #ffffff !important;
+      box-shadow: 0 6px 18px rgba(220, 38, 38, 0.45) !important;
+      transform: translateY(-1.5px);
+    }
+    .trial-expiry-pill-btn.pill-expired span {
+      color: #ffffff !important;
+    }
+    .trial-expiry-pill-btn.pill-expired .trial-pulse-dot {
+      background-color: #ffffff !important;
+      box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7) !important;
+    }
+    .trial-expiry-pill-btn.pill-expired .trial-renew-action {
+      background: #ffffff !important;
+      color: #dc2626 !important;
+      font-weight: 800 !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18) !important;
+    }
   </style>
 
 </head>
@@ -489,19 +516,25 @@
                   @php
                     $isUserExp = Auth::user()->isExpired();
                     $daysRemaining = Auth::user()->daysRemaining();
+                    $modalAdminId = Auth::user()->admin_id ?: 1;
+                    $modalAdminUser = Auth::user()->admin ?: \App\Models\User::find($modalAdminId);
+                    if (!$modalAdminUser) {
+                        $modalAdminUser = \App\Models\User::where('type', 'admin')->first();
+                    }
+                    $isOnlinePaymentEnabled = $modalAdminUser && !empty($modalAdminUser->razorpay_key_id) && !empty($modalAdminUser->razorpay_key_secret) && (bool)$modalAdminUser->razorpay_enabled;
                   @endphp
 
                   <li class="nav-item">
-                    <a href="{{URL::to('admin/billing')}}" class="trial-expiry-pill-btn {{ $isUserExp ? 'bg-danger text-white border-0' : '' }}" title="Manage your subscription & renew plan">
-                      <span class="trial-pulse-dot" style="{{ $isUserExp ? 'background: #fff;' : '' }}"></span>
+                    <a href="{{URL::to('admin/billing')}}" class="trial-expiry-pill-btn {{ $isUserExp ? 'pill-expired' : '' }}" title="Manage your subscription & renew plan" @if($isUserExp && $isOnlinePaymentEnabled) onclick="if(window.openSubscriptionExpiredModal){ event.preventDefault(); window.openSubscriptionExpiredModal(); }" @endif style="{{ $isUserExp ? 'background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important; border: 1px solid #b91c1c !important; color: #ffffff !important; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35) !important;' : '' }}">
+                      <span class="trial-pulse-dot" style="{{ $isUserExp ? 'background-color: #ffffff !important; box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7) !important;' : '' }}"></span>
                       @if($isUserExp)
-                        <span class="text-white fw-bold">⚠️ Subscription Expired — Renew Now</span>
+                        <span class="fw-bold" style="color: #ffffff !important;">⚠️ Subscription Expired — Renew Now</span>
                       @elseif($daysRemaining <= 1)
                         <span>Only <strong>1 day left</strong> to expire access</span>
                       @else
                         <span><strong>{{ $daysRemaining }} days left</strong> to expire access</span>
                       @endif
-                      <span class="trial-renew-action" style="{{ $isUserExp ? 'background: rgba(255,255,255,0.25); color: #fff;' : '' }}">Renew <i class="ti ti-arrow-right"></i></span>
+                      <span class="trial-renew-action" style="{{ $isUserExp ? 'background: #ffffff !important; color: #dc2626 !important; font-weight: 800 !important; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18) !important;' : '' }}">Renew <i class="ti ti-arrow-right"></i></span>
                     </a>
                   </li>
 
@@ -1460,22 +1493,25 @@
     }
   @endphp
 
-  @if($isExpiredUserGlobal)
+  @if($isExpiredUserGlobal && $isOnlinePaymentEnabled)
   <!-- ============================================================== -->
-  <!-- UNCLOSABLE SUBSCRIPTION EXPIRED MODAL                          -->
+  <!-- SUBSCRIPTION EXPIRED MODAL (CLOSABLE / PAY LATER)              -->
   <!-- ============================================================== -->
   <style>
-    #subscriptionExpiredModal .btn-close { display: none !important; }
     #subscriptionExpiredModal { z-index: 99999 !important; }
     .modal-backdrop.show { z-index: 99998 !important; opacity: 0.88 !important; background-color: #0b1120 !important; }
+    #closeExpiredModalBtn:hover { transform: scale(1.1); transition: transform 0.2s; }
   </style>
 
-  <div class="modal fade show" id="subscriptionExpiredModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="subscriptionExpiredModalLabel" aria-modal="true" role="dialog" style="display: none;">
+  <div class="modal fade" id="subscriptionExpiredModal" tabindex="-1" aria-labelledby="subscriptionExpiredModalLabel" aria-hidden="true" style="display: none;">
     <div class="modal-dialog modal-dialog-centered modal-xl">
       <div class="modal-content rounded-4 border-0 shadow-2xl overflow-hidden" style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);">
         
         <!-- Header Banner -->
-        <div class="p-4 p-md-5 text-center text-white" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);">
+        <div class="p-4 p-md-5 text-center text-white position-relative" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);">
+          <!-- Cross / Close button to hide modal -->
+          <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 shadow-none" data-bs-dismiss="modal" aria-label="Close" id="closeExpiredModalBtn" title="Close modal" style="opacity: 0.95; cursor: pointer;"></button>
+
           <div class="d-inline-flex p-3 rounded-circle bg-white bg-opacity-20 mb-3 shadow-sm">
             <i class="ti ti-lock fs-1 text-white"></i>
           </div>
@@ -1558,6 +1594,9 @@
             <i class="ti ti-shield-check text-success me-1"></i> 256-bit Secure Razorpay Checkout (UPI, Cards, NetBanking)
           </small>
           <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-3 py-1 fw-semibold" data-bs-dismiss="modal" id="payLaterModalFooterBtn">
+              <i class="ti ti-clock me-1"></i> Pay Later
+            </button>
             <a href="{{ url('admin/logout') }}" class="btn btn-sm btn-outline-danger rounded-pill px-3">
               <i class="ti ti-logout me-1"></i> Sign Out
             </a>
@@ -1571,38 +1610,65 @@
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script>
     (function() {
-      function forceOpenExpiredModal() {
+      window.openSubscriptionExpiredModal = function() {
+        sessionStorage.removeItem('subscription_modal_dismissed');
+        var modalEl = document.getElementById('subscriptionExpiredModal');
+        if (!modalEl) {
+          window.location.href = "{{ url('admin/billing') }}";
+          return;
+        }
+
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+          modal.show();
+        } else if (typeof jQuery !== 'undefined') {
+          jQuery('#subscriptionExpiredModal').modal('show');
+        }
+      };
+
+      function openExpiredModalIfNeeded() {
+        if (sessionStorage.getItem('subscription_modal_dismissed') === '1') {
+          return;
+        }
         var modalEl = document.getElementById('subscriptionExpiredModal');
         if (!modalEl) return;
 
         if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-          var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl, {
-            backdrop: 'static',
-            keyboard: false
-          });
+          var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
           modal.show();
         } else if (typeof jQuery !== 'undefined') {
-          jQuery('#subscriptionExpiredModal').modal({
-            backdrop: 'static',
-            keyboard: false,
-            show: true
-          });
+          jQuery('#subscriptionExpiredModal').modal('show');
         }
+      }
 
-        modalEl.addEventListener('hide.bs.modal', function(e) {
-          e.preventDefault();
-          return false;
+      var modalEl = document.getElementById('subscriptionExpiredModal');
+      if (modalEl) {
+        modalEl.addEventListener('hidden.bs.modal', function() {
+          sessionStorage.setItem('subscription_modal_dismissed', '1');
+        });
+      }
+
+      var payLaterBtn = document.getElementById('payLaterModalFooterBtn');
+      if (payLaterBtn) {
+        payLaterBtn.addEventListener('click', function() {
+          sessionStorage.setItem('subscription_modal_dismissed', '1');
+        });
+      }
+
+      var closeXBtn = document.getElementById('closeExpiredModalBtn');
+      if (closeXBtn) {
+        closeXBtn.addEventListener('click', function() {
+          sessionStorage.setItem('subscription_modal_dismissed', '1');
         });
       }
 
       if (document.readyState === 'loading') {
-        document.addEventListener("DOMContentLoaded", forceOpenExpiredModal);
+        document.addEventListener("DOMContentLoaded", openExpiredModalIfNeeded);
       } else {
-        forceOpenExpiredModal();
+        openExpiredModalIfNeeded();
       }
-      window.addEventListener("load", forceOpenExpiredModal);
-      setTimeout(forceOpenExpiredModal, 400);
-      setTimeout(forceOpenExpiredModal, 1200);
+      window.addEventListener("load", openExpiredModalIfNeeded);
+      setTimeout(openExpiredModalIfNeeded, 400);
 
       document.addEventListener("DOMContentLoaded", function() {
         document.querySelectorAll('.pay-modal-plan-btn').forEach(function(btn) {

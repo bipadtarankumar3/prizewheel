@@ -36,6 +36,13 @@ class CheckUserSubscription
                         $adminId = $firstAdmin ? $firstAdmin->id : 1;
                     }
 
+                    $adminUser = $user->admin ?: User::find($adminId);
+                    if (!$adminUser) {
+                        $adminUser = User::where('type', 'admin')->first();
+                    }
+                    $isOnlinePaymentEnabled = $adminUser && !empty($adminUser->razorpay_key_id) && !empty($adminUser->razorpay_key_secret) && (bool)$adminUser->razorpay_enabled;
+                    View::share('isOnlinePaymentEnabled', $isOnlinePaymentEnabled);
+
                     $availablePlans = Plan::where('admin_id', $adminId)
                         ->where('status', 'active')
                         ->orderBy('price', 'asc')
@@ -52,6 +59,7 @@ class CheckUserSubscription
                         'admin/billing',
                         'admin/dashboard',
                         'admin/logout',
+                        'admin/support',
                         'admin/subscription/*',
                         'admin/invoice/*',
                     ];

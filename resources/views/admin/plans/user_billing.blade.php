@@ -11,26 +11,6 @@
     $daysLeft = $user->daysRemaining();
   @endphp
 
-  <!-- Status Alert Banner -->
-  @if($isExpired)
-    <div class="alert alert-danger rounded-4 p-4 shadow-sm border-0 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
-      <div class="d-flex align-items-center gap-3">
-        <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center p-3">
-          <i class="ti ti-alert-triangle fs-3"></i>
-        </div>
-        <div>
-          <h5 class="fw-bold text-danger mb-1">Your Store Subscription Has Expired!</h5>
-          <p class="mb-0 text-muted small">
-            Customer wheel spins and new campaign creation are paused. Select one of the plans below to instantly renew via Razorpay.
-          </p>
-        </div>
-      </div>
-      <a href="#plansGrid" class="btn btn-danger rounded-pill px-4 py-2 fw-semibold shadow-sm">
-        <i class="ti ti-credit-card me-1"></i> Choose Plan & Pay
-      </a>
-    </div>
-  @endif
-
   <!-- Top Hero Card: Current Subscription Overview -->
   <div class="card border-0 rounded-4 shadow-sm mb-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff;">
     <div class="card-body p-4 p-md-5">
@@ -143,115 +123,133 @@
 
   <!-- Plans Selection Section -->
   <div class="mb-5" id="plansGrid">
-    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-      <div>
-        <h4 class="fw-bold text-dark mb-1">Choose a Subscription Plan</h4>
-        <p class="text-muted small mb-0">Select a plan to renew and unlock all digital wheel features instantly via Razorpay.</p>
+    @if($adminRazorpayConfigured)
+      <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div>
+          <h4 class="fw-bold text-dark mb-1">Choose a Subscription Plan</h4>
+          <p class="text-muted small mb-0">Select a plan to renew and unlock all digital wheel features instantly via Razorpay.</p>
+        </div>
       </div>
-      @if(!$adminRazorpayConfigured)
-        <span class="badge rounded-pill bg-warning-subtle text-warning px-3 py-2 fw-semibold">
-          <i class="ti ti-info-circle me-1"></i> Admin Online Gateway Pending Setup
-        </span>
-      @endif
-    </div>
 
-    <div class="row g-4">
-      @forelse($plans as $plan)
-        <div class="col-lg-4 col-md-6">
-          <div class="card h-100 border-0 rounded-4 shadow-sm position-relative overflow-hidden transition-all hover-shadow" style="border: 2px solid {{ $plan->is_popular ? '#ff6b00' : '#e2e8f0' }} !important; background: #ffffff;">
-            
-            @if($plan->is_popular)
-              <div class="position-absolute top-0 end-0 py-1 px-4 text-white text-uppercase fw-bold" style="background: #ff6b00; font-size: 10px; letter-spacing: 1px; border-bottom-left-radius: 12px;">
-                ★ Recommended
-              </div>
-            @endif
-
-            <div class="card-body p-4 d-flex flex-column">
-              <span class="badge rounded-pill px-3 py-1 mb-2 fw-semibold bg-light text-dark border align-self-start">
-                {{ $plan->duration_days }} Days Access
-              </span>
-              <h4 class="fw-bold mb-1 text-dark">{{ $plan->name }}</h4>
-              <p class="text-muted small mb-3">{{ $plan->description ?: 'Complete prize wheel & review marketing package' }}</p>
-
-              <!-- Price -->
-              <div class="p-3 rounded-3 mb-4" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
-                <div class="d-flex align-items-baseline gap-1">
-                  <span class="fs-4 fw-bold text-dark">₹</span>
-                  <span class="display-6 fw-extrabold text-dark" style="letter-spacing: -1px;">{{ number_format($plan->price, 0) }}</span>
-                  <span class="text-muted fw-semibold small">/ {{ $plan->duration_days }} Days</span>
+      <div class="row g-4">
+        @forelse($plans as $plan)
+          <div class="col-lg-4 col-md-6">
+            <div class="card h-100 border-0 rounded-4 shadow-sm position-relative overflow-hidden transition-all hover-shadow" style="border: 2px solid {{ $plan->is_popular ? '#ff6b00' : '#e2e8f0' }} !important; background: #ffffff;">
+              
+              @if($plan->is_popular)
+                <div class="position-absolute top-0 end-0 py-1 px-4 text-white text-uppercase fw-bold" style="background: #ff6b00; font-size: 10px; letter-spacing: 1px; border-bottom-left-radius: 12px;">
+                  ★ Recommended
                 </div>
-              </div>
+              @endif
 
-              <!-- Features List -->
-              <div class="mb-4 flex-grow-1">
-                <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small">
-                  <li class="d-flex align-items-center gap-2">
-                    <i class="ti ti-circle-check-filled text-success fs-5"></i>
-                    <span><strong>{{ $plan->spin_rounds_limit === -1 ? 'Unlimited' : number_format($plan->spin_rounds_limit) }}</strong> Wheel Spins</span>
-                  </li>
-                  <li class="d-flex align-items-center gap-2">
-                    <i class="ti ti-circle-check-filled text-success fs-5"></i>
-                    <span><strong>{{ $plan->campaigns_limit === -1 ? 'Unlimited' : $plan->campaigns_limit }}</strong> Active Campaigns</span>
-                  </li>
-                  <li class="d-flex align-items-center gap-2">
-                    @if($plan->has_whatsapp)
+              <div class="card-body p-4 d-flex flex-column">
+                <span class="badge rounded-pill px-3 py-1 mb-2 fw-semibold bg-light text-dark border align-self-start">
+                  {{ $plan->duration_days }} Days Access
+                </span>
+                <h4 class="fw-bold mb-1 text-dark">{{ $plan->name }}</h4>
+                <p class="text-muted small mb-3">{{ $plan->description ?: 'Complete prize wheel & review marketing package' }}</p>
+
+                <!-- Price -->
+                <div class="p-3 rounded-3 mb-4" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
+                  <div class="d-flex align-items-baseline gap-1">
+                    <span class="fs-4 fw-bold text-dark">₹</span>
+                    <span class="display-6 fw-extrabold text-dark" style="letter-spacing: -1px;">{{ number_format($plan->price, 0) }}</span>
+                    <span class="text-muted fw-semibold small">/ {{ $plan->duration_days }} Days</span>
+                  </div>
+                </div>
+
+                <!-- Features List -->
+                <div class="mb-4 flex-grow-1">
+                  <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small">
+                    <li class="d-flex align-items-center gap-2">
                       <i class="ti ti-circle-check-filled text-success fs-5"></i>
-                      <span>WhatsApp Customer Alerts</span>
-                    @else
-                      <i class="ti ti-circle-x text-muted fs-5"></i>
-                      <span class="text-muted text-decoration-line-through">WhatsApp Automation</span>
-                    @endif
-                  </li>
-                  <li class="d-flex align-items-center gap-2">
-                    @if($plan->has_ip_skip)
+                      <span><strong>{{ $plan->spin_rounds_limit === -1 ? 'Unlimited' : number_format($plan->spin_rounds_limit) }}</strong> Wheel Spins</span>
+                    </li>
+                    <li class="d-flex align-items-center gap-2">
                       <i class="ti ti-circle-check-filled text-success fs-5"></i>
-                      <span>IP Skip & Fraud Protection</span>
-                    @else
-                      <i class="ti ti-circle-x text-muted fs-5"></i>
-                      <span class="text-muted text-decoration-line-through">IP Protection</span>
-                    @endif
-                  </li>
-                  <li class="d-flex align-items-center gap-2">
-                    @if($plan->has_custom_branding)
-                      <i class="ti ti-circle-check-filled text-success fs-5"></i>
-                      <span>Custom Logo & Background</span>
-                    @else
-                      <i class="ti ti-circle-x text-muted fs-5"></i>
-                      <span class="text-muted text-decoration-line-through">Custom Branding</span>
-                    @endif
-                  </li>
-                  @if(!empty($plan->features_list))
-                    @php
-                      $cleanFeatures = preg_split('/(\\\\r\\\\n|\\\\n|\\\\r|\r\n|\n|\r)/', $plan->features_list);
-                    @endphp
-                    @foreach($cleanFeatures as $feat)
-                      @if(trim($feat))
-                        <li class="d-flex align-items-center gap-2">
-                          <i class="ti ti-circle-check-filled text-primary fs-5"></i>
-                          <span>{{ trim($feat) }}</span>
-                        </li>
+                      <span><strong>{{ $plan->campaigns_limit === -1 ? 'Unlimited' : $plan->campaigns_limit }}</strong> Active Campaigns</span>
+                    </li>
+                    <li class="d-flex align-items-center gap-2">
+                      @if($plan->has_whatsapp)
+                        <i class="ti ti-circle-check-filled text-success fs-5"></i>
+                        <span>WhatsApp Customer Alerts</span>
+                      @else
+                        <i class="ti ti-circle-x text-muted fs-5"></i>
+                        <span class="text-muted text-decoration-line-through">WhatsApp Automation</span>
                       @endif
-                    @endforeach
-                  @endif
-                </ul>
+                    </li>
+                    <li class="d-flex align-items-center gap-2">
+                      @if($plan->has_ip_skip)
+                        <i class="ti ti-circle-check-filled text-success fs-5"></i>
+                        <span>IP Skip & Fraud Protection</span>
+                      @else
+                        <i class="ti ti-circle-x text-muted fs-5"></i>
+                        <span class="text-muted text-decoration-line-through">IP Protection</span>
+                      @endif
+                    </li>
+                    <li class="d-flex align-items-center gap-2">
+                      @if($plan->has_custom_branding)
+                        <i class="ti ti-circle-check-filled text-success fs-5"></i>
+                        <span>Custom Logo & Background</span>
+                      @else
+                        <i class="ti ti-circle-x text-muted fs-5"></i>
+                        <span class="text-muted text-decoration-line-through">Custom Branding</span>
+                      @endif
+                    </li>
+                    @if(!empty($plan->features_list))
+                      @php
+                        $cleanFeatures = preg_split('/(\\\\r\\\\n|\\\\n|\\\\r|\r\n|\n|\r)/', $plan->features_list);
+                      @endphp
+                      @foreach($cleanFeatures as $feat)
+                        @if(trim($feat))
+                          <li class="d-flex align-items-center gap-2">
+                            <i class="ti ti-circle-check-filled text-primary fs-5"></i>
+                            <span>{{ trim($feat) }}</span>
+                          </li>
+                        @endif
+                      @endforeach
+                    @endif
+                  </ul>
+                </div>
+
+                <!-- Pay CTA Button -->
+                <button type="button" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm pay-plan-btn" data-plan-id="{{ $plan->id }}" data-plan-name="{{ $plan->name }}" data-plan-price="{{ $plan->price }}" style="background: {{ $plan->is_popular ? '#ff6b00' : '#0284c7' }}; border-color: {{ $plan->is_popular ? '#ff6b00' : '#0284c7' }};">
+                  <i class="ti ti-bolt me-1"></i> Pay ₹{{ number_format($plan->price, 0) }} via Razorpay
+                </button>
+
               </div>
-
-              <!-- Pay CTA Button -->
-              <button type="button" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm pay-plan-btn" data-plan-id="{{ $plan->id }}" data-plan-name="{{ $plan->name }}" data-plan-price="{{ $plan->price }}" style="background: {{ $plan->is_popular ? '#ff6b00' : '#0284c7' }}; border-color: {{ $plan->is_popular ? '#ff6b00' : '#0284c7' }};">
-                <i class="ti ti-bolt me-1"></i> Pay ₹{{ number_format($plan->price, 0) }} via Razorpay
-              </button>
-
             </div>
           </div>
-        </div>
-      @empty
-        <div class="col-12">
-          <div class="card border-0 rounded-4 shadow-sm text-center py-5">
-            <p class="text-muted mb-0">No active plans are currently listed. Please contact your account administrator.</p>
+        @empty
+          <div class="col-12">
+            <div class="card border-0 rounded-4 shadow-sm text-center py-5">
+              <p class="text-muted mb-0">No active plans are currently listed. Please contact your account administrator.</p>
+            </div>
+          </div>
+        @endforelse
+      </div>
+    @else
+      <!-- Online Payment Disabled View: Contact Admin & Support Page Button -->
+      <div class="card border-0 rounded-4 shadow-sm overflow-hidden" style="background: #ffffff; border: 1px solid #fed7aa !important;">
+        <div class="card-body p-4 p-md-5 text-center">
+          <div class="rounded-circle bg-warning-subtle text-warning d-inline-flex align-items-center justify-content-center p-3 mb-3 shadow-sm" style="width: 72px; height: 72px;">
+            <i class="ti ti-wallet-off fs-1 text-warning"></i>
+          </div>
+          <h3 class="fw-bold text-dark mb-2">Our Online Payment is Currently Disabled</h3>
+          <p class="text-muted mx-auto mb-4" style="max-width: 600px; font-size: 15px; line-height: 1.6;">
+            Online plan subscriptions via Razorpay are currently turned off. If you would like to renew your store subscription, add wheel spins, or make a payment directly, please contact your account administrator or visit our support page.
+          </p>
+          <div class="d-flex align-items-center justify-content-center gap-3 flex-wrap">
+            <a href="{{ url('admin/support') }}" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: linear-gradient(135deg, #ff6b00 0%, #ea580c 100%); border-color: #ff6b00;">
+              <i class="ti ti-headset me-1 fs-5"></i> Contact Administrator / Support Page
+            </a>
+            <a href="{{ url('admin/dashboard') }}" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-semibold">
+              <i class="ti ti-arrow-left me-1"></i> Back to Dashboard
+            </a>
           </div>
         </div>
-      @endforelse
-    </div>
+      </div>
+    @endif
   </div>
 
   <!-- Previous Payment History -->

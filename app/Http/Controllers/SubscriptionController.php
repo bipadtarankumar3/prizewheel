@@ -411,8 +411,11 @@ class SubscriptionController extends Controller
         $pendingPaymentsCount = $paymentsHistory->where('status', 'pending')->count();
 
         $adminRazorpayConfigured = false;
-        $adminUser = User::find($adminId);
-        if ($adminUser && !empty($adminUser->razorpay_key_id) && !empty($adminUser->razorpay_key_secret) && $adminUser->razorpay_enabled) {
+        $adminUser = $user->admin ?: User::find($adminId);
+        if (!$adminUser) {
+            $adminUser = User::where('type', 'admin')->first();
+        }
+        if ($adminUser && !empty($adminUser->razorpay_key_id) && !empty($adminUser->razorpay_key_secret) && (bool)$adminUser->razorpay_enabled) {
             $adminRazorpayConfigured = true;
         }
 
@@ -442,18 +445,15 @@ class SubscriptionController extends Controller
         $plan = Plan::findOrFail($request->plan_id);
 
         // Determine admin credentials
-        $admin = $user->admin ?: User::find($plan->admin_id);
-        if (!$admin || empty($admin->razorpay_key_id) || empty($admin->razorpay_key_secret)) {
-            // Check super admin fallback
-            $superAdmin = User::where('type', 'admin')->whereNotNull('razorpay_key_id')->where('razorpay_enabled', 1)->first();
-            if ($superAdmin) {
-                $admin = $superAdmin;
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Online payment is currently unavailable. Please contact your administrator to configure payment details.'
-                ], 422);
-            }
+        $admin = $user->admin ?: User::find($user->admin_id ?: $plan->admin_id);
+        if (!$admin) {
+            $admin = User::where('type', 'admin')->first();
+        }
+        if (!$admin || empty($admin->razorpay_key_id) || empty($admin->razorpay_key_secret) || !(bool)$admin->razorpay_enabled) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Online payment is currently disabled. Please contact your administrator.'
+            ], 422);
         }
 
         $amountInPaise = (int)round($plan->price * 100);
