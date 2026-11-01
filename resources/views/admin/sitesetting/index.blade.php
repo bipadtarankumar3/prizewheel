@@ -111,7 +111,7 @@
           </div>
         </div>
 
-        <!-- Optional Background Audio Setting -->
+        {{-- Optional Background Audio Setting (Turned off for now)
         <div class="card border-0 rounded-4 shadow-sm mb-4">
           <div class="card-header bg-transparent border-bottom py-3 px-4 d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-2">
@@ -154,6 +154,7 @@
             </div>
           </div>
         </div>
+        --}}
       </div>
 
       <!-- Side Column: Summary & Save Action -->
