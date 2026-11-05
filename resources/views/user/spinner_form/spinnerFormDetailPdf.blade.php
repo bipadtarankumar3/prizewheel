@@ -129,12 +129,24 @@
         <div class="dossier-subtitle">Full dossier of customer spin and prize enquiry</div>
     </div>
 
+    @php
+        $rawCampLabel = $SpinnerForm->campaign_name ?: ($SpinnerForm->camp_short_name ?? '');
+        // If campaign title contains Indic/non-Latin characters unsupported by DomPDF DejaVu Sans, fallback to ASCII campaign_name
+        if (!empty($rawCampLabel) && preg_match('/[\x{0900}-\x{0DFF}]/u', $rawCampLabel)) {
+            $asciiCandidate = $SpinnerForm->camp_short_name ?? '';
+            if (!empty($asciiCandidate) && !preg_match('/[\x{0900}-\x{0DFF}]/u', $asciiCandidate)) {
+                $rawCampLabel = $asciiCandidate;
+            } else {
+                $rawCampLabel = 'Campaign #' . ($SpinnerForm->camping_id ?? '');
+            }
+        }
+    @endphp
     <div class="customer-strip">
         <div class="customer-name">{{ $SpinnerForm->name ?: 'Anonymous Customer' }}</div>
         <div class="customer-meta">
             <span class="badge-enquiry">Enquiry #{{ $SpinnerForm->id }}</span>
-            @if(!empty($SpinnerForm->campaign_name))
-                &bull; <strong style="color: #ea580c;">{{ $SpinnerForm->campaign_name }}</strong>
+            @if(!empty($rawCampLabel))
+                &bull; <strong style="color: #ea580c;">{{ $rawCampLabel }}</strong>
             @endif
             &bull; {{ date('d M Y, h:i A', strtotime($SpinnerForm->created_at)) }}
         </div>

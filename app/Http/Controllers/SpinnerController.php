@@ -563,9 +563,30 @@ class SpinnerController extends Controller
         }
     }
 
+    private function resolveProofBase64($screenshotUrl)
+    {
+        if (empty($screenshotUrl)) {
+            return null;
+        }
+        $parsedPath = parse_url($screenshotUrl, PHP_URL_PATH);
+        if ($parsedPath) {
+            $relativePath = ltrim(str_replace('/public/', '/', $parsedPath), '/');
+            $localFile = public_path($relativePath);
+            if (!file_exists($localFile) && basename($parsedPath)) {
+                $localFile = public_path('upload/' . basename($parsedPath));
+            }
+            if (file_exists($localFile) && is_readable($localFile)) {
+                $ext = strtolower(pathinfo($localFile, PATHINFO_EXTENSION)) ?: 'jpeg';
+                if ($ext === 'jpg') $ext = 'jpeg';
+                return 'data:image/' . $ext . ';base64,' . base64_encode(file_get_contents($localFile));
+            }
+        }
+        return null;
+    }
+
     public function spinner_form_details($id){
         if(Auth::check()){
-            $array['SpinnerForm'] = SpinnerForm::
+            $SpinnerForm = SpinnerForm::
             select(
                 'spinner_forms.id',
                 'spinner_forms.name',
@@ -582,13 +603,17 @@ class SpinnerController extends Controller
                 'spinner_forms.created_at',
                 'bike_models.name as bike_name',
                 'spinners.name as spinner_name',
-                'campings.title as campaign_name'
+                'campings.title as campaign_name',
+                'campings.campaign_name as camp_short_name'
             )
             ->leftJoin('bike_models','bike_models.id','spinner_forms.bike_model_id')
             ->leftJoin('spinners','spinners.id','spinner_forms.spinner_id')
             ->leftJoin('campings','campings.id','spinner_forms.camping_id')
             ->where('spinner_forms.id', $id)
             ->first();
+
+            $array['SpinnerForm'] = $SpinnerForm;
+            $array['proofImageSrc'] = $SpinnerForm ? $this->resolveProofBase64($SpinnerForm->schreenshot) : null;
             
             return view('user.spinner_form.spinner_form_details', $array);
         }
@@ -613,7 +638,8 @@ class SpinnerController extends Controller
                 'spinner_forms.created_at',
                 'bike_models.name as bike_name',
                 'spinners.name as spinner_name',
-                'campings.title as campaign_name'
+                'campings.title as campaign_name',
+                'campings.campaign_name as camp_short_name'
             )
             ->leftJoin('bike_models','bike_models.id','spinner_forms.bike_model_id')
             ->leftJoin('spinners','spinners.id','spinner_forms.spinner_id')
@@ -625,22 +651,7 @@ class SpinnerController extends Controller
                 return back()->with('error', 'Customer lead not found.');
             }
 
-            $proofImageSrc = null;
-            if (!empty($SpinnerForm->schreenshot)) {
-                $parsedPath = parse_url($SpinnerForm->schreenshot, PHP_URL_PATH);
-                if ($parsedPath) {
-                    $relativePath = ltrim(str_replace('/public/', '/', $parsedPath), '/');
-                    $localFile = public_path($relativePath);
-                    if (!file_exists($localFile) && basename($parsedPath)) {
-                        $localFile = public_path('upload/' . basename($parsedPath));
-                    }
-                    if (file_exists($localFile) && is_readable($localFile)) {
-                        $ext = strtolower(pathinfo($localFile, PATHINFO_EXTENSION)) ?: 'jpeg';
-                        if ($ext === 'jpg') $ext = 'jpeg';
-                        $proofImageSrc = 'data:image/' . $ext . ';base64,' . base64_encode(file_get_contents($localFile));
-                    }
-                }
-            }
+            $proofImageSrc = $this->resolveProofBase64($SpinnerForm->schreenshot);
 
             $pdf = PDF::loadView('user.spinner_form.spinnerFormDetailPdf', compact('SpinnerForm', 'proofImageSrc'))
                 ->setPaper('a4', 'portrait');

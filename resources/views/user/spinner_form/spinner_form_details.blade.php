@@ -1,4 +1,4 @@
-<div class="p-3" id="customerLeadDetailsPrintable" data-lead-id="{{ $SpinnerForm->id }}">
+<div class="p-3" id="customerLeadDetailsPrintable" data-lead-id="{{ $SpinnerForm->id }}" data-lead-name="{{ Str::slug($SpinnerForm->name ?: 'customer', '_') }}">
     <!-- Header Strip -->
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 pb-3 border-bottom">
         <div class="d-flex align-items-center gap-3 overflow-hidden">
@@ -20,9 +20,9 @@
             <button type="button" class="btn btn-outline-dark btn-sm rounded-pill font-weight-bold px-3" onclick="printCustomerLeadDetails()">
                 <i class="ti ti-printer me-1"></i> Print
             </button>
-            <a href="{{ URL::to('admin/spinner_form_details_pdf/' . $SpinnerForm->id) }}" class="btn btn-primary btn-sm rounded-pill font-weight-bold px-3 text-white" style="background: linear-gradient(135deg, #ff6b00, #ea580c); border: none;">
+            <button type="button" class="btn btn-primary btn-sm rounded-pill font-weight-bold px-3 text-white" style="background: linear-gradient(135deg, #ff6b00, #ea580c); border: none;" onclick="downloadCustomerLeadPdf(this)" data-fallback-url="{{ URL::to('admin/spinner_form_details_pdf/' . $SpinnerForm->id) }}">
                 <i class="ti ti-download me-1"></i> Download
-            </a>
+            </button>
         </div>
     </div>
 
@@ -85,7 +85,7 @@
                         {{ $SpinnerForm->whatsapp_number ?? 'Not Provided' }}
                     </span>
                     @if(!empty($SpinnerForm->whatsapp_number))
-                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $SpinnerForm->whatsapp_number) }}" target="_blank" class="btn btn-success btn-sm py-1 px-3 rounded-pill font-weight-bold" style="font-size: 0.75rem;">
+                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $SpinnerForm->whatsapp_number) }}" target="_blank" class="btn btn-success btn-sm py-1 px-3 rounded-pill font-weight-bold no-print-in-modal" style="font-size: 0.75rem;">
                             <i class="ti ti-brand-whatsapp me-1"></i> Chat
                         </a>
                     @endif
@@ -141,7 +141,7 @@
                 <i class="ti ti-file-certificate text-primary me-1"></i> Attached Customer Bill / Proof
             </span>
             @if(!empty($SpinnerForm->schreenshot))
-                <a href="{{ $SpinnerForm->schreenshot }}" download="{{ $SpinnerForm->name ?? 'receipt' }}" class="btn btn-outline-primary btn-sm rounded-pill font-weight-bold px-3">
+                <a href="{{ $SpinnerForm->schreenshot }}" download="{{ $SpinnerForm->name ?? 'receipt' }}" class="btn btn-outline-primary btn-sm rounded-pill font-weight-bold px-3 no-print-in-modal">
                     <i class="ti ti-download me-1"></i> Download File
                 </a>
             @endif
@@ -149,7 +149,7 @@
         @if(!empty($SpinnerForm->schreenshot))
             <div class="text-center p-2 bg-light rounded-12">
                 <a href="{{ $SpinnerForm->schreenshot }}" target="_blank">
-                    <img src="{{ $SpinnerForm->schreenshot }}" alt="Proof" class="img-fluid rounded border shadow-sm" style="max-height: 260px; object-fit: contain;">
+                    <img src="{{ $proofImageSrc ?? $SpinnerForm->schreenshot }}" alt="Proof" class="img-fluid rounded border shadow-sm" style="max-height: 260px; object-fit: contain;" crossorigin="anonymous">
                 </a>
             </div>
         @else

@@ -541,9 +541,9 @@
                     <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-3 font-weight-bold" onclick="printCustomerLeadDetails()">
                         <i class="ti ti-printer me-1"></i> Print Lead
                     </button>
-                    <a href="#" id="modalLeadDownloadBtn" class="btn btn-primary btn-sm rounded-pill px-3 font-weight-bold text-white" style="background: linear-gradient(135deg, #ff6b00, #ea580c); border: none; display: none;">
+                    <button type="button" id="modalLeadDownloadBtn" onclick="downloadCustomerLeadPdf(this)" data-fallback-url="" class="btn btn-primary btn-sm rounded-pill px-3 font-weight-bold text-white" style="background: linear-gradient(135deg, #ff6b00, #ea580c); border: none; display: none;">
                         <i class="ti ti-download me-1"></i> Download PDF
-                    </a>
+                    </button>
                 </div>
                 <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-4 font-weight-bold" data-bs-dismiss="modal" data-dismiss="modal" onclick="hide_modal()">
                     Close
@@ -556,6 +556,7 @@
 @endsection
 
 @section('js')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
     function spinner_form_details(id, autoPrint) {
         var modalEl = document.getElementById('add_spinner_modal');
@@ -563,7 +564,7 @@
 
         var dlBtn = document.getElementById('modalLeadDownloadBtn');
         if (dlBtn) {
-            dlBtn.href = "{{ URL::to('admin/spinner_form_details_pdf') }}/" + id;
+            dlBtn.setAttribute('data-fallback-url', "{{ URL::to('admin/spinner_form_details_pdf') }}/" + id);
             dlBtn.style.display = 'inline-flex';
         }
 
@@ -588,6 +589,74 @@
             error: function(err) {
                 console.error('Failed to load lead details:', err);
                 $('.spinner_body').html('<div class="alert alert-danger m-3 font-weight-bold">Failed to load customer details. Please try again.</div>');
+            }
+        });
+    }
+
+    function downloadCustomerLeadPdf(btnEl) {
+        var contentEl = document.getElementById('customerLeadDetailsPrintable') || document.querySelector('.spinner_body');
+        if (!contentEl) return;
+
+        var fallbackUrl = btnEl ? btnEl.getAttribute('data-fallback-url') : '';
+        if (typeof html2pdf === 'undefined') {
+            if (fallbackUrl) {
+                window.location.href = fallbackUrl;
+            } else {
+                printCustomerLeadDetails();
+            }
+            return;
+        }
+
+        var leadId = contentEl.getAttribute('data-lead-id') || 'details';
+        var leadName = contentEl.getAttribute('data-lead-name') || 'customer';
+        var fileName = 'lead_enquiry_' + leadId + '_' + leadName + '.pdf';
+
+        var wrapper = document.createElement('div');
+        wrapper.style.padding = '20px';
+        wrapper.style.background = '#ffffff';
+        wrapper.style.color = '#0f172a';
+        wrapper.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif';
+
+        var headerDiv = document.createElement('div');
+        headerDiv.style.borderBottom = '2px solid #e2e8f0';
+        headerDiv.style.paddingBottom = '12px';
+        headerDiv.style.marginBottom = '16px';
+        headerDiv.innerHTML = '<h4 style="margin:0; font-weight:800; font-size:18px; color:#0f172a;">Customer Lead Details</h4>' +
+            '<div style="font-size:12px; color:#64748b;">Full dossier of customer spin and prize enquiry</div>';
+        wrapper.appendChild(headerDiv);
+
+        var clone = contentEl.cloneNode(true);
+        clone.querySelectorAll('.no-print-in-modal').forEach(function(el) {
+            el.remove();
+        });
+        wrapper.appendChild(clone);
+
+        var originalHtml = btnEl ? btnEl.innerHTML : '';
+        if (btnEl) {
+            btnEl.disabled = true;
+            btnEl.innerHTML = '<i class="ti ti-loader me-1"></i> Generating PDF...';
+        }
+
+        var opt = {
+            margin:       [10, 10, 10, 10],
+            filename:     fileName,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(wrapper).save().then(function() {
+            if (btnEl) {
+                btnEl.disabled = false;
+                btnEl.innerHTML = originalHtml;
+            }
+        }).catch(function() {
+            if (btnEl) {
+                btnEl.disabled = false;
+                btnEl.innerHTML = originalHtml;
+            }
+            if (fallbackUrl) {
+                window.location.href = fallbackUrl;
             }
         });
     }
