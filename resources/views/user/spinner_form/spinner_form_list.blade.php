@@ -541,9 +541,6 @@
                     <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-3 font-weight-bold" onclick="printCustomerLeadDetails()">
                         <i class="ti ti-printer me-1"></i> Print Lead
                     </button>
-                    <button type="button" id="modalLeadDownloadBtn" onclick="downloadCustomerLeadPdf(this)" data-fallback-url="" class="btn btn-primary btn-sm rounded-pill px-3 font-weight-bold text-white" style="background: linear-gradient(135deg, #ff6b00, #ea580c); border: none; display: none;">
-                        <i class="ti ti-download me-1"></i> Download PDF
-                    </button>
                 </div>
                 <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-4 font-weight-bold" data-bs-dismiss="modal" data-dismiss="modal" onclick="hide_modal()">
                     Close
@@ -556,17 +553,10 @@
 @endsection
 
 @section('js')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
     function spinner_form_details(id, autoPrint) {
         var modalEl = document.getElementById('add_spinner_modal');
         $('.spinner_body').html('<div class="text-center py-5"><div class="spinner-border text-warning" role="status"></div><div class="mt-2 text-muted small font-weight-bold">Loading full customer details...</div></div>');
-
-        var dlBtn = document.getElementById('modalLeadDownloadBtn');
-        if (dlBtn) {
-            dlBtn.setAttribute('data-fallback-url', "{{ URL::to('admin/spinner_form_details_pdf') }}/" + id);
-            dlBtn.style.display = 'inline-flex';
-        }
 
         // Open modal via Bootstrap 5 or jQuery
         if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
@@ -593,74 +583,6 @@
         });
     }
 
-    function downloadCustomerLeadPdf(btnEl) {
-        var contentEl = document.getElementById('customerLeadDetailsPrintable') || document.querySelector('.spinner_body');
-        if (!contentEl) return;
-
-        var fallbackUrl = btnEl ? btnEl.getAttribute('data-fallback-url') : '';
-        if (typeof html2pdf === 'undefined') {
-            if (fallbackUrl) {
-                window.location.href = fallbackUrl;
-            } else {
-                printCustomerLeadDetails();
-            }
-            return;
-        }
-
-        var leadId = contentEl.getAttribute('data-lead-id') || 'details';
-        var leadName = contentEl.getAttribute('data-lead-name') || 'customer';
-        var fileName = 'lead_enquiry_' + leadId + '_' + leadName + '.pdf';
-
-        var wrapper = document.createElement('div');
-        wrapper.style.padding = '20px';
-        wrapper.style.background = '#ffffff';
-        wrapper.style.color = '#0f172a';
-        wrapper.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif';
-
-        var headerDiv = document.createElement('div');
-        headerDiv.style.borderBottom = '2px solid #e2e8f0';
-        headerDiv.style.paddingBottom = '12px';
-        headerDiv.style.marginBottom = '16px';
-        headerDiv.innerHTML = '<h4 style="margin:0; font-weight:800; font-size:18px; color:#0f172a;">Customer Lead Details</h4>' +
-            '<div style="font-size:12px; color:#64748b;">Full dossier of customer spin and prize enquiry</div>';
-        wrapper.appendChild(headerDiv);
-
-        var clone = contentEl.cloneNode(true);
-        clone.querySelectorAll('.no-print-in-modal').forEach(function(el) {
-            el.remove();
-        });
-        wrapper.appendChild(clone);
-
-        var originalHtml = btnEl ? btnEl.innerHTML : '';
-        if (btnEl) {
-            btnEl.disabled = true;
-            btnEl.innerHTML = '<i class="ti ti-loader me-1"></i> Generating PDF...';
-        }
-
-        var opt = {
-            margin:       [10, 10, 10, 10],
-            filename:     fileName,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-        html2pdf().set(opt).from(wrapper).save().then(function() {
-            if (btnEl) {
-                btnEl.disabled = false;
-                btnEl.innerHTML = originalHtml;
-            }
-        }).catch(function() {
-            if (btnEl) {
-                btnEl.disabled = false;
-                btnEl.innerHTML = originalHtml;
-            }
-            if (fallbackUrl) {
-                window.location.href = fallbackUrl;
-            }
-        });
-    }
-
     function printCustomerLeadDetails() {
         var contentEl = document.getElementById('customerLeadDetailsPrintable') || document.querySelector('.spinner_body');
         if (!contentEl) return;
@@ -680,19 +602,32 @@
             '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Customer Lead Details</title>' +
             '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">' +
             '<style>' +
-            'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; padding: 24px; color: #0f172a; background: #fff; }' +
-            '.print-header { border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }' +
-            '.print-header h4 { margin: 0; font-weight: 800; font-size: 1.25rem; }' +
-            '.print-header small { color: #64748b; }' +
-            '.rounded-12 { border-radius: 12px; }' +
-            '.rounded-15 { border-radius: 15px; }' +
-            '.badge-warning { background-color: #fef08a; color: #854d0e; }' +
-            '.badge-light { background-color: #f8fafc; color: #0f172a; }' +
-            '@media print { .no-print { display: none !important; } body { padding: 0; } }' +
+            '@page { size: A4 portrait; margin: 8mm 10mm; }' +
+            '*, *::before, *::after { box-sizing: border-box; }' +
+            'html, body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; margin: 0 !important; padding: 0 !important; color: #0f172a; background: #fff; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }' +
+            '.print-page-wrap { padding: 4px 6px; page-break-inside: avoid; break-inside: avoid; }' +
+            '.print-header { border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }' +
+            '.print-header h4 { margin: 0; font-weight: 800; font-size: 1.05rem; }' +
+            '.print-header small { color: #64748b; font-size: 0.74rem; }' +
+            '.print-page-wrap .p-3 { padding: 8px 12px !important; }' +
+            '.print-page-wrap .mb-4 { margin-bottom: 10px !important; padding-bottom: 8px !important; }' +
+            '.print-page-wrap .mb-3 { margin-bottom: 0 !important; }' +
+            '.print-page-wrap .mb-2 { margin-bottom: 6px !important; }' +
+            '.print-page-wrap .row { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 8px !important; margin: 0 0 10px 0 !important; }' +
+            '.print-page-wrap .row > .col-md-6 { width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; }' +
+            '.print-page-wrap .row > .col-12 { grid-column: 1 / -1 !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; }' +
+            '.print-page-wrap .card { page-break-inside: avoid !important; break-inside: avoid !important; padding: 10px 12px !important; margin-bottom: 0 !important; }' +
+            '.print-page-wrap img { max-height: 220px !important; width: auto !important; object-fit: contain !important; }' +
+            '.rounded-12 { border-radius: 10px; }' +
+            '.rounded-15 { border-radius: 12px; }' +
+            '.badge-warning { background-color: #fef08a !important; color: #854d0e !important; }' +
+            '.badge-light { background-color: #f8fafc !important; color: #0f172a !important; }' +
             '</style></head><body>' +
+            '<div class="print-page-wrap">' +
             '<div class="print-header"><div><h4>Customer Lead Details</h4><small>Full dossier of customer spin and prize enquiry</small></div></div>' +
             clone.innerHTML +
-            '<script>window.onload = function() { setTimeout(function() { window.print(); window.close(); }, 350); };<\/script>' +
+            '</div>' +
+            '<script>window.onload = function() { setTimeout(function() { window.print(); window.close(); }, 300); };<\/script>' +
             '</body></html>'
         );
         printWin.document.close();

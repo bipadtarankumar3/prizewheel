@@ -20,9 +20,6 @@
             <button type="button" class="btn btn-outline-dark btn-sm rounded-pill font-weight-bold px-3" onclick="printCustomerLeadDetails()">
                 <i class="ti ti-printer me-1"></i> Print
             </button>
-            <button type="button" class="btn btn-primary btn-sm rounded-pill font-weight-bold px-3 text-white" style="background: linear-gradient(135deg, #ff6b00, #ea580c); border: none;" onclick="downloadCustomerLeadPdf(this)" data-fallback-url="{{ URL::to('admin/spinner_form_details_pdf/' . $SpinnerForm->id) }}">
-                <i class="ti ti-download me-1"></i> Download
-            </button>
         </div>
     </div>
 
