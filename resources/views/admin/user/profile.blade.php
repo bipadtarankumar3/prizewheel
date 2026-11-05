@@ -73,20 +73,21 @@
                   
                   <div class="col-sm-12 col-md-4">
                     <div class="mb-3">
-                      <label for="inputlname" class="control-label col-form-label">Email</label>
+                      <label for="inputEmail3" class="control-label col-form-label">Email</label>
                       <input type="email" name="email"  @if (isset($user)) value="{{$user->email}}"  @endif class="form-control" id="inputEmail3" placeholder="Email Here" @required(true)>
                     </div>
                   </div>
                   <div class="col-sm-12 col-md-4">
                     <div class="mb-3">
-                      <label for="inputEmail3" class="control-label col-form-label">Old Password</label>
-                      <input type="password" name="old_password"  @if (!isset($user)) @required(true) @endif class="form-control" id="inputEmail3" placeholder="Old Password Here" >
+                      <label for="profile_password" class="control-label col-form-label">Password</label>
+                      <input type="password" name="password"  @if (!isset($user)) @required(true) @endif class="form-control" id="profile_password" placeholder="Password Here" autocomplete="new-password">
                     </div>
                   </div>
                   <div class="col-sm-12 col-md-4">
                     <div class="mb-3">
-                      <label for="inputEmail3" class="control-label col-form-label">Password</label>
-                      <input type="password" name="password"  @if (!isset($user)) @required(true) @endif class="form-control" id="inputEmail3" placeholder="Password Here" >
+                      <label for="profile_confirm_password" class="control-label col-form-label">Confirm Password</label>
+                      <input type="password" name="confirm_password"  @if (!isset($user)) @required(true) @endif class="form-control" id="profile_confirm_password" placeholder="Confirm Password Here" autocomplete="new-password">
+                      <small id="password_match_error" class="text-danger fw-semibold" style="display: none;">Password and Confirm Password do not match.</small>
                     </div>
                   </div>
 
@@ -163,5 +164,50 @@
         </div>
     </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var pwdInput = document.getElementById('profile_password');
+    var confirmInput = document.getElementById('profile_confirm_password');
+    var errorText = document.getElementById('password_match_error');
+    var form = pwdInput ? pwdInput.closest('form') : null;
+
+    function checkPasswordMatch() {
+      if (!pwdInput || !confirmInput) return true;
+      var p = pwdInput.value;
+      var c = confirmInput.value;
+      if (p === '' && c === '') {
+        confirmInput.classList.remove('is-invalid', 'is-valid');
+        if (errorText) errorText.style.display = 'none';
+        return true;
+      }
+      if (p !== c) {
+        confirmInput.classList.add('is-invalid');
+        confirmInput.classList.remove('is-valid');
+        if (errorText) errorText.style.display = 'block';
+        return false;
+      } else {
+        confirmInput.classList.remove('is-invalid');
+        confirmInput.classList.add('is-valid');
+        if (errorText) errorText.style.display = 'none';
+        return true;
+      }
+    }
+
+    if (pwdInput && confirmInput) {
+      pwdInput.addEventListener('input', checkPasswordMatch);
+      confirmInput.addEventListener('input', checkPasswordMatch);
+    }
+
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        if (!checkPasswordMatch()) {
+          e.preventDefault();
+          confirmInput.focus();
+        }
+      });
+    }
+  });
+</script>
 
 @endsection

@@ -27,6 +27,7 @@ class User extends Authenticatable
      */
     protected $attributes = [
         'default_spinn' => '2',
+        'spin_whell_round' => 1,
     ];  
 
     /**

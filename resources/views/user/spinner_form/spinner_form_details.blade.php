@@ -1,18 +1,28 @@
-<div class="p-3">
+<div class="p-3" id="customerLeadDetailsPrintable" data-lead-id="{{ $SpinnerForm->id }}">
     <!-- Header Strip -->
-    <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
-        <div style="width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #ff6b00, #ea580c); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; flex-shrink: 0;">
-            {{ strtoupper(substr($SpinnerForm->name ?? 'C', 0, 1)) }}
-        </div>
-        <div class="overflow-hidden flex-grow-1">
-            <h5 class="font-weight-bold text-dark mb-0" style="font-size: 1.15rem;">{{ $SpinnerForm->name ?? 'Anonymous Customer' }}</h5>
-            <div class="text-muted" style="font-size: 0.82rem;">
-                <span class="badge badge-light text-dark border mr-1">Enquiry #{{ $SpinnerForm->id }}</span>
-                @if(!empty($SpinnerForm->campaign_name))
-                    &bull; <strong class="text-primary">{{ $SpinnerForm->campaign_name }}</strong>
-                @endif
-                &bull; {{ date('d M Y, h:i A', strtotime($SpinnerForm->created_at)) }}
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 pb-3 border-bottom">
+        <div class="d-flex align-items-center gap-3 overflow-hidden">
+            <div style="width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #ff6b00, #ea580c); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; flex-shrink: 0;">
+                {{ strtoupper(substr($SpinnerForm->name ?? 'C', 0, 1)) }}
             </div>
+            <div class="overflow-hidden flex-grow-1">
+                <h5 class="font-weight-bold text-dark mb-0" style="font-size: 1.15rem;">{{ $SpinnerForm->name ?? 'Anonymous Customer' }}</h5>
+                <div class="text-muted" style="font-size: 0.82rem;">
+                    <span class="badge badge-light text-dark border mr-1">Enquiry #{{ $SpinnerForm->id }}</span>
+                    @if(!empty($SpinnerForm->campaign_name))
+                        &bull; <strong class="text-primary">{{ $SpinnerForm->campaign_name }}</strong>
+                    @endif
+                    &bull; {{ date('d M Y, h:i A', strtotime($SpinnerForm->created_at)) }}
+                </div>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2 no-print-in-modal">
+            <button type="button" class="btn btn-outline-dark btn-sm rounded-pill font-weight-bold px-3" onclick="printCustomerLeadDetails()">
+                <i class="ti ti-printer me-1"></i> Print
+            </button>
+            <a href="{{ URL::to('admin/spinner_form_details_pdf/' . $SpinnerForm->id) }}" class="btn btn-primary btn-sm rounded-pill font-weight-bold px-3 text-white" style="background: linear-gradient(135deg, #ff6b00, #ea580c); border: none;">
+                <i class="ti ti-download me-1"></i> Download
+            </a>
         </div>
     </div>
 

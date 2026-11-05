@@ -119,14 +119,14 @@ class UserController extends Controller
         $user = User::create([
             'user_unique_id' => Str::random(10),
             'name' => $request->name,
-            'name_url' => $uniqueSlug,
+            'name_url' => '',
             'email' => $cleanEmail,
             'password' => Hash::make($request->password),
             'phone' => $request->phone ?? '',
             'type' => 'user',
             'status' => 'active',
             'expiry_date' => date('Y-m-d', strtotime('+1 day')),
-            'spin_whell_round' => 100,
+            'spin_whell_round' => 1,
             'default_background' => 'on',
             'default_spinn' => '2',
             'note' => 'Self-registered customer account (1-Day Trial)',
@@ -141,6 +141,7 @@ class UserController extends Controller
         session()->put('adminUserId', $user->id);
         session()->put('type', $user->type);
         session()->put('adminName', $user->name);
+        session()->put('google_first_login_modal', true);
 
         $notification = array(
             'messege' => 'Welcome! Your account has been created successfully with 1-Day Free Trial.',
@@ -196,15 +197,15 @@ class UserController extends Controller
         if (!$user) {
             $user = User::create([
                 'user_unique_id' => Str::random(10),
-                'name' => 'Google Business User',
-                'name_url' => 'google_business_user',
+                'name' => '',
+                'name_url' => '',
                 'email' => $demoEmail,
                 'password' => Hash::make(Str::random(16)),
-                'phone' => '+91 98765 43210',
+                'phone' => '',
                 'type' => 'user',
                 'status' => 'active',
                 'expiry_date' => date('Y-m-d', strtotime('+1 day')),
-                'spin_whell_round' => 100,
+                'spin_whell_round' => 1,
                 'default_background' => 'on',
                 'default_spinn' => '2',
                 'note' => 'Google Authenticated User (1-Day Trial)',
@@ -216,7 +217,7 @@ class UserController extends Controller
         session()->put('adminUserId', $user->id);
         session()->put('type', $user->type);
         session()->put('adminName', $user->name);
-        if (empty($user->phone)) {
+        if (empty($user->phone) || empty($user->name_url) || empty($user->name)) {
             session()->put('google_first_login_modal', true);
         }
 
@@ -271,24 +272,17 @@ class UserController extends Controller
                         $isNewUser = false;
                         if (!$user) {
                             $isNewUser = true;
-                            $baseSlug = Str::slug($name, '_') ?: 'user';
-                            $uniqueSlug = $baseSlug;
-                            $count = 1;
-                            while (User::where('name_url', $uniqueSlug)->exists()) {
-                                $uniqueSlug = $baseSlug . '_' . $count;
-                                $count++;
-                            }
                             $user = User::create([
                                 'user_unique_id' => Str::random(10),
-                                'name' => $name,
-                                'name_url' => $uniqueSlug,
+                                'name' => '',
+                                'name_url' => '',
                                 'email' => $email,
                                 'password' => Hash::make(Str::random(16)),
                                 'phone' => '',
                                 'type' => 'user',
                                 'status' => 'active',
                                 'expiry_date' => date('Y-m-d', strtotime('+1 day')),
-                                'spin_whell_round' => 100,
+                                'spin_whell_round' => 1,
                                 'default_background' => 'on',
                                 'default_spinn' => '2',
                                 'note' => 'Google SSO User (1-Day Trial)',
@@ -303,7 +297,7 @@ class UserController extends Controller
                         session()->put('adminUserId', $user->id);
                         session()->put('type', $user->type);
                         session()->put('adminName', $user->name);
-                        if (empty($user->phone)) {
+                        if (empty($user->phone) || empty($user->name_url) || empty($user->name)) {
                             session()->put('google_first_login_modal', true);
                         } else {
                             session()->forget('google_first_login_modal');
@@ -351,6 +345,11 @@ class UserController extends Controller
         $request->validate([
             'phone' => 'required|string',
             'name' => 'required|string|max:255',
+            'name_url' => 'required|string|max:255',
+        ], [
+            'name.required' => 'Business / Store Name is mandatory.',
+            'phone.required' => 'WhatsApp / Contact Number is mandatory.',
+            'name_url.required' => 'Custom URL Slug is mandatory.',
         ]);
 
         $cleanPhone = '';
@@ -364,18 +363,48 @@ class UserController extends Controller
 
         $user = Auth::user();
         if ($user) {
-            $user->name = $request->name;
-            $user->phone = $cleanPhone;
-
-            if ($request->filled('name_url')) {
-                $newSlug = Str::slug($request->name_url, '_');
-                if (!empty($newSlug)) {
-                    $slugExists = User::where('name_url', $newSlug)->where('id', '!=', $user->id)->exists();
-                    if (!$slugExists) {
-                        $user->name_url = $newSlug;
-                    }
-                }
+            $cleanName = trim($request->name);
+            if (empty($cleanName)) {
+                return back()->with([
+                    'messege' => 'Please enter a valid Business / Store Name.',
+                    'alert-type' => 'error'
+                ])->withInput();
             }
+
+            // Validate if Store Name already exists
+            $nameExists = User::whereRaw('LOWER(name) = ?', [strtolower($cleanName)])
+                ->where('id', '!=', $user->id)
+                ->exists();
+            if ($nameExists) {
+                return back()->with([
+                    'messege' => 'This Business / Store Name already exists. Please choose another name.',
+                    'alert-type' => 'error'
+                ])->withInput();
+            }
+
+            // Validate & sanitize Custom URL Slug
+            $newSlug = strtolower(preg_replace('/[^a-zA-Z0-9_-]/', '_', trim($request->name_url)));
+            $newSlug = trim(preg_replace('/_+/', '_', $newSlug), '_');
+            if (empty($newSlug)) {
+                return back()->with([
+                    'messege' => 'Please enter a valid Custom URL Slug.',
+                    'alert-type' => 'error'
+                ])->withInput();
+            }
+
+            $slugExists = User::whereRaw('LOWER(name_url) = ?', [strtolower($newSlug)])
+                ->where('id', '!=', $user->id)
+                ->exists();
+            if ($slugExists) {
+                return back()->with([
+                    'messege' => 'This Custom URL Slug already exists. Please choose another URL slug.',
+                    'alert-type' => 'error'
+                ])->withInput();
+            }
+
+            $user->name = $cleanName;
+            $user->phone = $cleanPhone;
+            $user->name_url = $newSlug;
 
             if ($request->filled('wp_key')) {
                 $user->wp_key = $request->wp_key;
@@ -1009,9 +1038,50 @@ class UserController extends Controller
 
     public function user_name_checking(Request $request){
 
-        //dd($request->all());
+        $ignoreId = $request->get('ignore_id');
+        if (!$ignoreId && Auth::check() && Auth::user()->type == 'user') {
+            $ignoreId = Auth::id();
+        }
 
-        $user = User::where('name_url',$request->name)->first();
+        if ($request->has('check_type')) {
+            $type = $request->get('check_type');
+            $rawVal = trim((string)$request->get('value', ''));
+
+            if ($type === 'store_name') {
+                if ($rawVal === '') {
+                    return response()->json(['status' => 'empty']);
+                }
+                $query = User::whereRaw('LOWER(name) = ?', [strtolower($rawVal)]);
+                if ($ignoreId) {
+                    $query->where('id', '!=', $ignoreId);
+                }
+                return response()->json([
+                    'status' => $query->exists() ? 'exist' : 'not_exist'
+                ]);
+            }
+
+            if ($type === 'name_url') {
+                $slug = strtolower(preg_replace('/[^a-zA-Z0-9_-]/', '_', $rawVal));
+                $slug = trim(preg_replace('/_+/', '_', $slug), '_');
+                if ($slug === '') {
+                    return response()->json(['status' => 'empty', 'slug' => '']);
+                }
+                $query = User::whereRaw('LOWER(name_url) = ?', [$slug]);
+                if ($ignoreId) {
+                    $query->where('id', '!=', $ignoreId);
+                }
+                return response()->json([
+                    'status' => $query->exists() ? 'exist' : 'not_exist',
+                    'slug' => $slug
+                ]);
+            }
+        }
+
+        $query = User::where('name_url', $request->name);
+        if ($ignoreId) {
+            $query->where('id', '!=', $ignoreId);
+        }
+        $user = $query->first();
         if ($user) {
             $user_status = 'exist';
         } else {
@@ -1032,17 +1102,17 @@ class UserController extends Controller
 
                 $user = User::find($request->id);
 
-                if ($request->password != '' && $request->old_password != '') {
-                    if(!Hash::check($request->old_password, $user->password)){
+                if ($request->filled('password') || $request->filled('confirm_password')) {
+                    if ($request->has('confirm_password') && $request->password !== $request->confirm_password) {
                         $notification = array(
-                            'messege'=>'Old Password is not matching',
-                            'alert-type'=>'error'
+                            'messege' => 'Password and Confirm Password do not match',
+                            'alert-type' => 'error'
                         );
-                        return back()->with($notification);
-                    }else{
+                        return back()->with($notification)->withInput();
+                    }
+                    if (!empty($request->password)) {
                         $user->password = Hash::make($request->password);
                     }
-                    
                 }
 
                 if ($request->customer_password == 'changed') {
@@ -1256,8 +1326,17 @@ class UserController extends Controller
             $user = User::find($request->id);
             $user->name = $request->name;
             $user->email = $request->email;
-            if ($request->password != '') {
-                $user->password = $request->password;
+            if ($request->filled('password') || $request->filled('confirm_password')) {
+                if ($request->has('confirm_password') && $request->password !== $request->confirm_password) {
+                    $notification = array(
+                        'messege' => 'Password and Confirm Password do not match',
+                        'alert-type' => 'error'
+                    );
+                    return back()->with($notification)->withInput();
+                }
+                if (!empty($request->password)) {
+                    $user->password = Hash::make($request->password);
+                }
             }
             if ($request->filled('phone')) {
                 $cleanPhone = '';

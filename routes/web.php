@@ -165,6 +165,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth']], function () {
     Route::post('downloadSpinnerFormListPdf', [SpinnerController::class,'downloadSpinnerFormListPdf']);
     Route::any('spinner_form_list/{id}', [SpinnerController::class,'spinner_form_list']);
     Route::any('spinner_form_details/{id}', [SpinnerController::class,'spinner_form_details']);
+    Route::get('spinner_form_details_pdf/{id}', [SpinnerController::class,'spinner_form_details_pdf']);
     Route::any('delete_spinner_form_list/{id}', [SpinnerController::class,'delete_spinner_form_list']);
     // ----------------- Spinner End------------------------
 

@@ -32,7 +32,7 @@
                     <tr>
                         <td style="padding: 36px 32px;">
                             <p style="font-size: 16px; color: #334155; margin: 0 0 18px 0; line-height: 1.6;">
-                                Hi <strong>{{ $user->name ?? 'Valued Customer' }}</strong>,
+                                Hi <strong>{{ $user->name ?: 'Valued Customer' }}</strong>,
                             </p>
                             <p style="font-size: 15px; color: #475569; margin: 0 0 24px 0; line-height: 1.6;">
                                 Thank you for creating an account with <strong>Prize Wheel</strong>! You now have full access to set up custom digital spin wheels, run viral marketing campaigns, and collect verified customer leads.

@@ -98,7 +98,7 @@
                   <div class="col-sm-12 col-md-3">
                     <div class="mb-3">
                       <label for="inputEmail3" class="control-label col-form-label">Spin Wheel Round  <span style="color: red;">*</span></label>
-                      <input type="number" name="spin_whell_round"  @if (isset($user)) value="{{$user->spin_whell_round}}"  @endif class="form-control" id="date" placeholder="Spin Wheel Round" required>
+                      <input type="number" name="spin_whell_round"  @if (isset($user)) value="{{$user->spin_whell_round}}" @else value="1" @endif class="form-control" id="date" placeholder="Spin Wheel Round" required>
                     </div>
                   </div>
                   <div class="col-sm-12 col-md-6">

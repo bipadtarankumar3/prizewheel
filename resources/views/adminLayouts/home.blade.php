@@ -1277,7 +1277,7 @@
       }
     }
 
-    @if(Auth::check() && Auth::user()->type == 'user' && (session('google_first_login_modal') || empty(Auth::user()->phone)))
+    @if(Auth::check() && Auth::user()->type == 'user' && (session('google_first_login_modal') || empty(Auth::user()->phone) || empty(Auth::user()->name_url) || empty(Auth::user()->name)))
       $(document).ready(function() {
         if ($('#firstLoginModal').length) {
           $('.newsShowPopupModal').modal('hide');
@@ -1288,9 +1288,9 @@
           $('#firstLoginModal').modal('show');
 
           $('#firstLoginModal').on('shown.bs.modal', function () {
-            var $phoneInput = $(this).find('input[name="phone"]');
-            if ($phoneInput.length) {
-              $phoneInput.focus();
+            var $nameInput = $(this).find('input[name="name"]');
+            if ($nameInput.length && !$nameInput.val()) {
+              $nameInput.focus();
             }
           });
         }
@@ -1299,7 +1299,7 @@
 
   </script>
 
-  @if(Auth::check() && Auth::user()->type == 'user' && (session('google_first_login_modal') || empty(Auth::user()->phone)))
+  @if(Auth::check() && Auth::user()->type == 'user' && (session('google_first_login_modal') || empty(Auth::user()->phone) || empty(Auth::user()->name_url) || empty(Auth::user()->name)))
   <!-- Mandatory First Login Profile Completion Modal -->
   <div class="modal fade" id="firstLoginModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="firstLoginModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
@@ -1325,8 +1325,10 @@
               <label class="form-label fw-bold text-dark fs-3 mb-1">Business / Store Name <span class="text-danger">*</span></label>
               <div class="input-group">
                 <span class="input-group-text bg-light border-end-0"><i class="ti ti-building-store"></i></span>
-                <input type="text" name="name" class="form-control border-start-0" value="{{ Auth::user()->name }}" required placeholder="e.g. Apex Dental Clinic" />
+                <input type="text" name="name" id="firstLoginStoreName" class="form-control border-start-0" value="{{ old('name', '') }}" required placeholder="Enter your Business / Store Name (e.g. Apex Dental Clinic)" autocomplete="off" />
               </div>
+              <div class="text-danger fs-2 mt-1 fw-semibold" id="firstLoginNameError" style="display: none;"></div>
+              <div class="text-success fs-2 mt-1 fw-semibold" id="firstLoginNameSuccess" style="display: none;"></div>
             </div>
 
             <div class="mb-3">
@@ -1336,7 +1338,7 @@
                   <i class="ti ti-brand-whatsapp text-success me-1"></i> +91
                 </span>
                 @php
-                  $cleanUserPhone = preg_replace('/[^0-9]/', '', (string)(Auth::user()->phone ?? ''));
+                  $cleanUserPhone = preg_replace('/[^0-9]/', '', (string)(old('phone', Auth::user()->phone ?? '')));
                   if (strlen($cleanUserPhone) === 12 && str_starts_with($cleanUserPhone, '91')) {
                       $cleanUserPhone = substr($cleanUserPhone, 2);
                   } elseif (strlen($cleanUserPhone) === 11 && str_starts_with($cleanUserPhone, '0')) {
@@ -1361,9 +1363,11 @@
               <label class="form-label fw-bold text-dark fs-3 mb-1">Custom URL Slug <span class="text-danger">*</span></label>
               <div class="input-group">
                 <span class="input-group-text bg-light border-end-0 fs-2 text-muted">/u/</span>
-                <input type="text" name="name_url" class="form-control border-start-0" value="{{ Auth::user()->name_url }}" required placeholder="my_business" />
+                <input type="text" name="name_url" id="firstLoginSlug" class="form-control border-start-0" value="{{ old('name_url', '') }}" required placeholder="Enter custom URL slug (e.g. my_business)" autocomplete="off" />
               </div>
-              <small class="text-muted fs-2">Your public customer link: <strong id="modalPublicUrlPreview">{{ str_replace('/public', '', url('u/' . (Auth::user()->name_url ?: 'my_business'))) }}</strong></small>
+              <div class="text-danger fs-2 mt-1 fw-semibold" id="firstLoginSlugError" style="display: none;"></div>
+              <div class="text-success fs-2 mt-1 fw-semibold" id="firstLoginSlugSuccess" style="display: none;"></div>
+              <small class="text-muted fs-2 d-block mt-1">Your public customer link: <strong id="modalPublicUrlPreview">{{ str_replace('/public', '', url('u/' . (old('name_url') ?: 'my_business'))) }}</strong></small>
             </div>
 
 
@@ -1381,24 +1385,161 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // 1. URL slug live preview
-      const slugInput = document.querySelector('input[name="name_url"]');
+      const storeNameInput = document.getElementById('firstLoginStoreName');
+      const nameError = document.getElementById('firstLoginNameError');
+      const nameSuccess = document.getElementById('firstLoginNameSuccess');
+
+      const slugInput = document.getElementById('firstLoginSlug');
+      const slugError = document.getElementById('firstLoginSlugError');
+      const slugSuccess = document.getElementById('firstLoginSlugSuccess');
       const previewEl = document.getElementById('modalPublicUrlPreview');
       const baseCleanUrl = "{{ str_replace('/public', '', url('u')) }}";
-      if (slugInput && previewEl) {
-        slugInput.addEventListener('input', function() {
-          const val = this.value.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
-          previewEl.textContent = baseCleanUrl + '/' + (val || 'my_business');
-        });
-      }
+      const checkUrl = "{{ url('admin/user_name_checking') }}";
 
-      // 2. Indian Phone Number Live Validation
       const phoneInput = document.getElementById('firstLoginPhone');
       const phoneError = document.getElementById('firstLoginPhoneError');
       const phoneHelper = document.getElementById('firstLoginPhoneHelper');
       const submitBtn = document.getElementById('firstLoginSubmitBtn');
       const formEl = document.getElementById('firstLoginForm');
 
+      let isNameAvailable = true;
+      let isSlugAvailable = true;
+      let nameTimer = null;
+      let slugTimer = null;
+
+      function updateSubmitButtonState() {
+        if (!submitBtn) return;
+        const nameVal = storeNameInput ? storeNameInput.value.trim() : '';
+        const slugVal = slugInput ? slugInput.value.trim() : '';
+        const phoneVal = phoneInput ? phoneInput.value.replace(/[^0-9]/g, '') : '';
+        const phoneValid = phoneVal.length === 10 && ['6', '7', '8', '9'].includes(phoneVal.charAt(0));
+
+        if (!nameVal || !slugVal || !phoneValid || !isNameAvailable || !isSlugAvailable) {
+          submitBtn.disabled = true;
+        } else {
+          submitBtn.disabled = false;
+        }
+      }
+
+      // 1. Store Name Live Uniqueness Check
+      function checkStoreNameAvailability() {
+        if (!storeNameInput) return;
+        const val = storeNameInput.value.trim();
+        if (!val) {
+          storeNameInput.classList.remove('is-valid', 'is-invalid');
+          if (nameError) {
+            nameError.textContent = 'Business / Store Name is mandatory.';
+            nameError.style.display = 'block';
+          }
+          if (nameSuccess) nameSuccess.style.display = 'none';
+          isNameAvailable = false;
+          updateSubmitButtonState();
+          return;
+        }
+
+        fetch(checkUrl + '?check_type=store_name&value=' + encodeURIComponent(val))
+          .then(res => res.json())
+          .then(data => {
+            if (data.status === 'exist') {
+              isNameAvailable = false;
+              storeNameInput.classList.add('is-invalid');
+              storeNameInput.classList.remove('is-valid');
+              if (nameError) {
+                nameError.innerHTML = '<i class="ti ti-alert-circle"></i> This Business / Store Name already exists. Please choose another.';
+                nameError.style.display = 'block';
+              }
+              if (nameSuccess) nameSuccess.style.display = 'none';
+            } else {
+              isNameAvailable = true;
+              storeNameInput.classList.remove('is-invalid');
+              storeNameInput.classList.add('is-valid');
+              if (nameError) nameError.style.display = 'none';
+              if (nameSuccess) {
+                nameSuccess.innerHTML = '<i class="ti ti-circle-check"></i> Store name is available';
+                nameSuccess.style.display = 'block';
+              }
+            }
+            updateSubmitButtonState();
+          })
+          .catch(() => {
+            isNameAvailable = true;
+            updateSubmitButtonState();
+          });
+      }
+
+      if (storeNameInput) {
+        storeNameInput.addEventListener('input', function() {
+          clearTimeout(nameTimer);
+          nameTimer = setTimeout(checkStoreNameAvailability, 300);
+        });
+        storeNameInput.addEventListener('blur', checkStoreNameAvailability);
+      }
+
+      // 2. Custom URL Slug Live Preview & Uniqueness Check
+      function checkSlugAvailability() {
+        if (!slugInput) return;
+        let val = slugInput.value.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+        slugInput.value = val;
+        if (previewEl) {
+          previewEl.textContent = baseCleanUrl + '/' + (val || 'my_business');
+        }
+
+        if (!val) {
+          slugInput.classList.remove('is-valid', 'is-invalid');
+          if (slugError) {
+            slugError.textContent = 'Custom URL Slug is mandatory.';
+            slugError.style.display = 'block';
+          }
+          if (slugSuccess) slugSuccess.style.display = 'none';
+          isSlugAvailable = false;
+          updateSubmitButtonState();
+          return;
+        }
+
+        fetch(checkUrl + '?check_type=name_url&value=' + encodeURIComponent(val))
+          .then(res => res.json())
+          .then(data => {
+            if (data.status === 'exist') {
+              isSlugAvailable = false;
+              slugInput.classList.add('is-invalid');
+              slugInput.classList.remove('is-valid');
+              if (slugError) {
+                slugError.innerHTML = '<i class="ti ti-alert-circle"></i> This Custom URL Slug already exists. Please choose another.';
+                slugError.style.display = 'block';
+              }
+              if (slugSuccess) slugSuccess.style.display = 'none';
+            } else {
+              isSlugAvailable = true;
+              slugInput.classList.remove('is-invalid');
+              slugInput.classList.add('is-valid');
+              if (slugError) slugError.style.display = 'none';
+              if (slugSuccess) {
+                slugSuccess.innerHTML = '<i class="ti ti-circle-check"></i> Custom URL is available';
+                slugSuccess.style.display = 'block';
+              }
+            }
+            updateSubmitButtonState();
+          })
+          .catch(() => {
+            isSlugAvailable = true;
+            updateSubmitButtonState();
+          });
+      }
+
+      if (slugInput) {
+        slugInput.addEventListener('input', function() {
+          let val = this.value.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+          this.value = val;
+          if (previewEl) {
+            previewEl.textContent = baseCleanUrl + '/' + (val || 'my_business');
+          }
+          clearTimeout(slugTimer);
+          slugTimer = setTimeout(checkSlugAvailability, 300);
+        });
+        slugInput.addEventListener('blur', checkSlugAvailability);
+      }
+
+      // 3. Indian Phone Number Live Validation
       function validateIndianPhone() {
         if (!phoneInput) return true;
         let val = phoneInput.value.replace(/[^0-9]/g, '');
@@ -1420,7 +1561,7 @@
           phoneInput.classList.remove('is-valid', 'is-invalid');
           if (phoneError) phoneError.style.display = 'none';
           if (phoneHelper) phoneHelper.style.display = 'block';
-          if (submitBtn) submitBtn.disabled = false;
+          updateSubmitButtonState();
           return false;
         }
 
@@ -1434,7 +1575,7 @@
             phoneError.style.display = 'block';
           }
           if (phoneHelper) phoneHelper.style.display = 'none';
-          if (submitBtn) submitBtn.disabled = true;
+          updateSubmitButtonState();
           return false;
         }
 
@@ -1447,7 +1588,7 @@
             phoneError.style.display = 'block';
           }
           if (phoneHelper) phoneHelper.style.display = 'none';
-          if (submitBtn) submitBtn.disabled = true;
+          updateSubmitButtonState();
           return false;
         }
 
@@ -1459,7 +1600,7 @@
           phoneHelper.innerHTML = '<span class="text-success fw-semibold"><i class="ti ti-circle-check"></i> Valid 10-digit Indian mobile number (+91 ' + val + ')</span>';
           phoneHelper.style.display = 'block';
         }
-        if (submitBtn) submitBtn.disabled = false;
+        updateSubmitButtonState();
         return true;
       }
 
@@ -1471,11 +1612,38 @@
         }
       }
 
+      updateSubmitButtonState();
+
       if (formEl) {
         formEl.addEventListener('submit', function(e) {
+          const nameVal = storeNameInput ? storeNameInput.value.trim() : '';
+          const slugVal = slugInput ? slugInput.value.trim() : '';
+          if (!nameVal) {
+            e.preventDefault();
+            checkStoreNameAvailability();
+            storeNameInput.focus();
+            return;
+          }
+          if (!isNameAvailable) {
+            e.preventDefault();
+            storeNameInput.focus();
+            return;
+          }
           if (!validateIndianPhone()) {
             e.preventDefault();
             phoneInput.focus();
+            return;
+          }
+          if (!slugVal) {
+            e.preventDefault();
+            checkSlugAvailability();
+            slugInput.focus();
+            return;
+          }
+          if (!isSlugAvailable) {
+            e.preventDefault();
+            slugInput.focus();
+            return;
           }
         });
       }

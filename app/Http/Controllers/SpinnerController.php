@@ -594,4 +594,61 @@ class SpinnerController extends Controller
         }
     }
 
+    public function spinner_form_details_pdf($id){
+        if(Auth::check()){
+            $SpinnerForm = SpinnerForm::
+            select(
+                'spinner_forms.id',
+                'spinner_forms.name',
+                'spinner_forms.email',
+                'spinner_forms.whatsapp_number',
+                'spinner_forms.phone',
+                'spinner_forms.address',
+                'spinner_forms.schreenshot',
+                'spinner_forms.spinner_id',
+                'spinner_forms.camping_id',
+                'spinner_forms.bike_model_id',
+                'spinner_forms.mac_address',
+                'spinner_forms.status',
+                'spinner_forms.created_at',
+                'bike_models.name as bike_name',
+                'spinners.name as spinner_name',
+                'campings.title as campaign_name'
+            )
+            ->leftJoin('bike_models','bike_models.id','spinner_forms.bike_model_id')
+            ->leftJoin('spinners','spinners.id','spinner_forms.spinner_id')
+            ->leftJoin('campings','campings.id','spinner_forms.camping_id')
+            ->where('spinner_forms.id', $id)
+            ->first();
+
+            if (!$SpinnerForm) {
+                return back()->with('error', 'Customer lead not found.');
+            }
+
+            $proofImageSrc = null;
+            if (!empty($SpinnerForm->schreenshot)) {
+                $parsedPath = parse_url($SpinnerForm->schreenshot, PHP_URL_PATH);
+                if ($parsedPath) {
+                    $relativePath = ltrim(str_replace('/public/', '/', $parsedPath), '/');
+                    $localFile = public_path($relativePath);
+                    if (!file_exists($localFile) && basename($parsedPath)) {
+                        $localFile = public_path('upload/' . basename($parsedPath));
+                    }
+                    if (file_exists($localFile) && is_readable($localFile)) {
+                        $ext = strtolower(pathinfo($localFile, PATHINFO_EXTENSION)) ?: 'jpeg';
+                        if ($ext === 'jpg') $ext = 'jpeg';
+                        $proofImageSrc = 'data:image/' . $ext . ';base64,' . base64_encode(file_get_contents($localFile));
+                    }
+                }
+            }
+
+            $pdf = PDF::loadView('user.spinner_form.spinnerFormDetailPdf', compact('SpinnerForm', 'proofImageSrc'))
+                ->setPaper('a4', 'portrait');
+
+            $slugName = !empty($SpinnerForm->name) ? \Illuminate\Support\Str::slug($SpinnerForm->name, '_') : 'customer';
+            return $pdf->download('lead_enquiry_' . $SpinnerForm->id . '_' . $slugName . '.pdf');
+        }
+        return redirect('/login');
+    }
+
 }
