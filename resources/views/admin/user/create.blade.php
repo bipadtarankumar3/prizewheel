@@ -68,7 +68,7 @@
                 </div>
                 <div class="row">
                   
-                  <div class="col-sm-12 col-md-6">
+                  <div class="col-sm-12 col-md-4">
                     <div class="mb-3">
                       <label for="inputlname" class="control-label col-form-label">Email  <span style="color: red;">*</span></label>
                       <input type="email" name="email"  @if (isset($user)) value="{{$user->email}}"  @endif class="form-control" id="inputEmail3" placeholder="Email Here" required>
@@ -77,15 +77,24 @@
                   
                   <div class="col-sm-12 col-md-3">
                     <div class="mb-3">
-                      <label for="password" class="control-label col-form-label">Password</label>
-                      <input type="password" name="password"  @if (!isset($user)) required @endif class="form-control" id="password" placeholder="Password Here" >
-                      
-                    
+                      <label for="password" class="control-label col-form-label">Password @if (!isset($user)) <span style="color: red;">*</span> @endif</label>
+                      <input type="password" name="password"  @if (!isset($user)) required @endif class="form-control" id="password" placeholder="Password Here" autocomplete="new-password">
                     </div>
                   </div>
+
                   <div class="col-sm-12 col-md-3">
-                    <label for="show-password" class="control-label col-form-label">Show Password</label>
-                    <input type="checkbox" id="show-password">
+                    <div class="mb-3">
+                      <label for="confirm_password" class="control-label col-form-label">Confirm Password @if (!isset($user)) <span style="color: red;">*</span> @endif</label>
+                      <input type="password" name="confirm_password"  @if (!isset($user)) required @endif class="form-control" id="confirm_password" placeholder="Confirm Password Here" autocomplete="new-password">
+                      <small id="create_password_match_error" class="text-danger fw-semibold" style="display: none;">Password and Confirm Password do not match.</small>
+                    </div>
+                  </div>
+
+                  <div class="col-sm-12 col-md-2 d-flex align-items-center">
+                    <div class="mb-3 mt-3">
+                      <label for="show-password" class="control-label col-form-label me-1">Show Password</label>
+                      <input type="checkbox" id="show-password">
+                    </div>
                   </div>
                 </div>
                 <div class="row">
@@ -191,7 +200,35 @@
       }
 
       $("#show-password").change(function(){
-            $(this).prop("checked") ?  $("#password").prop("type", "text") : $("#password").prop("type", "password");    
+            var type = $(this).prop("checked") ? "text" : "password";
+            $("#password, #confirm_password").prop("type", type);
         });
+
+      function checkCreatePasswordMatch() {
+          var p = $("#password").val() || '';
+          var c = $("#confirm_password").val() || '';
+          if (p === '' && c === '') {
+              $("#confirm_password").removeClass('is-invalid is-valid');
+              $("#create_password_match_error").hide();
+              return true;
+          }
+          if (p !== c) {
+              $("#confirm_password").addClass('is-invalid').removeClass('is-valid');
+              $("#create_password_match_error").show();
+              return false;
+          } else {
+              $("#confirm_password").removeClass('is-invalid').addClass('is-valid');
+              $("#create_password_match_error").hide();
+              return true;
+          }
+      }
+
+      $("#password, #confirm_password").on('input', checkCreatePasswordMatch);
+      $("form").on('submit', function(e) {
+          if (!checkCreatePasswordMatch()) {
+              e.preventDefault();
+              $("#confirm_password").focus();
+          }
+      });
     </script>
 @endsection

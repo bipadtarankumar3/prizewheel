@@ -1209,6 +1209,14 @@ class UserController extends Controller
                 return back()->with($notification);
             } else {
 
+                if ($request->has('confirm_password') && $request->password !== $request->confirm_password) {
+                    $notification = array(
+                        'messege' => 'Password and Confirm Password do not match',
+                        'alert-type' => 'error'
+                    );
+                    return back()->with($notification)->withInput();
+                }
+
                 $user = User::where('email',$request->email)->first();
 
                 if ($user) {
