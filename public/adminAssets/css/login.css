@@ -1586,3 +1586,61 @@ body {
   }
 }
 
+
+
+/* =========================================================
+   LIVE DEMO HINT (tap-to-try on the phone mockup)
+   ========================================================= */
+.demo-try-hint {
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 auto 12px;
+  padding: 7px 16px;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(16, 185, 129, 0.45);
+  background: #ecfdf5;
+  color: #065f46;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+  animation: demoHintBounce 2.2s ease-in-out infinite;
+  position: relative;
+  z-index: 5;
+}
+.demo-try-hint i { color: #10b981; }
+.demo-try-hint:hover { background: #d1fae5; }
+.demo-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+  animation: demoLiveDot 1.6s infinite;
+}
+@keyframes demoLiveDot {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+  70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+@keyframes demoHintBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.wheel-center-knob.demo-pulse {
+  animation: demoKnobPulse 1.6s ease-out infinite;
+}
+@keyframes demoKnobPulse {
+  0% { box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.9), 0 0 0 0 rgba(234, 88, 12, 0.55); }
+  70% { box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.9), 0 0 0 14px rgba(234, 88, 12, 0); }
+  100% { box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.9), 0 0 0 0 rgba(234, 88, 12, 0); }
+}
+.wheel-disc { cursor: pointer; }
+@media (prefers-reduced-motion: reduce) {
+  .demo-try-hint, .demo-live-dot, .wheel-center-knob.demo-pulse { animation: none; }
+}
+@media (max-width: 380px) {
+  .demo-try-hint { font-size: 11px; padding: 6px 12px; }
+}

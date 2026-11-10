@@ -74,6 +74,13 @@
               <!-- Phone Mockup Frame -->
               <div class="phone-mockup-wrapper">
 
+                <!-- Live demo hint -->
+                <button type="button" class="demo-try-hint" onclick="spinDemoWheel()" title="Tap to spin the demo wheel">
+                  <span class="demo-live-dot"></span>
+                  <span>Live Demo — Tap <strong>SPIN</strong> to try it!</span>
+                  <i class="fa-solid fa-hand-pointer"></i>
+                </button>
+
                 <!-- Phone -->
                 <div class="phone-mockup">
                   <div class="phone-island">
@@ -186,14 +193,14 @@
                         </div>
 
                         <!-- Center Spin Knob -->
-                        <div class="wheel-center-knob" onclick="spinDemoWheel()">
+                        <div class="wheel-center-knob demo-pulse" onclick="spinDemoWheel()" title="Tap to spin">
                           <span>SPIN</span>
                           <i class="fa-solid fa-play"></i>
                         </div>
                       </div>
 
                       <div class="wheel-result-banner" id="wheelPrizeText">
-                        <i class="fa-solid fa-trophy"></i> Click SPIN to win!
+                        <i class="fa-solid fa-hand-pointer"></i> Tap SPIN to try it — it's free!
                       </div>
                     </div>
                   </div>
@@ -975,13 +982,14 @@
     // Wheel Spin Micro-Animation
     let currentWheelRotation = 0;
     let isSpinning = false;
+    // Slice order clockwise from the top pointer — must match the SVG labels
     const prizes = [
-      "20% Discount Coupon! 🎁",
-      "Free Refreshing Drink! 🥤",
-      "10% Cashback Bonus! 💰",
-      "JACKPOT! $50 Gift Card! 🏆",
-      "Free Specialty Coffee! ☕",
-      "50% Off Next Order! 🎉"
+      "JACKPOT! 🏆",
+      "Free Coffee! ☕",
+      "50% Off! 🎉",
+      "20% Off! 🎁",
+      "Free Gift! 🎀",
+      "10% Off! 💰"
     ];
 
     function spinDemoWheel() {
@@ -990,19 +998,22 @@
 
       const wheel = document.getElementById('interactiveWheel');
       const banner = document.getElementById('wheelPrizeText');
+      const knob = document.querySelector('.wheel-center-knob');
+      if (knob) knob.classList.remove('demo-pulse');
 
       banner.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Spinning lucky wheel...`;
 
-      const randomSlices = Math.floor(Math.random() * 6);
-      const randomDeg = (5 * 360) + (randomSlices * 60) + 30;
-      currentWheelRotation += randomDeg;
+      // Pick the winning slice, then rotate so its centre stops under the top pointer
+      const winIndex = Math.floor(Math.random() * prizes.length);
+      const targetMod = (360 - (winIndex * 60 + 30)) % 360;
+      const currentMod = ((currentWheelRotation % 360) + 360) % 360;
+      currentWheelRotation += (5 * 360) + ((targetMod - currentMod + 360) % 360);
 
       wheel.style.transform = `rotate(${currentWheelRotation}deg)`;
 
       setTimeout(() => {
         isSpinning = false;
-        const wonPrize = prizes[randomSlices % prizes.length];
-        banner.innerHTML = `<i class="fa-solid fa-trophy"></i> Won: ${wonPrize}`;
+        banner.innerHTML = `<i class="fa-solid fa-trophy"></i> You won: ${prizes[winIndex]} <u style="cursor:pointer" onclick="spinDemoWheel()">Spin again</u>`;
 
         if (typeof confetti === 'function') {
           confetti({
