@@ -475,7 +475,7 @@
                         <span class="badge bg-light-info text-primary fw-bold rounded-pill px-2">Payments</span>
                     </div>
                     <div class="stat-val-num text-dark">{{ number_format($totalPaymentsCount ?? 0) }}</div>
-                    <p class="stat-val-label">Total Invoices</p>
+                    <p class="stat-val-label">Total Receipts</p>
                 </div>
             </a>
         </div>
@@ -741,7 +741,7 @@
                                         </div>
                                         <div class="mt-1 small">
                                             <span class="fw-bold text-dark">{{ $item->payments_made_count ?? 0 }}</span>
-                                            <span class="text-muted">Invoices</span>
+                                            <span class="text-muted">Receipts</span>
                                             <span class="badge bg-success-subtle text-success ms-1 fw-bold">₹{{ number_format($item->total_paid ?? 0, 0) }}</span>
                                         </div>
                                         <div class="mt-1">
