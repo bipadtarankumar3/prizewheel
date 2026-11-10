@@ -385,22 +385,11 @@ class SubscriptionController extends Controller
             return redirect('admin/plans');
         }
 
-        // Get plans from the user's admin
-        $adminId = $user->admin_id;
-        if (!$adminId) {
-            $firstAdmin = User::where('type', 'admin')->first();
-            $adminId = $firstAdmin ? $firstAdmin->id : 1;
-        }
-
-        $plans = Plan::where('admin_id', $adminId)
+        // Only plans created by the user's own admin (no fallback to other admins' plans)
+        $plans = Plan::where('admin_id', $user->planAdminId())
             ->where('status', 'active')
             ->orderBy('price', 'asc')
             ->get();
-
-        // If no plans found under their direct admin, fall back to any active plans
-        if ($plans->isEmpty()) {
-            $plans = Plan::where('status', 'active')->orderBy('price', 'asc')->get();
-        }
 
         $currentPlan = $user->plan_id ? Plan::find($user->plan_id) : null;
         $paymentsHistory = Payment::where('user_id', $user->id)->orderBy('id', 'desc')->get();
@@ -442,7 +431,13 @@ class SubscriptionController extends Controller
             'plan_id' => 'required|integer|exists:plans,id',
         ]);
 
-        $plan = Plan::findOrFail($request->plan_id);
+        $plan = Plan::where('id', $request->plan_id)
+            ->where('admin_id', $user->planAdminId())
+            ->where('status', 'active')
+            ->first();
+        if (!$plan) {
+            return response()->json(['success' => false, 'message' => 'This plan is not available for your account.']);
+        }
 
         // Determine admin credentials
         $admin = $user->admin ?: User::find($user->admin_id ?: $plan->admin_id);
@@ -644,7 +639,7 @@ class SubscriptionController extends Controller
 
         // Security check: Only the paying user or their admin can view
         if ($currentUser->type !== 'admin' && $payment->user_id !== $currentUser->id) {
-            abort(403, 'Unauthorized access to invoice.');
+            abort(403, 'Unauthorized access to receipt.');
         }
 
         return view('admin.plans.invoice', compact('payment'));

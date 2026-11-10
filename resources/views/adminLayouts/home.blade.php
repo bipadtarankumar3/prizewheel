@@ -525,7 +525,7 @@
                   @endphp
 
                   <li class="nav-item">
-                    <a href="{{URL::to('admin/billing')}}" class="trial-expiry-pill-btn {{ $isUserExp ? 'pill-expired' : '' }}" title="Manage your subscription & renew plan" @if($isUserExp && $isOnlinePaymentEnabled) onclick="if(window.openSubscriptionExpiredModal){ event.preventDefault(); window.openSubscriptionExpiredModal(); }" @endif style="{{ $isUserExp ? 'background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important; border: 1px solid #b91c1c !important; color: #ffffff !important; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35) !important;' : '' }}">
+                    <a href="{{URL::to('admin/billing')}}" class="trial-expiry-pill-btn {{ $isUserExp ? 'pill-expired' : '' }}" title="Manage your subscription & renew plan" onclick="if(window.openSubscriptionExpiredModal){ event.preventDefault(); window.openSubscriptionExpiredModal(); }" style="{{ $isUserExp ? 'background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important; border: 1px solid #b91c1c !important; color: #ffffff !important; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35) !important;' : '' }}">
                       <span class="trial-pulse-dot" style="{{ $isUserExp ? 'background-color: #ffffff !important; box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7) !important;' : '' }}"></span>
                       @if($isUserExp)
                         <span class="fw-bold" style="color: #ffffff !important;">⚠️ Subscription Expired — Renew Now</span>
@@ -1051,7 +1051,7 @@
 
   @php
     $popup = DB::table('popupalerts')->where('user_type','admin')->where('status','active')->orderBy('id','desc')->first();
-    $needsFirstLoginProfile = (Auth::check() && Auth::user()->type == 'user' && (session('google_first_login_modal') || empty(Auth::user()->phone)));
+    $needsFirstLoginProfile = Auth::check() && Auth::user()->needsProfileCompletion();
   @endphp
   @if (!empty($popup) && !$needsFirstLoginProfile)
   <!-- Modern Styled Popup Alert Modal -->
@@ -1277,7 +1277,7 @@
       }
     }
 
-    @if(Auth::check() && Auth::user()->type == 'user' && (session('google_first_login_modal') || empty(Auth::user()->phone) || empty(Auth::user()->name_url) || empty(Auth::user()->name)))
+    @if($needsFirstLoginProfile)
       $(document).ready(function() {
         if ($('#firstLoginModal').length) {
           $('.newsShowPopupModal').modal('hide');
@@ -1299,12 +1299,13 @@
 
   </script>
 
-  @if(Auth::check() && Auth::user()->type == 'user' && (session('google_first_login_modal') || empty(Auth::user()->phone) || empty(Auth::user()->name_url) || empty(Auth::user()->name)))
+  @if($needsFirstLoginProfile)
   <!-- Mandatory First Login Profile Completion Modal -->
   <div class="modal fade" id="firstLoginModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="firstLoginModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
       <div class="modal-content first-login-modal-content border-0 shadow-lg">
         <div class="modal-header first-login-modal-header border-0 flex-column align-items-start position-relative">
+          <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 shadow-none" data-bs-dismiss="modal" aria-label="Close" title="Close (this will appear again until your profile is completed)"></button>
           <div class="d-flex align-items-center gap-2 mb-2">
             <span class="badge bg-white text-dark fw-bold px-3 py-1 rounded-pill" style="font-size: 11px;">
               <i class="ti ti-rocket text-primary me-1"></i> 1-Day Trial Active
@@ -1325,7 +1326,7 @@
               <label class="form-label fw-bold text-dark fs-3 mb-1">Business / Store Name <span class="text-danger">*</span></label>
               <div class="input-group">
                 <span class="input-group-text bg-light border-end-0"><i class="ti ti-building-store"></i></span>
-                <input type="text" name="name" id="firstLoginStoreName" class="form-control border-start-0" value="{{ old('name', '') }}" required placeholder="Enter your Business / Store Name (e.g. Apex Dental Clinic)" autocomplete="off" />
+                <input type="text" name="name" id="firstLoginStoreName" class="form-control border-start-0" value="{{ old('name', Auth::user()->name ?? '') }}" required placeholder="Enter your Business / Store Name (e.g. Apex Dental Clinic)" autocomplete="off" />
               </div>
               <div class="text-danger fs-2 mt-1 fw-semibold" id="firstLoginNameError" style="display: none;"></div>
               <div class="text-success fs-2 mt-1 fw-semibold" id="firstLoginNameSuccess" style="display: none;"></div>
@@ -1363,12 +1364,33 @@
               <label class="form-label fw-bold text-dark fs-3 mb-1">Custom URL Slug <span class="text-danger">*</span></label>
               <div class="input-group">
                 <span class="input-group-text bg-light border-end-0 fs-2 text-muted">/u/</span>
-                <input type="text" name="name_url" id="firstLoginSlug" class="form-control border-start-0" value="{{ old('name_url', '') }}" required placeholder="Enter custom URL slug (e.g. my_business)" autocomplete="off" />
+                <input type="text" name="name_url" id="firstLoginSlug" class="form-control border-start-0" value="{{ old('name_url', Auth::user()->name_url ?? '') }}" required placeholder="Enter custom URL slug (e.g. my_business)" autocomplete="off" />
               </div>
               <div class="text-danger fs-2 mt-1 fw-semibold" id="firstLoginSlugError" style="display: none;"></div>
               <div class="text-success fs-2 mt-1 fw-semibold" id="firstLoginSlugSuccess" style="display: none;"></div>
-              <small class="text-muted fs-2 d-block mt-1">Your public customer link: <strong id="modalPublicUrlPreview">{{ str_replace('/public', '', url('u/' . (old('name_url') ?: 'my_business'))) }}</strong></small>
+              <small class="text-muted fs-2 d-block mt-1">Your public customer link: <strong id="modalPublicUrlPreview">{{ str_replace('/public', '', url('u/' . (old('name_url', Auth::user()->name_url ?? '') ?: 'my_business'))) }}</strong></small>
             </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-dark fs-3 mb-1">GST Number <span class="text-muted fw-normal fs-2">(optional)</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="ti ti-receipt-tax"></i></span>
+                <input type="text" name="gst_number" id="firstLoginGst" class="form-control border-start-0 text-uppercase" value="{{ old('gst_number', Auth::user()->gst_number ?? '') }}" maxlength="15" placeholder="15-character GSTIN (e.g. 22AAAAA0000A1Z5)" autocomplete="off" />
+              </div>
+              <div class="text-danger fs-2 mt-1 fw-semibold" id="firstLoginGstError" style="display: none;"></div>
+            </div>
+
+            @if(empty(Auth::user()->terms_accepted_at))
+            <div class="mb-1">
+              <div class="form-check d-flex align-items-start gap-2 ps-0" onclick="handleTermsLabelClick(event)" style="cursor:pointer;">
+                <input class="form-check-input ms-0 mt-1 flex-shrink-0" type="checkbox" name="terms" value="1" id="termsCheckbox" required onclick="handleTermsCheckboxClick(event)" style="cursor:pointer;">
+                <label class="form-check-label fs-2 text-dark" style="cursor:pointer;">
+                  I agree to the <a href="javascript:void(0)" onclick="openLegalModal('terms'); event.stopPropagation();" class="fw-bold" style="color:#ff6b00;">Terms of Service</a> &amp; <a href="javascript:void(0)" onclick="openLegalModal('privacy'); event.stopPropagation();" class="fw-bold" style="color:#ff6b00;">Privacy Policy</a> <span class="text-danger">*</span>
+                </label>
+              </div>
+              <div class="text-danger fs-2 mt-1 fw-semibold" id="firstLoginTermsError" style="display: none;">Please accept the Terms of Service &amp; Privacy Policy to continue.</div>
+            </div>
+            @endif
 
 
           </div>
@@ -1382,6 +1404,10 @@
       </div>
     </div>
   </div>
+
+  @if(empty(Auth::user()->terms_accepted_at))
+    @include('partials.legal_modal', ['loadFontAwesome' => true])
+  @endif
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -1614,8 +1640,54 @@
 
       updateSubmitButtonState();
 
+      // 4. Optional GST Number (Indian GSTIN) format validation
+      const gstInput = document.getElementById('firstLoginGst');
+      const gstError = document.getElementById('firstLoginGstError');
+      const gstPattern = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
+      function validateGst() {
+        if (!gstInput) return true;
+        const val = gstInput.value.toUpperCase().replace(/[^0-9A-Z]/g, '').substring(0, 15);
+        gstInput.value = val;
+        if (!val) {
+          gstInput.classList.remove('is-valid', 'is-invalid');
+          if (gstError) gstError.style.display = 'none';
+          return true;
+        }
+        if (!gstPattern.test(val)) {
+          gstInput.classList.add('is-invalid');
+          gstInput.classList.remove('is-valid');
+          if (gstError) {
+            gstError.textContent = 'Please enter a valid 15-character GST number (e.g. 22AAAAA0000A1Z5).';
+            gstError.style.display = 'block';
+          }
+          return false;
+        }
+        gstInput.classList.remove('is-invalid');
+        gstInput.classList.add('is-valid');
+        if (gstError) gstError.style.display = 'none';
+        return true;
+      }
+      if (gstInput) {
+        gstInput.addEventListener('input', validateGst);
+        gstInput.addEventListener('blur', validateGst);
+      }
+
       if (formEl) {
         formEl.addEventListener('submit', function(e) {
+          if (!validateGst()) {
+            e.preventDefault();
+            gstInput.focus();
+            return;
+          }
+          const termsBox = document.getElementById('termsCheckbox');
+          const termsErr = document.getElementById('firstLoginTermsError');
+          if (termsBox && !termsBox.checked) {
+            e.preventDefault();
+            if (termsErr) termsErr.style.display = 'block';
+            if (typeof openLegalModal === 'function') openLegalModal('terms');
+            return;
+          }
+          if (termsErr) termsErr.style.display = 'none';
           const nameVal = storeNameInput ? storeNameInput.value.trim() : '';
           const slugVal = slugInput ? slugInput.value.trim() : '';
           if (!nameVal) {
@@ -1652,18 +1724,19 @@
   @endif
 
   @php
-    $isExpiredUserGlobal = Auth::check() && Auth::user()->type === 'user' && Auth::user()->isExpired();
-    if ($isExpiredUserGlobal && (empty($subscriptionPlansForModal) || count($subscriptionPlansForModal) === 0)) {
-        $modalAdminId = Auth::user()->admin_id ?: 1;
-        $subscriptionPlansForModal = \App\Models\Plan::where(function($q) use ($modalAdminId) {
-            $q->where('admin_id', $modalAdminId)->orWhere('admin_id', 1);
-        })->where('status', 'active')->orderBy('price', 'asc')->get();
+    $isCustomerUserGlobal = Auth::check() && Auth::user()->type === 'user';
+    $isExpiredUserGlobal = $isCustomerUserGlobal && Auth::user()->isExpired();
+    $isOnlinePaymentEnabled = $isOnlinePaymentEnabled ?? false;
+    if ($isCustomerUserGlobal && (empty($subscriptionPlansForModal) || count($subscriptionPlansForModal) === 0)) {
+        // Only plans created by this user's own admin; none are shown if that admin has not added any
+        $subscriptionPlansForModal = \App\Models\Plan::where('admin_id', Auth::user()->planAdminId())
+            ->where('status', 'active')->orderBy('price', 'asc')->get();
     }
   @endphp
 
-  @if($isExpiredUserGlobal && $isOnlinePaymentEnabled)
+  @if($isCustomerUserGlobal)
   <!-- ============================================================== -->
-  <!-- SUBSCRIPTION EXPIRED MODAL (CLOSABLE / PAY LATER)              -->
+  <!-- SUBSCRIPTION / RENEW PLANS MODAL (CLOSABLE / PAY LATER)        -->
   <!-- ============================================================== -->
   <style>
     #subscriptionExpiredModal { z-index: 99999 !important; }
@@ -1676,21 +1749,34 @@
       <div class="modal-content rounded-4 border-0 shadow-2xl overflow-hidden" style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);">
         
         <!-- Header Banner -->
-        <div class="p-4 p-md-5 text-center text-white position-relative" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);">
+        <div class="p-4 p-md-5 text-center text-white position-relative" style="background: {{ $isExpiredUserGlobal ? 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)' : 'linear-gradient(135deg, #ff6b00 0%, #ea580c 100%)' }};">
           <!-- Cross / Close button to hide modal -->
           <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 shadow-none" data-bs-dismiss="modal" aria-label="Close" id="closeExpiredModalBtn" title="Close modal" style="opacity: 0.95; cursor: pointer;"></button>
 
           <div class="d-inline-flex p-3 rounded-circle bg-white bg-opacity-20 mb-3 shadow-sm">
-            <i class="ti ti-lock fs-1 text-white"></i>
+            <i class="ti {{ $isExpiredUserGlobal ? 'ti-lock' : 'ti-crown' }} fs-1 text-white"></i>
           </div>
-          <h2 class="fw-extrabold mb-2" style="letter-spacing: -0.5px;">Your Store Subscription Has Expired</h2>
-          <p class="mb-0 text-white-50 mx-auto" style="max-width: 650px; font-size: 15px; line-height: 1.6;">
-            Customer wheel spins, promotional campaigns, and dashboard operations are locked. Please choose a subscription plan below to pay via Razorpay and immediately resume access.
-          </p>
+          @if($isExpiredUserGlobal)
+            <h2 class="fw-extrabold mb-2" style="letter-spacing: -0.5px;">Your Store Subscription Has Expired</h2>
+            <p class="mb-0 text-white-50 mx-auto" style="max-width: 650px; font-size: 15px; line-height: 1.6;">
+              Customer wheel spins, promotional campaigns, and dashboard operations are locked. Please choose a subscription plan below to pay via Razorpay and immediately resume access.
+            </p>
+          @else
+            <h2 class="fw-extrabold mb-2" style="letter-spacing: -0.5px;">Renew / Upgrade Your Plan</h2>
+            <p class="mb-0 text-white-50 mx-auto" style="max-width: 650px; font-size: 15px; line-height: 1.6;">
+              Choose a subscription plan below and pay securely via Razorpay. The new validity is added to your store account instantly.
+            </p>
+          @endif
         </div>
 
         <!-- Body: Available Plans -->
         <div class="modal-body p-4 p-md-5 bg-light">
+          @if(!$isOnlinePaymentEnabled)
+            <div class="alert alert-warning border-0 rounded-3 d-flex align-items-center gap-2 mb-4">
+              <i class="ti ti-alert-triangle fs-5"></i>
+              <span>Online payment is currently disabled. Please contact your administrator to renew one of the plans below.</span>
+            </div>
+          @endif
           <div class="row g-4 justify-content-center">
             @if(!empty($subscriptionPlansForModal) && count($subscriptionPlansForModal) > 0)
               @foreach($subscriptionPlansForModal as $modalPlan)
@@ -1742,9 +1828,15 @@
                         @endif
                       </ul>
 
+                      @if($isOnlinePaymentEnabled)
                       <button type="button" class="btn btn-primary w-100 rounded-pill py-2 fw-bold pay-modal-plan-btn shadow-sm" data-plan-id="{{ $modalPlan->id }}" style="background: {{ $modalPlan->is_popular ? '#ff6b00' : '#0284c7' }}; border-color: {{ $modalPlan->is_popular ? '#ff6b00' : '#0284c7' }};">
-                        <i class="ti ti-bolt me-1"></i> Pay ₹{{ number_format($modalPlan->price, 0) }} &amp; Unlock
+                        <i class="ti ti-bolt me-1"></i> Pay ₹{{ number_format($modalPlan->price, 0) }} &amp; {{ $isExpiredUserGlobal ? 'Unlock' : 'Renew' }}
                       </button>
+                      @else
+                      <a href="{{ url('admin/support') }}" class="btn btn-outline-secondary w-100 rounded-pill py-2 fw-bold">
+                        <i class="ti ti-headset me-1"></i> Contact Administrator
+                      </a>
+                      @endif
                     </div>
                   </div>
                 </div>
@@ -1775,7 +1867,9 @@
     </div>
   </div>
 
+  @if($isOnlinePaymentEnabled)
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  @endif
   <script>
     (function() {
       window.openSubscriptionExpiredModal = function() {
@@ -1795,6 +1889,9 @@
       };
 
       function openExpiredModalIfNeeded() {
+        @if(!($isExpiredUserGlobal && $isOnlinePaymentEnabled))
+        return;
+        @endif
         if (sessionStorage.getItem('subscription_modal_dismissed') === '1') {
           return;
         }
@@ -1901,7 +1998,7 @@
                   .then(function(vData) {
                     if (vData.success) {
                       alert(vData.message || 'Payment successful! Your store is now renewed and unlocked.');
-                      window.location.reload();
+                      window.location.href = "{{ url('admin/billing') }}?payment=success";
                     } else {
                       alert(vData.message || 'Payment verification failed.');
                       btn.disabled = false;

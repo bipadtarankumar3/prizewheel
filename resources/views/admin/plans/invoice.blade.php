@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice - {{ $payment->payment_unique_id }}</title>
+  <title>Payment Receipt - {{ $payment->payment_unique_id }}</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   <style>
@@ -12,7 +12,7 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       color: #0f172a;
     }
-    .invoice-card {
+    .receipt-card {
       max-width: 800px;
       margin: 40px auto;
       background: #ffffff;
@@ -24,7 +24,7 @@
       body {
         background: #fff;
       }
-      .invoice-card {
+      .receipt-card {
         margin: 0;
         box-shadow: none;
         padding: 20px;
@@ -50,9 +50,9 @@
     </button>
   </div>
 
-  <div class="invoice-card">
+  <div class="receipt-card">
     
-    <!-- Invoice Header -->
+    <!-- Receipt Header -->
     <div class="d-flex justify-content-between align-items-start border-bottom pb-4 mb-4">
       <div>
         <div class="d-flex align-items-center gap-2 mb-2">
@@ -65,8 +65,9 @@
       </div>
 
       <div class="text-end">
-        <h4 class="text-uppercase fw-bold text-muted mb-1" style="letter-spacing: 1px;">TAX INVOICE</h4>
-        <span class="fw-bold text-dark fs-5">#{{ $payment->payment_unique_id }}</span>
+        <h4 class="text-uppercase fw-bold text-muted mb-1" style="letter-spacing: 1px;">PAYMENT RECEIPT</h4>
+        <span class="text-muted small d-block">Receipt No.</span>
+        <span class="fw-bold text-dark fs-5">{{ $payment->payment_unique_id }}</span>
         <div class="mt-2">
           @if($payment->status === 'success')
             <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-bold">✓ PAID</span>
@@ -80,17 +81,20 @@
     <!-- Billed To & From Details -->
     <div class="row g-4 mb-4">
       <div class="col-6">
-        <span class="text-uppercase small fw-bold text-muted d-block mb-2">Billed To (Client):</span>
+        <span class="text-uppercase small fw-bold text-muted d-block mb-2">Received From:</span>
         <h5 class="fw-bold text-dark mb-1">{{ $payment->user->name ?? 'Store Client' }}</h5>
         <p class="text-muted small mb-0">{{ $payment->user->email ?? '' }}</p>
         <p class="text-muted small mb-0">{{ $payment->user->phone ?? '' }}</p>
+        @if(!empty($payment->user->gst_number))
+          <p class="text-muted small mb-0">GSTIN: <strong class="text-dark">{{ $payment->user->gst_number }}</strong></p>
+        @endif
         @if(!empty($payment->user->name_url))
           <small class="text-primary fw-semibold">{{ url('u/' . $payment->user->name_url) }}</small>
         @endif
       </div>
 
       <div class="col-6 text-end">
-        <span class="text-uppercase small fw-bold text-muted d-block mb-2">Platform / Admin Details:</span>
+        <span class="text-uppercase small fw-bold text-muted d-block mb-2">Received By:</span>
         <h5 class="fw-bold text-dark mb-1">{{ $payment->admin->name ?? 'Administrator' }}</h5>
         <p class="text-muted small mb-0">{{ $payment->admin->email ?? '' }}</p>
         <p class="text-muted small mb-0">Date: <strong>{{ $payment->created_at->format('d F Y, h:i A') }}</strong></p>
@@ -135,7 +139,7 @@
             <td class="text-end text-muted p-3">₹0.00 (Inclusive)</td>
           </tr>
           <tr class="table-light">
-            <td colspan="3" class="text-end fw-extrabold fs-5 p-3 text-dark">Total Amount Paid:</td>
+            <td colspan="3" class="text-end fw-extrabold fs-5 p-3 text-dark">Total Amount Received:</td>
             <td class="text-end fw-extrabold fs-5 p-3 text-success">₹{{ number_format($payment->amount, 2) }}</td>
           </tr>
         </tfoot>
@@ -145,7 +149,7 @@
     <!-- Notes & Footer -->
     <div class="border-top pt-4 text-center">
       <p class="small text-muted mb-1">
-        This is a computer-generated receipt for electronic payment via Razorpay. No physical signature is required.
+        This is a computer-generated receipt for electronic payment via Razorpay. No physical signature is required. You will receive a confirmation email with the receipt attached.
       </p>
       <small class="text-muted">Thank you for powering your customer engagement with Prize Wheel!</small>
     </div>

@@ -38,14 +38,14 @@
                                 We have received your payment of <strong>₹{{ number_format($payment->amount, 2) }}</strong> for <strong>{{ $plan->name ?? $payment->plan_name }}</strong>. Your account has been extended and unlocked.
                             </p>
 
-                            <!-- Invoice Details Box -->
+                            <!-- Receipt Details Box -->
                             <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px; margin-bottom: 28px;">
                                 <h3 style="margin: 0 0 14px 0; color: #0f172a; font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
                                     Payment Receipt Summary
                                 </h3>
                                 <table width="100%" cellspacing="0" cellpadding="0" style="font-size: 14px;">
                                     <tr>
-                                        <td style="padding: 6px 0; color: #64748b; width: 140px;">Invoice / Order:</td>
+                                        <td style="padding: 6px 0; color: #64748b; width: 140px;">Receipt / Order:</td>
                                         <td style="padding: 6px 0; color: #0f172a; font-weight: 600;">{{ $payment->payment_unique_id }}</td>
                                     </tr>
                                     <tr>

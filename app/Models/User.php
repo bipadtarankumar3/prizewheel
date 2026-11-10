@@ -95,6 +95,32 @@ class User extends Authenticatable
     }
 
     /**
+     * Whether a customer account still has to complete the first-login business profile.
+     * Based only on saved data, so once the profile is filled it is never asked again.
+     */
+    public function needsProfileCompletion()
+    {
+        if ($this->type !== 'user') {
+            return false;
+        }
+        return trim((string) $this->name) === ''
+            || trim((string) $this->name_url) === ''
+            || trim((string) $this->phone) === '';
+    }
+
+    /**
+     * The admin whose subscription plans this customer can see and buy.
+     */
+    public function planAdminId()
+    {
+        if (!empty($this->admin_id)) {
+            return (int) $this->admin_id;
+        }
+        $firstAdmin = self::where('type', 'admin')->orderBy('id')->first();
+        return $firstAdmin ? (int) $firstAdmin->id : 1;
+    }
+
+    /**
      * Check if user account subscription is expired
      */
     public function isExpired()

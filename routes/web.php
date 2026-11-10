@@ -221,6 +221,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth']], function () {
     Route::get('billing', [SubscriptionController::class, 'user_billing_page'])->name('user.billing.index');
     Route::post('subscription/create_order', [SubscriptionController::class, 'create_razorpay_order'])->name('user.subscription.create_order');
     Route::post('subscription/verify_payment', [SubscriptionController::class, 'verify_razorpay_payment'])->name('user.subscription.verify_payment');
+    Route::get('receipt/{paymentId}', [SubscriptionController::class, 'invoice_view'])->name('subscription.receipt.view');
+    // Legacy URL kept so previously shared links keep working
     Route::get('invoice/{paymentId}', [SubscriptionController::class, 'invoice_view'])->name('subscription.invoice.view');
     // ----------------- Subscription, Plans & Razorpay End---------------------
 

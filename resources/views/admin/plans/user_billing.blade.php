@@ -67,13 +67,13 @@
     <div class="col-xl-3 col-sm-6">
       <div class="card border-0 rounded-4 shadow-sm p-4 bg-white h-100">
         <div class="d-flex align-items-center justify-content-between mb-2">
-          <span class="text-muted small text-uppercase fw-bold">Total Invoices</span>
+          <span class="text-muted small text-uppercase fw-bold">Total Receipts</span>
           <div class="p-2 rounded-3 bg-primary-subtle text-primary">
             <i class="ti ti-receipt-2 fs-4"></i>
           </div>
         </div>
         <h2 class="fw-extrabold text-dark mb-1" style="letter-spacing: -0.5px;">{{ $totalPaymentsCount }}</h2>
-        <span class="text-muted small">All payments & invoices</span>
+        <span class="text-muted small">All payments & receipts</span>
       </div>
     </div>
 
@@ -299,8 +299,8 @@
                 @endif
               </td>
               <td class="text-end pe-4">
-                <a href="{{ url('admin/invoice/' . $payment->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
-                  <i class="ti ti-file-text me-1"></i> Invoice
+                <a href="{{ url('admin/receipt/' . $payment->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                  <i class="ti ti-receipt me-1"></i> View Receipt
                 </a>
               </td>
             </tr>

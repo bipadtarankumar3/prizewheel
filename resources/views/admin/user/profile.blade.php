@@ -128,6 +128,16 @@
 
                     </div>
                   </div>
+
+                  <div class="col-sm-12 col-md-4">
+                    <div class="mb-3">
+                      <label for="spin_whell_round" class="control-label col-form-label">Spins Allowed Per Customer <span style="color: red;">*</span></label>
+                      <input type="number" name="spin_whell_round" id="spin_whell_round" class="form-control" min="1" max="1000" step="1" required
+                             value="{{ old('spin_whell_round', (isset($user) && (int) $user->spin_whell_round > 0) ? (int) $user->spin_whell_round : 1) }}"
+                             placeholder="e.g. 1">
+                      <small class="text-muted">How many times one customer (same device / IP) can spin the wheel in each campaign on your public page.</small>
+                    </div>
+                  </div>
                   @endif 
 
 

@@ -132,6 +132,7 @@ class UserController extends Controller
             'note' => 'Self-registered customer account (1-Day Trial)',
             'otp' => '123456',
             'otp_link_status' => 'yes',
+            'terms_accepted_at' => now(),
         ]);
 
         // Send welcome email to user and alert to admin
@@ -342,14 +343,26 @@ class UserController extends Controller
 
     public function complete_first_login_profile(Request $request)
     {
-        $request->validate([
+        $cleanGst = strtoupper(preg_replace('/\s+/', '', (string) $request->gst_number));
+        $request->merge(['gst_number' => $cleanGst !== '' ? $cleanGst : null]);
+
+        $rules = [
             'phone' => 'required|string',
             'name' => 'required|string|max:255',
             'name_url' => 'required|string|max:255',
-        ], [
+            // Indian GSTIN: 2-digit state code + 10-char PAN + entity no. + 'Z' + checksum
+            'gst_number' => ['nullable', 'regex:/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/'],
+        ];
+        if (Auth::check() && empty(Auth::user()->terms_accepted_at)) {
+            $rules['terms'] = 'accepted';
+        }
+
+        $request->validate($rules, [
             'name.required' => 'Business / Store Name is mandatory.',
             'phone.required' => 'WhatsApp / Contact Number is mandatory.',
             'name_url.required' => 'Custom URL Slug is mandatory.',
+            'gst_number.regex' => 'Please enter a valid 15-character GST number (e.g. 22AAAAA0000A1Z5).',
+            'terms.accepted' => 'Please accept the Terms of Service & Privacy Policy to continue.',
         ]);
 
         $cleanPhone = '';
@@ -405,6 +418,10 @@ class UserController extends Controller
             $user->name = $cleanName;
             $user->phone = $cleanPhone;
             $user->name_url = $newSlug;
+            $user->gst_number = $request->gst_number ?: null;
+            if (empty($user->terms_accepted_at)) {
+                $user->terms_accepted_at = now();
+            }
 
             if ($request->filled('wp_key')) {
                 $user->wp_key = $request->wp_key;
@@ -1148,7 +1165,15 @@ class UserController extends Controller
                     $user->expiry_date = $request->expiry_date;
                 }
                 if ($request->spin_whell_round != '') {
-                    $user->spin_whell_round = $request->spin_whell_round;
+                    $spinRounds = filter_var($request->spin_whell_round, FILTER_VALIDATE_INT);
+                    if ($spinRounds === false || $spinRounds < 1 || $spinRounds > 1000) {
+                        $notification = array(
+                            'messege' => 'Spins allowed per customer must be a whole number between 1 and 1000.',
+                            'alert-type' => 'error'
+                        );
+                        return back()->with($notification)->withInput();
+                    }
+                    $user->spin_whell_round = $spinRounds;
                 }
                 if ($request->note != '') {
                     $user->note = $request->note;

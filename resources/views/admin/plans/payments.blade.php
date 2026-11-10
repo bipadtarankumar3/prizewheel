@@ -161,7 +161,7 @@
             <th>Status</th>
             <th>Validity Extended</th>
             <th>Payment Date</th>
-            <th class="text-end pe-4">Invoice</th>
+            <th class="text-end pe-4">Receipt</th>
           </tr>
         </thead>
         <tbody>
@@ -224,8 +224,8 @@
               </td>
 
               <td class="text-end pe-4">
-                <a href="{{ url('admin/invoice/' . $p->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold">
-                  <i class="ti ti-file-text me-1"></i> Invoice
+                <a href="{{ url('admin/receipt/' . $p->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold">
+                  <i class="ti ti-receipt me-1"></i> View Receipt
                 </a>
               </td>
             </tr>
