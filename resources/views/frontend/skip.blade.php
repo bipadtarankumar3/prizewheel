@@ -1102,7 +1102,7 @@
 
     function openPreSpinModal() {
       $('#formModalTitle').html('<i class="fas fa-user-edit mr-2 text-primary"></i> Enter Details to Spin & Win');
-      $('#FormModal .modal-header .close').hide();
+      $('#FormModal .modal-header .close').show();
       $('.winner-header-info').hide();
       $('.prespin-header-info').show();
       $('.take_screen_button').hide();
@@ -1459,12 +1459,8 @@
       const isLimitFinished = {{ $isLimitFinished ? 'true' : 'false' }};
       const hasCompletedSession = sessionStorage.getItem('spin_completed_{{ $user->id }}') === 'true';
 
-      // Auto open details form on page load in before_spin mode ONLY if user hasn't submitted yet and has remaining spins:
-      if (spinFormTiming === 'before_spin' && !preSpinFormId && !isLimitFinished && !hasCompletedSession) {
-        setTimeout(function() {
-          openPreSpinModal();
-        }, 400);
-      }
+      // before_spin mode: the details form is NOT opened on page load.
+      // The visitor sees the wheel first; the form opens when they click the Spin button.
     });
 
     function numOnly(selector) {

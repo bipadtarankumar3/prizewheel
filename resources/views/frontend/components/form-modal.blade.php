@@ -4,7 +4,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="formModalTitle"><i class="fas fa-trophy mr-2 text-warning"></i> Claim Your Prize — Enter Details</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @if(($spin_form_timing ?? 'after_spin') == 'before_spin') style="display: none;" @endif>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" title="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -17,6 +17,19 @@
           <input type="hidden" name="camping_id" value="{{ $Camping->id }}">
           <input type="hidden" id="screenshot-input" name="screenshot-file">
 
+          @php
+            $modalLogo = !empty($user->logo) ? $user->logo : '';
+            if ($modalLogo && !filter_var($modalLogo, FILTER_VALIDATE_URL)) {
+                $modalLogo = url($modalLogo);
+            }
+          @endphp
+          @if($modalLogo)
+            <div class="form-modal-store-logo text-center mb-3">
+              <img src="{{ $modalLogo }}" alt="{{ $user->name ?? 'Store' }} logo" onerror="this.parentNode.style.display='none'"
+                   style="max-height: 70px; max-width: 180px; object-fit: contain;">
+            </div>
+          @endif
+
           <div class="winner-header-info text-center mb-4">
             <img src="" alt="Prize" class="spinner_image mb-2" style="max-height: 85px; max-width: 130px; object-fit: contain; display: none;">
             <h3 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin-bottom: 6px;">Congratulations, you won!</h3>
@@ -26,9 +39,11 @@
           </div>
 
           <div class="prespin-header-info text-center mb-4" style="display: none;">
+            @if(empty($modalLogo))
             <div style="width: 54px; height: 54px; border-radius: 50%; background: #eff6ff; color: #2563eb; display: inline-flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 8px;">
               <i class="fas fa-user-edit"></i>
             </div>
+            @endif
             <h3 style="font-size: 1.3rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Enter Details to Spin & Win</h3>
             <p class="text-muted small mb-0">Please fill in your contact information below to unlock your spin!</p>
           </div>
@@ -40,11 +55,11 @@
           @endphp
 
           <div class="form-row">
-            <div class="form-group col-md-6 col-12">
+            <div class="form-group col-12">
               <label for="name">Name</label>
               <input type="text" name="name" class="form-control" id="name" placeholder="Enter your full name" required>
             </div>
-            <div class="form-group col-md-6 col-12">
+            <div class="form-group col-12">
               <label for="phone">
                 @if($hasWhatsapp)
                   <i class="fab fa-whatsapp text-success mr-1"></i> Mobile / WhatsApp Number
@@ -61,13 +76,13 @@
           @if ($hasEmail || $hasAddress)
           <div class="form-row">
             @if ($hasEmail)
-            <div class="form-group {{ $hasAddress ? 'col-md-6 col-12' : 'col-12' }}">
+            <div class="form-group col-12">
               <label for="email">Email</label>
               <input type="email" name="email" class="form-control" id="email" placeholder="example@gmail.com">
             </div>
             @endif
             @if ($hasAddress)
-            <div class="form-group {{ $hasEmail ? 'col-md-6 col-12' : 'col-12' }}">
+            <div class="form-group col-12">
               <label for="address">Address</label>
               <input type="text" name="address" class="form-control" id="address" placeholder="Enter your address">
             </div>
@@ -78,7 +93,7 @@
           <div class="form-row">
             @if (!empty($FormFields) && $FormFields->choose_option == 'on')
               @if (isset($BikeModel) && count($BikeModel) > 0)
-                <div class="form-group col-md-6 col-12">
+                <div class="form-group col-12">
                   <label for="bike_model_id">Are You Interested In</label>
                   <select name="bike_model_id" id="bike_model_id" class="form-control" required>
                     <option value="">Select an option</option>
@@ -91,7 +106,7 @@
             @endif
 
             @if (!empty($FormFields) && $FormFields->screenshot == 'on')
-              <div class="form-group col-md-6 col-12">
+              <div class="form-group col-12">
                 <label for="screenshot">Screenshot</label>
                 <input type="file" name="screenshot" class="form-control" @if (!empty($FormFields) && $FormFields->screenshot_required == 'on') required @endif id="screenshot">
               </div>
@@ -107,11 +122,11 @@
             </div>
           @endif
 
-          <div class="text-right mt-3">
+          <div class="text-center mt-3">
             @if (!empty($FormFields) && $FormFields->screenshot == 'on')
               <button type="button" class="btn btn-secondary form_take_screenshot mr-2" data-dismiss="modal">Take Screenshot</button>
             @endif
-            <button type="submit" class="btn btn-primary form_submit_button">Submit</button>
+            <button type="submit" class="btn btn-primary form_submit_button px-5">Submit</button>
           </div>
         </form>
       </div>
