@@ -1740,7 +1740,8 @@
   <!-- ============================================================== -->
   <style>
     #subscriptionExpiredModal { z-index: 99999 !important; }
-    .modal-backdrop.show { z-index: 99998 !important; opacity: 0.88 !important; background-color: #0b1120 !important; }
+    /* Only raise/darken the backdrop while the plans modal itself is open, so other modals (e.g. profile setup) are not covered */
+    body.subscription-modal-open .modal-backdrop.show { z-index: 99998 !important; opacity: 0.88 !important; background-color: #0b1120 !important; }
     #closeExpiredModalBtn:hover { transform: scale(1.1); transition: transform 0.2s; }
   </style>
 
@@ -1892,6 +1893,10 @@
         @if(!($isExpiredUserGlobal && $isOnlinePaymentEnabled))
         return;
         @endif
+        // Profile setup modal takes priority; don't stack the plans modal over it
+        if (document.getElementById('firstLoginModal')) {
+          return;
+        }
         if (sessionStorage.getItem('subscription_modal_dismissed') === '1') {
           return;
         }
@@ -1908,7 +1913,11 @@
 
       var modalEl = document.getElementById('subscriptionExpiredModal');
       if (modalEl) {
+        modalEl.addEventListener('show.bs.modal', function() {
+          document.body.classList.add('subscription-modal-open');
+        });
         modalEl.addEventListener('hidden.bs.modal', function() {
+          document.body.classList.remove('subscription-modal-open');
           sessionStorage.setItem('subscription_modal_dismissed', '1');
         });
       }

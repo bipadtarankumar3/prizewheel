@@ -400,7 +400,7 @@ class SubscriptionController extends Controller
         $pendingPaymentsCount = $paymentsHistory->where('status', 'pending')->count();
 
         $adminRazorpayConfigured = false;
-        $adminUser = $user->admin ?: User::find($adminId);
+        $adminUser = $user->admin ?: User::find($user->planAdminId());
         if (!$adminUser) {
             $adminUser = User::where('type', 'admin')->first();
         }
